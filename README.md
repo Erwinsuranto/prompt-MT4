@@ -102,17 +102,17 @@ Implementasikan prinsip:
 
 Jika kondisi penting tidak terpenuhi:
 
-```text
+text
 NO SIGNAL
-```
+
 
 Jangan memaksa sistem menghasilkan BUY/SELL.
 
 Jika sebuah candle pattern ternyata tidak memberikan edge yang cukup pada data asli, tandai sebagai:
 
-```text
+text
 DISABLED / WATCHLIST
-```
+
 
 bukan sebagai signal.
 
