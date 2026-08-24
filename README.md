@@ -6,8 +6,137 @@
 ```
 
 ```
-# 
+# Prompt — Validasi Backtest XAUUSD Real Data
 ```
+# Prompt — Validasi Backtest XAUUSD Real Data
+
+Lanjutkan project berdasarkan roadmap yang sudah ada. Jangan membuat strategi baru di luar roadmap dan jangan langsung membuat auto-trading.
+
+Fokus tahap ini adalah **memvalidasi apakah setup dan candle confirmation benar-benar memiliki edge pada data XAUUSD asli**.
+
+### Tugas
+
+1. Audit seluruh backtester Python yang sudah dibuat.
+2. Pastikan tidak ada:
+
+   * look-ahead bias
+   * penggunaan candle masa depan
+   * repaint logic
+   * entry sebelum candle confirmation CLOSE
+   * S/R yang menggunakan informasi masa depan
+   * perhitungan SL/TP yang tidak realistis
+3. Identifikasi dengan jelas bagaimana setiap setup A/B/C/D saat ini dihitung.
+4. Jangan mengubah strategi hanya untuk mendapatkan win rate lebih tinggi.
+
+### Data
+
+Siapkan backtest untuk **data historis XAUUSD asli**, bukan synthetic data.
+
+Prioritas:
+
+* M15 untuk market structure dan S/R utama.
+* M5 untuk breakout, retest, rejection, dan candle confirmation.
+
+Jika data real belum tersedia di environment, jangan mengarang data. Buat dokumentasi format data yang dibutuhkan dan mekanisme import dari MT5/broker.
+
+### Uji Setup Secara Terpisah
+
+Uji dan laporkan secara terpisah:
+
+1. Resistance Rejection → SELL
+2. Resistance Breakout + Retest + Bullish Confirmation → BUY
+3. Support Rejection + Bullish Confirmation → BUY
+4. Support Breakdown + Retest + Bearish Confirmation → SELL
+
+Kemudian uji candle confirmation secara terpisah:
+
+* Engulfing
+* Rejection/Pin Bar
+* Strong Body
+* Breakout/Breakdown Candle
+* Retest Confirmation
+
+Jangan langsung menggabungkan semua pattern. Kita harus mengetahui kontribusi masing-masing pattern.
+
+### Statistik
+
+Untuk setiap setup/pattern tampilkan minimal:
+
+* Total sample
+* Win rate
+* Loss rate
+* Average R:R
+* Profit factor
+* Expectancy
+* Maximum drawdown
+* Consecutive wins
+* Consecutive losses
+* Hasil berdasarkan kondisi M15:
+
+  * bullish
+  * bearish
+  * sideways
+* Hasil berdasarkan setup:
+
+  * rejection
+  * breakout
+  * retest
+  * continuation
+
+### Validasi Anti-Overfitting
+
+Gunakan pemisahan data yang benar:
+
+* periode training/in-sample
+* periode validation/out-of-sample
+
+Jika memungkinkan, gunakan walk-forward validation.
+
+Jangan memilih parameter hanya berdasarkan hasil terbaik pada satu periode.
+
+### Strict Signal Rule
+
+Implementasikan prinsip:
+
+**CONFIRM OR NO SIGNAL**
+
+Jika kondisi penting tidak terpenuhi:
+
+```text
+NO SIGNAL
+```
+
+Jangan memaksa sistem menghasilkan BUY/SELL.
+
+Jika sebuah candle pattern ternyata tidak memberikan edge yang cukup pada data asli, tandai sebagai:
+
+```text
+DISABLED / WATCHLIST
+```
+
+bukan sebagai signal.
+
+### Output
+
+Setelah selesai:
+
+1. Jelaskan struktur backtester saat ini.
+2. Jelaskan apakah ada look-ahead/repainting/bias.
+3. Jelaskan data apa yang sudah digunakan.
+4. Berikan hasil statistik setiap setup dan pattern.
+5. Pisahkan hasil in-sample dan out-of-sample.
+6. Tentukan pattern/setup mana yang layak dilanjutkan ke tahap berikutnya.
+7. Tentukan mana yang harus dinonaktifkan.
+8. Jangan mengklaim "akurasi tinggi" hanya berdasarkan sample kecil.
+9. Jangan mengubah roadmap tanpa alasan dan persetujuan.
+
+**Jangan implementasikan Telegram signal baru atau auto-trading pada tahap ini.**
+
+Target tahap ini hanya satu:
+
+> Mengetahui berdasarkan data nyata apakah Support/Resistance + Breakout/Rejection + Retest + Candle Confirmation benar-benar cukup kuat untuk dijadikan dasar signal.
+
+Jika data nyata belum tersedia, berhenti pada persiapan/import data dan laporkan apa yang dibutuhkan. Jangan menggunakan synthetic data sebagai bukti akurasi.
 
 ```
 # 
