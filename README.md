@@ -19,6 +19,127 @@
 ```
 # 
 ```
+# Prompt — Obtain Real XAUUSD M5/M15 Dataset
+
+Lanjutkan project berdasarkan roadmap dan hasil validasi sebelumnya.
+
+Saat ini blocker utama adalah **belum tersedianya data XAUUSD asli M5 dan M15**.
+
+Jangan membuat synthetic data dan jangan mengklaim hasil strategi tanpa data market asli.
+
+## Tugas
+
+1. Audit `xausr.mt5_export` dan dokumentasi `docs/DATA.md`.
+2. Pastikan exporter benar-benar mengambil OHLC candle dari **MetaTrader 5/broker**, bukan data sintetis.
+3. Tentukan cara paling aman dan sederhana untuk mendapatkan:
+
+   * XAUUSD M5
+   * XAUUSD M15
+   * minimal 2 tahun
+   * ideal 3 tahun jika histori broker tersedia.
+4. Jangan mengasumsikan nama symbol selalu `XAUUSD`.
+
+Jika broker menggunakan nama seperti:
+
+```text
+XAUUSD
+XAUUSDm
+XAUUSD.
+GOLD
+```
+
+jelaskan cara mendeteksi symbol yang tersedia dan gunakan symbol yang benar-benar tersedia di MT5.
+
+## Export
+
+Siapkan prosedur export yang menghasilkan:
+
+```text
+data/XAUUSD_M5.csv
+data/XAUUSD_M15.csv
+```
+
+Format minimal:
+
+```text
+timestamp,open,high,low,close,volume
+```
+
+Pertahankan timezone secara eksplisit dan dokumentasikan timezone data.
+
+## Data Integrity
+
+Setelah export, otomatis lakukan pemeriksaan:
+
+* jumlah candle
+* earliest timestamp
+* latest timestamp
+* duplicate
+* missing candle
+* invalid OHLC
+* timestamp ordering
+* timezone
+* gap data
+* M5 consistency
+* M15 consistency
+
+Jangan menyatakan data valid jika pemeriksaan belum selesai.
+
+## Broker Differences
+
+Dokumentasikan bahwa:
+
+* spread dapat berbeda antar broker,
+* timezone server dapat berbeda,
+* jam trading dapat berbeda,
+* historical availability dapat berbeda,
+* tick volume dan real volume dapat berbeda.
+
+Jangan menyamakan data broker yang berbeda sebagai data identik.
+
+## Backtest Readiness
+
+Setelah dataset tersedia dan valid:
+
+JANGAN langsung mengoptimasi strategi.
+
+Cukup pastikan:
+
+```text
+REAL DATA
+   ↓
+DATA INTEGRITY PASS
+   ↓
+BACKTEST READY
+```
+
+Kemudian berhenti dan laporkan hasil pemeriksaan.
+
+## Strict Rules
+
+* Jangan membuat data market palsu.
+* Jangan mengisi missing candle dengan harga buatan.
+* Jangan menghapus data hanya agar statistik terlihat bagus.
+* Jangan mengubah strategi untuk menyesuaikan dataset.
+* Jangan menjalankan auto-trading.
+* Jangan mengklaim akurasi.
+* Jangan mengklaim indikator terbaik.
+* Jangan menggunakan hasil synthetic sebagai bukti.
+
+Jika MT5/broker tidak dapat diakses dari environment saat ini, jangan mencari jalan pintas dengan data sintetis.
+
+Jelaskan dengan tepat:
+
+1. Apa yang sudah tersedia.
+2. Apa yang belum tersedia.
+3. Dari mana data harus diexport.
+4. Perintah yang harus dijalankan.
+5. File CSV yang harus ditempatkan di project.
+6. Command untuk memvalidasi data.
+
+Target tahap ini hanya:
+
+> **Mendapatkan dataset XAUUSD M5 + M15 asli yang bersih dan dapat dipercaya sehingga penelitian signal berikutnya bisa dilakukan secara valid.**
 
 ```
 # 
