@@ -2,8 +2,183 @@
 
 
 
+
+
+
+
+
 # 
 ```
+
+```
+# 
+```
+
+```
+# 
+```
+
+```
+# 
+```
+# Prompt — Real XAUUSD Data Pipeline & Validation
+
+Lanjutkan project berdasarkan roadmap yang sudah ada.
+
+**Jangan membuat strategi baru. Jangan menambah indikator baru. Jangan melakukan auto-trading.**
+
+Fokus tahap ini hanya memastikan kita dapat menggunakan **data historis XAUUSD asli** untuk penelitian dan backtest yang valid.
+
+## 1. Audit kondisi project
+
+Periksa terlebih dahulu:
+
+* Struktur project saat ini.
+* Backtester Python.
+* Modul data loader/import.
+* Format CSV yang sudah didukung.
+* Modul M5.
+* Modul M15.
+* Test yang sudah tersedia.
+* Dokumentasi DATA.md/README.md.
+
+Jangan menghapus atau merusak implementasi yang sudah ada.
+
+## 2. Real Data Only
+
+Synthetic data hanya boleh digunakan untuk unit test.
+
+Untuk validasi strategi, gunakan:
+
+* XAUUSD M5
+* XAUUSD M15
+* Data historis asli dari MT5/broker
+* Idealnya minimal 2 tahun.
+* Lebih baik 3 tahun jika tersedia.
+
+Jangan membuat atau mengarang data market.
+
+Jika data asli belum tersedia, **jangan menggantinya dengan synthetic data**.
+
+Berhenti pada tahap preparation/import dan jelaskan dengan jelas data apa yang masih diperlukan.
+
+## 3. Data Integrity
+
+Validasi:
+
+* timestamp
+* timezone
+* OHLC
+* duplicate candle
+* missing candle
+* candle ordering
+* invalid OHLC
+* gap data
+* consistency M5
+* consistency M15
+
+Pastikan candle M15 tidak menggunakan informasi M5 yang secara waktu belum tersedia.
+
+## 4. No Look-Ahead Validation
+
+Audit seluruh pipeline agar:
+
+* S/R hanya menggunakan data yang sudah tersedia pada saat itu.
+* Market structure tidak membaca candle masa depan.
+* Confirmation hanya menggunakan candle yang sudah CLOSE.
+* Breakout hanya dinyatakan valid setelah close.
+* Retest hanya dinilai setelah kejadian retest.
+* Entry timestamp selalu setelah confirmation.
+* SL/TP tidak menggunakan informasi masa depan untuk menentukan entry.
+
+Buat test khusus untuk mendeteksi look-ahead bias.
+
+## 5. Backtest Dataset Split
+
+Jika data real tersedia, siapkan:
+
+* In-sample/training period
+* Validation period
+* Out-of-sample period
+
+Jangan melakukan optimasi parameter menggunakan data out-of-sample.
+
+Jika memungkinkan gunakan walk-forward validation.
+
+## 6. Baseline Test
+
+Sebelum menambah indikator atau optimasi apa pun, jalankan baseline menggunakan logika roadmap yang sudah ada:
+
+* M15 market structure
+* Support/Resistance zone
+* M5 rejection
+* M5 breakout/breakdown
+* Retest
+* Candle confirmation
+* CONFIRM OR NO SIGNAL
+
+Jangan mengubah threshold hanya untuk memperbagus statistik.
+
+## 7. Statistik
+
+Jika data real sudah tersedia, laporkan:
+
+* jumlah candle
+* periode data
+* jumlah setup
+* jumlah signal
+* jumlah NO SIGNAL
+* win rate
+* loss rate
+* average R:R
+* expectancy
+* profit factor
+* maximum drawdown
+* consecutive wins
+* consecutive losses
+
+Pisahkan hasil:
+
+* M15 bullish
+* M15 bearish
+* M15 sideways
+* resistance rejection
+* resistance breakout
+* support rejection
+* support breakdown
+* retest
+* continuation
+
+## 8. Strict Rule
+
+Gunakan aturan:
+
+CONFIRM OR NO SIGNAL
+
+Jika data, structure, S/R, breakout/rejection, retest, candle confirmation, atau R:R tidak memenuhi syarat:
+
+NO SIGNAL
+
+Jangan memaksa menghasilkan BUY/SELL.
+
+## 9. Output
+
+Setelah selesai, laporkan:
+
+1. Apakah data XAUUSD asli sudah tersedia.
+2. Sumber/periode data.
+3. Apakah data bersih.
+4. Apakah ada look-ahead bias.
+5. Apakah backtester siap menggunakan data real.
+6. Hasil baseline jika data tersedia.
+7. Masalah yang ditemukan.
+8. Apa yang harus dilakukan berikutnya.
+
+**Jangan mengklaim akurasi tinggi.**
+
+Target tahap ini adalah memastikan fondasi data dan backtest benar sebelum kita melakukan penelitian indikator/confluence.
+
+Jika data real belum tersedia, **jangan membuat hasil statistik palsu** dan jangan menggunakan synthetic data sebagai bukti performa.
 
 ```
 # Prompt — Validasi Backtest XAUUSD Real Data
