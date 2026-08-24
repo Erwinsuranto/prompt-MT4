@@ -5,8 +5,6 @@
 
 
 
-
-
 # 
 ```
 
@@ -17,6 +15,244 @@
 ```
 # 
 ```
+
+```
+# 
+```
+
+```
+# 
+```
+# Prompt — Research Confluence & Signal Confirmation
+
+Lanjutkan project berdasarkan roadmap yang sudah ada.
+
+**Jangan melakukan auto-trading. Jangan mengklaim indikator tertentu paling akurat tanpa pengujian. Jangan menggunakan synthetic data sebagai bukti performa.**
+
+Fokus tahap ini adalah merancang **framework penelitian confluence** untuk XAUUSD M15 + M5.
+
+## Tujuan
+
+Kita ingin mengetahui apakah kombinasi beberapa jenis confirmation dapat meningkatkan kualitas signal dibandingkan Support/Resistance + Price Action saja.
+
+Prinsip:
+
+> Setiap indikator harus membuktikan bahwa ia menambah informasi yang berguna. Jika tidak menambah edge, jangan digunakan.
+
+## Kandidat Confirmation
+
+Kelompokkan berdasarkan fungsi, jangan sekadar menumpuk indikator.
+
+### 1. Market Structure
+
+* HH
+* HL
+* LH
+* LL
+* BOS
+* CHOCH
+
+### 2. Support/Resistance
+
+* Swing levels
+* Repeated rejection
+* Consolidation zones
+* Previous S/R flip
+* Strength of zone
+
+### 3. Trend / Regime
+
+Teliti secara objektif:
+
+* ADX
+* DMI (+DI/-DI)
+* EMA trend filter
+
+Gunakan indikator ini sebagai **filter kondisi market**, bukan tombol BUY/SELL.
+
+### 4. Volatility
+
+Teliti:
+
+* ATR
+* ATR relative to recent ATR
+* Candle range relative to ATR
+
+Tujuannya mengetahui apakah breakout/confirmation cukup signifikan dan apakah market terlalu tenang atau terlalu volatile.
+
+### 5. Price Action
+
+Teliti secara terpisah:
+
+* Bullish/Bearish Engulfing
+* Pin Bar/Rejection
+* Strong Body
+* Breakout Candle
+* Breakdown Candle
+* Retest Confirmation
+
+Semua confirmation utama harus menggunakan candle yang sudah CLOSE.
+
+### 6. Price Location
+
+Teliti apakah setup lebih berkualitas ketika harga berada:
+
+* dekat Support
+* dekat Resistance
+* setelah breakout
+* setelah retest
+* relatif terhadap VWAP jika data memungkinkan
+
+VWAP hanya kandidat penelitian, bukan asumsi bahwa VWAP pasti meningkatkan akurasi.
+
+## Eksperimen
+
+Jika data XAUUSD asli sudah tersedia, bandingkan secara bertahap:
+
+### Baseline
+
+M15 Structure
++
+S/R
++
+M5 Price Action
+
+### Experiment 1
+
+Baseline + ADX/DMI
+
+### Experiment 2
+
+Baseline + ATR
+
+### Experiment 3
+
+Baseline + EMA trend filter
+
+### Experiment 4
+
+Baseline + VWAP
+
+### Experiment 5
+
+Baseline + ADX/DMI + ATR
+
+### Experiment 6
+
+Baseline + kombinasi confirmation terbaik yang terbukti dari eksperimen sebelumnya.
+
+Jangan menggabungkan semua indikator secara otomatis.
+
+## Evaluasi
+
+Untuk setiap eksperimen ukur:
+
+* Total sample
+* Signal count
+* Win rate
+* Average R:R
+* Expectancy
+* Profit factor
+* Maximum drawdown
+* Consecutive losses
+* Performance bullish market
+* Performance bearish market
+* Performance sideways market
+* Performance breakout
+* Performance rejection
+* Performance retest
+* Out-of-sample performance
+* Walk-forward performance
+
+Bandingkan dengan baseline.
+
+## Strict Rule
+
+Jika indikator:
+
+* tidak meningkatkan hasil secara konsisten,
+* hanya meningkatkan win rate pada sample kecil,
+* meningkatkan hasil in-sample tetapi gagal out-of-sample,
+* menyebabkan overfitting,
+* atau tidak memberikan informasi tambahan yang jelas,
+
+maka tandai:
+
+```text
+NOT USEFUL / DISABLED
+```
+
+Jangan memasukkannya ke signal engine.
+
+## Signal Quality
+
+Tujuan bukan mendapatkan signal sebanyak mungkin.
+
+Signal hanya boleh dibuat jika:
+
+```text
+M15 Structure
++
+Valid S/R
++
+Valid Market Regime
++
+M5 Reaction
++
+Candle CLOSE Confirmation
++
+Breakout/Rejection/Retest Valid
++
+Risk/Reward Valid
++
+Confluence Cukup
+=
+CONFIRMED SIGNAL
+```
+
+Jika terdapat konflik:
+
+```text
+NO SIGNAL
+```
+
+## Anti-Overfitting
+
+Wajib:
+
+* In-sample
+* Validation
+* Out-of-sample
+* Walk-forward jika memungkinkan
+
+Jangan memilih kombinasi indikator berdasarkan hasil terbaik pada satu periode saja.
+
+Jangan melakukan tuning berulang terhadap OOS data.
+
+## Output
+
+Buat laporan yang menjawab:
+
+1. Confirmation mana yang benar-benar menambah kualitas baseline.
+2. Confirmation mana yang tidak memberikan manfaat.
+3. Kondisi market mana yang paling cocok untuk setiap setup.
+4. Apakah ADX/DMI membantu.
+5. Apakah ATR membantu.
+6. Apakah EMA membantu.
+7. Apakah VWAP membantu.
+8. Candle confirmation mana yang paling konsisten.
+9. Kombinasi confirmation mana yang paling robust out-of-sample.
+10. Kondisi apa yang menyebabkan sistem harus **NO SIGNAL**.
+
+**Jangan menyebut suatu indikator atau kombinasi sebagai "paling akurat" sebelum memiliki sample yang memadai dan hasil out-of-sample/walk-forward yang konsisten.**
+
+Jika data XAUUSD asli belum tersedia, jangan membuat hasil eksperimen. Siapkan framework pengujian saja dan laporkan bahwa pengujian real belum dapat dilakukan.
+
+Belum perlu membuat auto-trading.
+
+Target akhir tahap ini:
+
+> Menemukan kombinasi confirmation yang benar-benar menambah kualitas signal XAUUSD M15 + M5 berdasarkan data nyata, bukan berdasarkan asumsi atau popularitas indikator.
 
 ```
 # 
