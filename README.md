@@ -9,9 +9,614 @@
 ```
 
 ```
-# 
+# Prompt berikutnya fokus implementasi langsung fitur candle continuation + Support/Resistance + rejection/breakout/retest
 ```
+Lanjutkan implementasi project XAUUSD berdasarkan roadmap yang sudah ada.
 
+Kali ini JANGAN hanya melakukan review atau membuat dokumentasi. IMPLEMENTASIKAN FITUR LANGSUNG ke codebase yang ada.
+
+Setelah implementasi selesai:
+1. Jalankan test yang relevan.
+2. Perbaiki error yang ditemukan.
+3. Pastikan tidak ada perubahan yang merusak fitur sebelumnya.
+4. Commit semua perubahan.
+5. Push langsung ke repository Git yang sedang digunakan.
+6. Laporkan commit hash dan hasil test.
+
+==================================================
+FITUR UTAMA — CANDLE CONTINUATION + S/R
+==================================================
+
+Tujuan:
+
+Sistem harus dapat memahami apakah candle setelah Support/Resistance, rejection, breakout, atau retest benar-benar melakukan CONTINUATION.
+
+Jangan menganggap:
+
+GREEN CANDLE = BUY
+RED CANDLE = SELL
+
+Sistem harus memahami konteks harga.
+
+Alur utama:
+
+M15 STRUCTURE
+    ↓
+SUPPORT / RESISTANCE ZONE
+    ↓
+PRICE REACHES ZONE
+    ↓
+REACTION
+    ↓
+REJECTION / BREAKOUT / BREAKDOWN
+    ↓
+RETEST
+    ↓
+CANDLE CONFIRMATION
+    ↓
+CONTINUATION
+    ↓
+CONFIRMED SETUP / NO SIGNAL
+
+
+==================================================
+1. SUPPORT / RESISTANCE SEBAGAI ZONA
+==================================================
+
+Pastikan Support dan Resistance tidak diperlakukan hanya sebagai satu harga.
+
+Gunakan zona berdasarkan struktur yang sudah tersedia di project.
+
+Zona dapat berasal dari:
+
+- swing high
+- swing low
+- repeated rejection
+- consolidation
+- previous support
+- previous resistance
+- S/R flip
+
+Simpan informasi minimal:
+
+- zone type
+- zone high
+- zone low
+- strength
+- touch count
+- source
+- timeframe
+
+Jangan menggunakan informasi candle masa depan untuk menentukan zona pada timestamp historis.
+
+
+==================================================
+2. RESISTANCE REJECTION
+==================================================
+
+Implementasikan deteksi:
+
+Harga naik
+↓
+Masuk Resistance Zone
+↓
+Wick/rejection
+↓
+Close kembali di bawah resistance
+↓
+Bearish confirmation
+↓
+Candle berikutnya menunjukkan continuation turun
+
+Jangan langsung menganggap candle pertama yang menyentuh resistance sebagai SELL.
+
+Status harus dapat dibedakan:
+
+- APPROACHING_RESISTANCE
+- TESTING_RESISTANCE
+- REJECTION_DETECTED
+- BEARISH_CONFIRMATION
+- BEARISH_CONTINUATION
+- INVALIDATED
+
+
+==================================================
+3. SUPPORT REJECTION
+==================================================
+
+Kebalikan dari resistance:
+
+Harga turun
+↓
+Masuk Support Zone
+↓
+Rejection
+↓
+Close kembali di atas support
+↓
+Bullish confirmation
+↓
+Candle berikutnya menunjukkan continuation naik
+
+Status:
+
+- APPROACHING_SUPPORT
+- TESTING_SUPPORT
+- REJECTION_DETECTED
+- BULLISH_CONFIRMATION
+- BULLISH_CONTINUATION
+- INVALIDATED
+
+
+==================================================
+4. RESISTANCE BREAKOUT CONTINUATION
+==================================================
+
+Jangan menganggap:
+
+HIGH > RESISTANCE = BREAKOUT
+
+Breakout harus menggunakan candle CLOSE.
+
+Minimal:
+
+1. Harga menembus resistance.
+2. Candle M5 close di atas resistance zone.
+3. Breakout body/range cukup signifikan berdasarkan data yang tersedia.
+4. Harga tidak langsung gagal kembali ke bawah zone.
+5. Jika terjadi retest, retest harus dievaluasi.
+6. Muncul bullish confirmation.
+7. Candle berikutnya menunjukkan continuation.
+
+Status:
+
+RESISTANCE_BREAK_ATTEMPT
+RESISTANCE_BREAK_CONFIRMED
+BREAKOUT_RETEST
+BREAKOUT_RETEST_HOLD
+BULLISH_CONFIRMATION
+BULLISH_CONTINUATION
+BREAKOUT_FAILED
+
+
+==================================================
+5. SUPPORT BREAKDOWN CONTINUATION
+==================================================
+
+Kebalikan:
+
+1. Harga menembus support.
+2. Candle M5 close di bawah support zone.
+3. Breakdown cukup signifikan.
+4. Harga melakukan retest jika terjadi.
+5. Retest gagal kembali di atas support.
+6. Bearish confirmation.
+7. Candle berikutnya menunjukkan continuation turun.
+
+Status:
+
+SUPPORT_BREAK_ATTEMPT
+SUPPORT_BREAK_CONFIRMED
+BREAKDOWN_RETEST
+BREAKDOWN_RETEST_FAIL
+BEARISH_CONFIRMATION
+BEARISH_CONTINUATION
+BREAKDOWN_FAILED
+
+
+==================================================
+6. CANDLE CONTINUATION ENGINE
+==================================================
+
+Buat logic khusus untuk menentukan CONTINUATION.
+
+Continuation harus dievaluasi dari candle yang sudah CLOSE.
+
+Contoh bullish continuation:
+
+Confirmation candle:
+    bullish
+
+Candle berikutnya:
+    close > confirmation close
+    atau memenuhi aturan continuation yang sudah didefinisikan
+
+Maka:
+
+BULLISH_CONTINUATION
+
+Contoh bearish:
+
+Confirmation candle:
+    bearish
+
+Candle berikutnya:
+    close < confirmation close
+    atau memenuhi aturan continuation yang sudah didefinisikan
+
+Maka:
+
+BEARISH_CONTINUATION
+
+
+Jangan menggunakan candle masa depan untuk menghasilkan signal pada candle sebelumnya.
+
+Pastikan timestamp signal selalu berada setelah candle confirmation benar-benar CLOSE.
+
+
+==================================================
+7. BEDAKAN CONFIRMATION DAN CONTINUATION
+==================================================
+
+Jangan gabungkan kedua konsep.
+
+Contoh:
+
+Resistance
+↓
+Rejection candle
+↓
+CONFIRMATION
+↓
+Candle berikutnya
+↓
+CONTINUATION
+
+Jika confirmation ada tetapi continuation belum terjadi:
+
+status:
+
+CONFIRMED_WAITING_CONTINUATION
+
+Bukan langsung:
+
+CONFIRMED BUY/SELL
+
+
+Jika continuation gagal:
+
+INVALIDATED / NO SIGNAL
+
+
+==================================================
+8. RETEST
+==================================================
+
+Retest harus menjadi event tersendiri.
+
+Untuk resistance breakout:
+
+Resistance
+↓
+Breakout
+↓
+Close above
+↓
+Return to resistance zone
+↓
+Zone bertahan sebagai support
+↓
+Bullish confirmation
+↓
+Continuation
+
+Untuk support breakdown:
+
+Support
+↓
+Breakdown
+↓
+Close below
+↓
+Return to support zone
+↓
+Zone gagal menjadi resistance
+↓
+Bearish confirmation
+↓
+Continuation
+
+
+==================================================
+9. FALSE BREAKOUT
+==================================================
+
+Deteksi false breakout.
+
+Contoh:
+
+Resistance
+↓
+Wick/high menembus
+↓
+Close kembali di bawah resistance
+↓
+Tidak ada continuation bullish
+
+Jangan menghasilkan BUY.
+
+Status:
+
+FALSE_BREAKOUT
+NO_SIGNAL
+
+Hal yang sama untuk support.
+
+
+==================================================
+10. M15 → M5
+==================================================
+
+Tetap gunakan:
+
+M15 = WHERE
+M5  = WHEN
+
+M15:
+
+- structure
+- trend
+- major support
+- major resistance
+
+M5:
+
+- reaction
+- breakout
+- breakdown
+- retest
+- confirmation
+- continuation
+
+Jangan membalik fungsi timeframe.
+
+
+==================================================
+11. SIGNAL STATE MACHINE
+==================================================
+
+Jika arsitektur project memungkinkan, gunakan state machine agar setup tidak langsung berubah menjadi BUY/SELL.
+
+Contoh:
+
+IDLE
+ ↓
+APPROACHING_ZONE
+ ↓
+TESTING_ZONE
+ ↓
+REJECTION / BREAKOUT / BREAKDOWN
+ ↓
+CONFIRMATION
+ ↓
+WAITING_CONTINUATION
+ ↓
+CONTINUATION
+ ↓
+CONFIRMED_SETUP
+
+Jika gagal:
+
+INVALIDATED
+ ↓
+NO_SIGNAL
+
+
+==================================================
+12. STRICT NO SIGNAL
+==================================================
+
+Jangan memaksa signal.
+
+Jika:
+
+- S/R tidak jelas
+- candle belum close
+- rejection belum confirmed
+- breakout belum confirmed
+- retest gagal
+- continuation belum terjadi
+- M15 structure konflik
+- setup invalidated
+
+maka:
+
+NO SIGNAL
+
+
+==================================================
+13. CHART / OUTPUT
+==================================================
+
+Jika project memiliki output/chart annotation, tampilkan event secara jelas.
+
+Contoh:
+
+RESISTANCE
+──────────────
+      ↑
+   TESTING
+      ↑
+   REJECTION
+      ↓
+ CONFIRMATION
+      ↓
+ CONTINUATION
+      ↓
+    SELL
+
+
+Untuk breakout:
+
+RESISTANCE
+──────────────
+      ↑
+   BREAKOUT
+      ↑
+     RETEST
+      ↑
+ CONFIRMATION
+      ↑
+ CONTINUATION
+      ↑
+     BUY
+
+
+Jangan hanya menampilkan BUY/SELL.
+
+Simpan alasan setup.
+
+
+==================================================
+14. DATA DAN BACKTEST
+==================================================
+
+Gunakan data XAUUSD real yang sudah tersedia.
+
+Jangan membuat synthetic market data.
+
+Tambahkan unit/integration test untuk:
+
+- resistance rejection
+- support rejection
+- resistance breakout
+- support breakdown
+- breakout retest
+- breakdown retest
+- bullish continuation
+- bearish continuation
+- false breakout
+- incomplete confirmation
+- invalidated setup
+- candle belum close
+- look-ahead protection
+
+Jika data real belum tersedia untuk test tertentu, gunakan fixture/unit test yang jelas hanya untuk menguji logic, bukan untuk mengklaim performa strategi.
+
+
+==================================================
+15. ANTI LOOK-AHEAD
+==================================================
+
+Wajib audit.
+
+Tidak boleh:
+
+- membaca candle masa depan
+- menggunakan future high/low untuk menentukan S/R historis
+- menggunakan candle continuation untuk menentukan confirmation candle
+- menghasilkan signal sebelum candle CLOSE
+- melakukan repaint signal historis
+
+Tambahkan test khusus jika belum tersedia.
+
+
+==================================================
+16. JANGAN MENAMBAH INDIKATOR
+==================================================
+
+Untuk tahap ini jangan menambahkan:
+
+- RSI
+- MACD
+- Bollinger Bands
+- stochastic
+- indikator lain
+
+Fokus hanya:
+
+M15 Structure
++
+Support/Resistance
++
+Rejection
++
+Breakout/Breakdown
++
+Retest
++
+Candle Confirmation
++
+Continuation
+
+
+==================================================
+17. CODE QUALITY
+==================================================
+
+Jangan membuat satu file besar.
+
+Pisahkan logic jika arsitektur project sudah modular.
+
+Minimal pisahkan konsep:
+
+- support/resistance detection
+- reaction/rejection detection
+- breakout/breakdown detection
+- retest detection
+- candle confirmation
+- continuation detection
+- signal state
+- tests
+
+Gunakan module yang sudah ada jika cocok. Jangan membuat duplikasi logic.
+
+
+==================================================
+18. VALIDASI SEBELUM PUSH
+==================================================
+
+Sebelum commit:
+
+- jalankan test suite
+- jalankan lint/type check jika project menggunakannya
+- jalankan test khusus signal engine
+- cek tidak ada regression
+- cek git diff
+- cek git status
+
+Jika ada error, perbaiki terlebih dahulu.
+
+Setelah semuanya PASS:
+
+git add .
+git commit -m "feat: add S/R continuation confirmation engine"
+git push
+
+Jika branch/repository memiliki aturan berbeda, ikuti konfigurasi repository yang sudah ada.
+
+Jangan force push.
+
+==================================================
+HASIL AKHIR
+==================================================
+
+Setelah selesai laporkan:
+
+1. File yang dibuat/diubah.
+2. Logic continuation yang diimplementasikan.
+3. Logic Support/Resistance yang diimplementasikan.
+4. Logic rejection.
+5. Logic breakout/breakdown.
+6. Logic retest.
+7. Anti-look-ahead protection.
+8. Test yang dijalankan.
+9. Hasil test.
+10. Commit hash.
+11. Push berhasil atau tidak.
+
+Jangan hanya mengatakan "sudah dibuat".
+
+Tunjukkan bukti dari test dan git status/commit.
+
+Target tahap ini:
+
+> Sistem mampu membedakan candle biasa dengan candle confirmation dan candle continuation, serta memahami apakah harga sedang ditolak Support/Resistance, melakukan breakout/breakdown, melakukan retest, atau benar-benar melanjutkan arah.
+
+Jangan implementasikan auto-trading.
+Jangan menambah indikator.
+Jangan mengubah roadmap.
+Langsung implementasikan, test, commit, dan push.
 ```
 # 
 ```
