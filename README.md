@@ -18,7 +18,665 @@
 ```
 # 
 ```
+Lanjutkan project dari kondisi TERAKHIR yang sudah ada.
 
+Konteks penting:
+- Project XAUUSD Support/Resistance Confirmation System.
+- TF utama tetap M15 + M5.
+- M15 = menentukan WHERE: market structure + Support/Resistance.
+- M5 = menentukan WHEN: reaction + breakout/rejection + retest + candle confirmation.
+- Continuation engine sudah dibuat pada commit sebelumnya:
+  48d72e7 - feat: add S/R continuation confirmation engine
+- Sebelumnya test suite berhasil:
+  94 tests passed.
+- Perubahan sebelumnya sudah di-push ke GitHub.
+- Data XAUUSD real sudah berhasil diexport dari MT5/broker.
+- Dataset yang tersedia sebelumnya:
+  data/XAUUSD_m_M5.csv
+  data/XAUUSD_m_M15.csv
+- Jangan membuat synthetic market data.
+- Jangan membuat strategi baru.
+- Jangan menambah timeframe.
+- Jangan menambah indikator.
+- Jangan menggunakan AI di dalam signal engine pada tahap ini.
+- Jangan membuat auto-trading.
+
+==================================================
+TUJUAN TAHAP INI
+==================================================
+
+Sekarang kita harus memastikan continuation engine yang sudah dibuat BENAR-BENAR terhubung ke backtester.
+
+Jangan hanya melakukan static code review.
+
+Lakukan audit → integrasi → test → backtest → evaluasi.
+
+Arsitektur yang harus dipertahankan:
+
+M15
+  ↓
+Market Structure
+  ↓
+Support / Resistance Zone
+  ↓
+M5 Reaction
+  ↓
+Breakout / Rejection
+  ↓
+Retest
+  ↓
+Candle CLOSE Confirmation
+  ↓
+Continuation Validation
+  ↓
+Risk/Reward
+  ↓
+CONFIRMED SIGNAL / NO SIGNAL
+
+==================================================
+1. AUDIT IMPLEMENTASI SEKARANG
+==================================================
+
+Periksa seluruh repository terlebih dahulu.
+
+Cari dan pahami:
+
+- continuation.py
+- backtest.py
+- baseline runner
+- stats.py
+- S/R detection
+- market structure
+- breakout/rejection logic
+- retest logic
+- candle confirmation
+- signal generation
+- dataset loader
+- test suite
+
+Jangan mengasumsikan nama file berdasarkan prompt.
+
+Gunakan struktur repository yang benar-benar ada.
+
+Pastikan continuation engine benar-benar dipanggil oleh backtester.
+
+Jika continuation.py ada tetapi tidak pernah dipanggil oleh runner, perbaiki integrasinya.
+
+Jangan membuat duplikasi engine.
+
+==================================================
+2. DATA REAL
+==================================================
+
+Gunakan data real yang sudah tersedia.
+
+Prioritas:
+
+M15:
+data/XAUUSD_m_M15.csv
+
+M5:
+data/XAUUSD_m_M5.csv
+
+Jika path berbeda, cari file dataset yang benar terlebih dahulu.
+
+Jangan membuat data baru.
+
+Jangan mengisi missing candle dengan candle sintetis.
+
+Jangan mengubah harga historis.
+
+Pastikan loader membaca timestamp, OHLC dan volume dengan benar.
+
+==================================================
+3. VALIDASI DATA SEBELUM BACKTEST
+==================================================
+
+Sebelum menjalankan strategi:
+
+- validasi timestamp
+- validasi ordering
+- duplicate
+- invalid OHLC
+- timezone
+- gap
+- M5/M15 alignment
+- coverage periode
+- apakah M15 berasal dari data yang konsisten dengan M5
+
+Jangan menghentikan backtest hanya karena weekend gap normal.
+
+Bedakan:
+
+NORMAL MARKET GAP
+vs
+DATA CORRUPTION
+
+Jika ada gap broker normal, catat sebagai gap.
+
+Jika ada gap abnormal/data corruption, laporkan.
+
+==================================================
+4. AUDIT NO LOOK-AHEAD
+==================================================
+
+Ini WAJIB.
+
+Pastikan setiap keputusan pada candle T hanya menggunakan data yang tersedia sampai candle T.
+
+Khusus:
+
+S/R:
+- tidak boleh memakai swing masa depan untuk keputusan entry masa lalu.
+
+Market structure:
+- tidak boleh mengetahui HH/HL/LH/LL yang baru terbentuk di masa depan.
+
+Breakout:
+- jangan valid hanya karena High menembus level.
+- breakout harus dikonfirmasi setelah candle CLOSE.
+
+Retest:
+- retest harus terjadi setelah breakout.
+- jangan mendeteksi retest menggunakan candle sebelum breakout.
+
+Continuation:
+- tidak boleh menganggap continuation valid sebelum confirmation selesai.
+
+Entry:
+- timestamp entry harus sesudah candle confirmation CLOSE.
+
+SL/TP:
+- jangan menggunakan future high/low untuk menentukan entry.
+
+Jika ditemukan look-ahead bias:
+STOP.
+Perbaiki terlebih dahulu.
+Kemudian jalankan test ulang.
+
+==================================================
+5. INTEGRASIKAN CONTINUATION ENGINE
+==================================================
+
+Continuation engine harus menangani dua setup:
+
+A. Resistance Breakout Continuation
+
+Harga:
+naik
+↓
+mendekati resistance
+↓
+break resistance
+↓
+M5 candle CLOSE di atas resistance
+↓
+retest resistance
+↓
+resistance bertahan sebagai support
+↓
+bullish confirmation
+↓
+CONFIRMED BUY CONTINUATION
+
+B. Support Breakdown Continuation
+
+Harga:
+turun
+↓
+mendekati support
+↓
+break support
+↓
+M5 candle CLOSE di bawah support
+↓
+retest support
+↓
+support gagal sebagai resistance
+↓
+bearish confirmation
+↓
+CONFIRMED SELL CONTINUATION
+
+Jangan menganggap:
+
+High > resistance
+
+sebagai breakout valid.
+
+Dan jangan menganggap:
+
+Low < support
+
+sebagai breakdown valid.
+
+==================================================
+6. CONFIRMATION HARUS CLOSE
+==================================================
+
+Signal tidak boleh muncul intrabar.
+
+Gunakan candle yang sudah selesai/close.
+
+Contoh BUY:
+
+M5 breakout candle close
+↓
+retest terjadi
+↓
+retest confirmation close
+↓
+bullish confirmation close
+↓
+baru signal BUY
+
+Jika candle masih berjalan:
+
+NO SIGNAL.
+
+==================================================
+7. REJECTION TETAP DIPERTAHANKAN
+==================================================
+
+Jangan merusak setup rejection yang sudah ada.
+
+Tetap pisahkan:
+
+Resistance Rejection → SELL
+
+Support Rejection → BUY
+
+Resistance Breakout + Retest → BUY
+
+Support Breakdown + Retest → SELL
+
+Jangan mencampurkan rejection dengan continuation.
+
+==================================================
+8. STATE MACHINE
+==================================================
+
+Jika saat ini continuation menggunakan state machine, audit state transition-nya.
+
+Contoh:
+
+IDLE
+↓
+LEVEL_REACHED
+↓
+BREAKOUT_CONFIRMED
+↓
+WAIT_RETEST
+↓
+RETEST_CONFIRMED
+↓
+WAIT_CONFIRMATION
+↓
+CONFIRMED
+↓
+SIGNAL
+
+Untuk failure:
+
+BREAKOUT_CONFIRMED
+↓
+RETEST_FAILED
+↓
+BREAKOUT_FAILED / NO SIGNAL
+
+atau:
+
+WAIT_RETEST
+↓
+timeout
+↓
+NO SIGNAL
+
+Jangan mempertahankan state continuation terlalu lama sehingga setup lama bisa menghasilkan signal jauh setelah kondisi awal sudah tidak relevan.
+
+==================================================
+9. TIMEOUT / EXPIRATION
+==================================================
+
+Periksa apakah continuation setup memiliki batas waktu/bar.
+
+Retest tidak boleh dianggap valid tanpa batas.
+
+Jika implementasi sekarang sudah memiliki timeout:
+
+audit dan test.
+
+Jika belum ada timeout dan penambahannya benar-benar diperlukan agar state machine tidak stale, implementasikan dengan parameter yang jelas dan konservatif.
+
+Jangan melakukan optimasi parameter.
+
+==================================================
+10. BASELINE VS CONTINUATION
+==================================================
+
+Backtester harus bisa membedakan:
+
+BASELINE
+dan
+BASELINE + CONTINUATION CONFIRMATION
+
+Jangan mengubah baseline secara diam-diam.
+
+Tujuannya melihat apakah continuation confirmation benar-benar memberikan nilai tambah.
+
+Laporkan:
+
+Baseline:
+- total setup
+- signal
+- win/loss
+- expectancy
+- profit factor
+- drawdown
+
+Continuation enabled:
+- total setup
+- signal
+- win/loss
+- expectancy
+- profit factor
+- drawdown
+
+==================================================
+11. TEST CASE
+==================================================
+
+Tambahkan/ubah test hanya jika diperlukan.
+
+Minimal test:
+
+1. breakout tanpa CLOSE confirmation
+   → NO SIGNAL
+
+2. breakout close valid
+   → state berubah
+
+3. breakout tetapi tidak ada retest
+   → NO SIGNAL
+
+4. retest gagal
+   → NO SIGNAL
+
+5. retest valid + bullish confirmation
+   → BUY continuation
+
+6. breakdown valid + retest + bearish confirmation
+   → SELL continuation
+
+7. candle confirmation masih open
+   → NO SIGNAL
+
+8. breakout terjadi tetapi kemudian kembali ke dalam zone
+   → breakout failed / NO SIGNAL
+
+9. S/R menggunakan future data
+   → test harus mendeteksi / mencegah
+
+10. entry timestamp tidak boleh lebih awal dari confirmation close.
+
+11. state continuation lama tidak boleh menghasilkan signal setelah expired.
+
+12. M15 context tidak boleh memakai candle M15 yang belum close.
+
+==================================================
+12. JANGAN OPTIMASI DULU
+==================================================
+
+PENTING:
+
+Jangan mengejar win rate.
+
+Jangan mengubah threshold hanya supaya hasil backtest lebih bagus.
+
+Jangan melakukan parameter sweep besar.
+
+Jangan memilih parameter terbaik berdasarkan hasil historis.
+
+Tahap ini hanya untuk:
+
+VALIDASI LOGIKA
++
+INTEGRASI
++
+ANTI LOOK-AHEAD
++
+BASELINE COMPARISON
+
+==================================================
+13. BACKTEST REAL DATA
+==================================================
+
+Setelah test lolos, jalankan backtest menggunakan dataset real yang tersedia.
+
+Gunakan periode data yang memang tersedia.
+
+Jangan mengarang periode.
+
+Jika dataset dimulai pada 2024-08-26 dan berakhir 2026-08-25, gunakan periode aktual tersebut.
+
+Pisahkan hasil jika runner mendukung:
+
+- in-sample
+- validation
+- out-of-sample
+
+Jika pembagian belum tersedia, jangan membuat pembagian yang mengubah strategi.
+
+Laporkan kemampuan runner saat ini.
+
+==================================================
+14. STATISTIK
+==================================================
+
+Minimal tampilkan:
+
+- total bars
+- total setup
+- total signal
+- BUY
+- SELL
+- NO SIGNAL
+- win
+- loss
+- win rate
+- average R:R
+- expectancy
+- profit factor
+- max drawdown
+- consecutive wins
+- consecutive losses
+
+Pisahkan:
+
+Resistance Rejection
+Resistance Breakout Continuation
+Support Rejection
+Support Breakdown Continuation
+
+Dan:
+
+M15 bullish
+M15 bearish
+M15 sideways
+
+==================================================
+15. SAMPLE DETAIL
+==================================================
+
+Jangan hanya memberikan statistik agregat.
+
+Tampilkan beberapa contoh signal nyata dari dataset.
+
+Untuk setiap contoh:
+
+timestamp
+direction
+M15 trend
+S/R level
+setup type
+breakout/rejection
+retest
+confirmation candle
+entry
+SL
+TP
+result
+
+Tujuannya agar kita bisa memeriksa apakah logika yang dihitung code memang sesuai dengan chart.
+
+==================================================
+16. IMPORTANT: ENTRY BUKAN RIBUAN PIPS
+==================================================
+
+Sistem ini bukan dibuat untuk menangkap pergerakan ratusan/ribuan pips.
+
+Tujuan kita adalah menemukan:
+
+ENTRY YANG TERKONFIRMASI
+pada area yang jelas
+dengan continuation/rejection yang valid.
+
+Contoh konsep:
+
+M15 menentukan area.
+
+M5 menunggu reaksi.
+
+Jika resistance:
+break → retest → confirmation → entry.
+
+Jika support:
+break → retest → confirmation → entry.
+
+Jika rejection:
+touch zone → rejection → confirmation → entry.
+
+Jangan memperbesar TP hanya untuk membuat hasil terlihat bagus.
+
+Gunakan Risk/Reward yang realistis sesuai implementasi saat ini.
+
+==================================================
+17. JANGAN TAMBAH TIMEFRAME
+==================================================
+
+Tetap:
+
+M15 = structure + S/R
+M5 = confirmation + entry
+
+Jangan menambahkan:
+
+M1
+M30
+H1
+H4
+
+kecuali audit membuktikan secara teknis bahwa M15 + M5 tidak cukup dan ada alasan kuat yang dapat ditunjukkan dengan data.
+
+Untuk tahap ini:
+
+TIDAK BOLEH MENAMBAH TF.
+
+==================================================
+18. JANGAN TAMBAH AI
+==================================================
+
+Tidak perlu AI/ML di dalam signal engine sekarang.
+
+Kita harus membuktikan dulu rule-based engine menggunakan data nyata.
+
+AI baru boleh dipertimbangkan setelah baseline rule-based benar-benar tervalidasi dan kita mempunyai dataset serta alasan eksperimen yang jelas.
+
+==================================================
+19. TEST FINAL
+==================================================
+
+Jalankan:
+
+- seluruh unit test
+- integration test
+- compile check
+- backtest real data
+
+Pastikan tidak ada regression.
+
+Jika test gagal:
+
+perbaiki penyebabnya.
+
+Jangan menonaktifkan test hanya agar suite PASS.
+
+==================================================
+20. GIT
+==================================================
+
+Jika semua perubahan sudah benar:
+
+git status
+git diff
+git log
+
+Pastikan hanya perubahan yang berkaitan dengan tahap ini.
+
+Buat commit dengan pesan yang jelas.
+
+Kemudian PUSH ke branch/repository yang memang digunakan project.
+
+Jangan force push.
+
+==================================================
+21. OUTPUT WAJIB
+==================================================
+
+Setelah selesai berikan laporan:
+
+1. File yang diperiksa.
+2. File yang diubah.
+3. Integrasi continuation berhasil atau tidak.
+4. Apakah ada look-ahead bias.
+5. Apakah ada repaint logic.
+6. Apakah confirmation benar-benar menunggu CLOSE.
+7. Jumlah test sebelum/sesudah.
+8. Hasil test.
+9. Hasil baseline.
+10. Hasil continuation.
+11. Contoh signal nyata.
+12. Masalah yang ditemukan.
+13. Commit hash.
+14. Status push.
+
+Jika ada bagian yang belum bisa divalidasi, katakan terus terang.
+
+Jangan mengatakan "akurat" hanya karena test PASS.
+
+Target tahap ini:
+
+Membuktikan bahwa:
+
+M15 Structure
++
+M15 S/R
++
+M5 Reaction
++
+Breakout/Rejection
++
+Retest
++
+Candle CLOSE Confirmation
++
+Continuation Engine
+
+benar-benar bekerja secara temporal dan dapat diuji pada data XAUUSD real.
+
+Jika semua sudah PASS, BERHENTI.
+
+Jangan lanjut ke indikator baru, AI, timeframe baru, Telegram baru, atau auto-trading sebelum saya memberikan instruksi berikutnya.
 ```
 # S/R + rejection + breakout/breakdown + retest + candle confirmation
 ```
