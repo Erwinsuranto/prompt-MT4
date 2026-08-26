@@ -15,6 +15,716 @@
 ```
 # 
 ```
+Lanjutkan project XAUUSD berdasarkan roadmap yang sudah ada.
+
+KONDISI SAAT INI:
+- Data XAUUSD asli sudah berhasil diambil dari MetaTrader 5/broker.
+- Symbol yang digunakan: XAUUSD.m
+- File M5 sudah tersedia: data/XAUUSD_m_M5.csv
+- File M15 sudah tersedia: data/XAUUSD_m_M15.csv
+- Export M5 berhasil: 100835 bars
+- Export M15 berhasil: 47265 bars
+- Validasi M15 menunjukkan ERROR=0
+- Validasi agregasi M5 → M15 menunjukkan ERROR=0
+- Coverage overlap M5 → M15 = 100%
+- Data memiliki gap/weekend gap yang harus tetap diperlakukan sebagai gap asli, bukan diisi candle sintetis.
+- Jangan membuat synthetic market data.
+- Jangan mengubah data asli hanya untuk memperbagus hasil.
+- Jangan melakukan auto-trading.
+
+==================================================
+TAHAP SEKARANG: BASELINE BACKTEST
+==================================================
+
+Tujuan tahap ini adalah mengetahui performa dasar strategi roadmap menggunakan DATA XAUUSD ASLI sebelum menambahkan indikator/confluence apa pun.
+
+Jangan menambahkan:
+- ADX
+- DMI
+- ATR
+- EMA
+- VWAP
+- RSI
+- MACD
+- machine learning
+- indikator tambahan lainnya
+
+Jangan melakukan optimasi parameter untuk mengejar win rate.
+
+Gunakan strategi baseline yang sudah ditentukan roadmap:
+
+M15:
+    Market Structure
+    +
+    Support/Resistance
+
+M5:
+    Rejection
+    +
+    Breakout/Breakdown
+    +
+    Retest
+    +
+    Candle Confirmation
+
+==================================================
+1. AUDIT BACKTESTER TERLEBIH DAHULU
+==================================================
+
+Sebelum menjalankan backtest, audit kode backtester yang sudah ada.
+
+Periksa:
+
+- data loader
+- timestamp handling
+- timezone handling
+- M5/M15 alignment
+- market structure detection
+- support/resistance detection
+- breakout detection
+- breakdown detection
+- retest detection
+- rejection detection
+- candle confirmation
+- entry calculation
+- SL calculation
+- TP calculation
+- result calculation
+- trade lifecycle
+- equity curve
+- drawdown calculation
+
+Jangan menghapus implementasi yang sudah ada tanpa alasan.
+
+Jika menemukan bug, perbaiki bug tersebut sebelum menjalankan baseline.
+
+==================================================
+2. WAJIB CEK LOOK-AHEAD BIAS
+==================================================
+
+Pastikan backtester tidak menggunakan informasi masa depan.
+
+Aturan penting:
+
+Candle yang belum CLOSE tidak boleh digunakan sebagai confirmation.
+
+Untuk setiap entry:
+
+    confirmation candle CLOSE
+            ↓
+    confirmation diketahui
+            ↓
+    entry pada candle/tick berikutnya
+
+Jangan:
+
+    future candle
+        ↓
+    mengetahui pattern
+        ↓
+    entry kembali ke masa lalu
+
+Support/Resistance juga tidak boleh menggunakan swing future yang belum diketahui pada waktu entry.
+
+Market structure hanya boleh menggunakan informasi yang sudah tersedia sampai timestamp tersebut.
+
+Retest hanya boleh dianggap valid setelah retest benar-benar terjadi.
+
+SL/TP tidak boleh menggunakan future price untuk menentukan apakah setup layak masuk.
+
+Tambahkan test khusus untuk memastikan tidak ada look-ahead.
+
+Jika terdapat look-ahead bias:
+    STOP
+    perbaiki terlebih dahulu
+    jangan lanjutkan statistik
+
+==================================================
+3. PERIODE BACKTEST
+==================================================
+
+Karena M5 dan M15 mempunyai periode historis yang tidak identik, tentukan periode COMMON OVERLAP secara otomatis.
+
+Jangan menggunakan periode sebelum data M5 tersedia.
+
+Gunakan hanya periode yang benar-benar tersedia pada kedua timeframe.
+
+Laporkan:
+
+M5 earliest
+M5 latest
+
+M15 earliest
+M15 latest
+
+COMMON earliest
+COMMON latest
+
+Jangan menganggap data di luar common overlap tersedia.
+
+==================================================
+4. M15 MARKET STRUCTURE
+==================================================
+
+Gunakan roadmap yang sudah ada.
+
+Identifikasi:
+
+- HH
+- HL
+- LH
+- LL
+- BOS
+- CHOCH
+
+Klasifikasikan market:
+
+    BULLISH
+    BEARISH
+    SIDEWAYS
+
+Jangan menggunakan indikator tambahan.
+
+Pastikan structure detection tidak melihat candle future.
+
+==================================================
+5. SUPPORT / RESISTANCE
+==================================================
+
+Gunakan Support/Resistance yang sudah ada dalam roadmap.
+
+Level harus diperlakukan sebagai ZONE, bukan harga tunggal.
+
+Gunakan informasi yang memang sudah tersedia pada saat setup terjadi.
+
+Pertimbangkan:
+
+- swing high
+- swing low
+- repeated rejection
+- consolidation
+- previous support/resistance
+- flip level
+
+Jangan membuat S/R menggunakan future data.
+
+==================================================
+6. SETUP A
+==================================================
+
+RESISTANCE REJECTION → SELL
+
+Urutan:
+
+Harga naik
+↓
+Harga masuk Resistance Zone
+↓
+Terjadi rejection
+↓
+Candle M5 CLOSE
+↓
+Bearish confirmation
+↓
+Entry SELL
+
+Jangan entry sebelum confirmation candle CLOSE.
+
+Catat setiap setup meskipun akhirnya tidak valid.
+
+==================================================
+7. SETUP B
+==================================================
+
+RESISTANCE BREAKOUT + RETEST → BUY
+
+Urutan:
+
+Harga mencapai resistance
+↓
+Breakout
+↓
+Candle M5 CLOSE di atas resistance
+↓
+Breakout valid
+↓
+Harga melakukan retest
+↓
+Retest bertahan
+↓
+Bullish confirmation candle CLOSE
+↓
+BUY
+
+Jangan menganggap:
+
+High > resistance
+
+sebagai breakout valid.
+
+Breakout harus dikonfirmasi menggunakan CLOSE.
+
+==================================================
+8. SETUP C
+==================================================
+
+SUPPORT REJECTION → BUY
+
+Urutan:
+
+Harga turun
+↓
+Masuk Support Zone
+↓
+Rejection
+↓
+Candle M5 CLOSE
+↓
+Bullish confirmation
+↓
+BUY
+
+==================================================
+9. SETUP D
+==================================================
+
+SUPPORT BREAKDOWN + RETEST → SELL
+
+Urutan:
+
+Harga mencapai support
+↓
+Breakdown
+↓
+Candle M5 CLOSE di bawah support
+↓
+Breakdown valid
+↓
+Retest
+↓
+Retest gagal reclaim support
+↓
+Bearish confirmation candle CLOSE
+↓
+SELL
+
+==================================================
+10. CANDLE CONFIRMATION
+==================================================
+
+Untuk baseline, gunakan candle confirmation yang SUDAH ADA di roadmap.
+
+Uji secara terpisah:
+
+1. Bullish/Bearish Engulfing
+2. Rejection / Pin Bar
+3. Strong Body
+4. Breakout / Breakdown Candle
+5. Retest Confirmation
+
+Jangan langsung menggabungkan semuanya menjadi satu pattern.
+
+Tujuannya mengetahui kontribusi masing-masing confirmation.
+
+==================================================
+11. RISK MANAGEMENT BACKTEST
+==================================================
+
+Gunakan mekanisme SL/TP yang sudah ada di project.
+
+Jangan mengubah SL/TP hanya untuk meningkatkan statistik.
+
+Jika mekanisme SL/TP belum jelas, audit dan dokumentasikan terlebih dahulu.
+
+Pastikan:
+
+- entry price jelas
+- stop loss jelas
+- take profit jelas
+- R:R jelas
+- spread/slippage handling jelas jika memang tersedia
+- urutan candle setelah entry digunakan secara realistis
+
+Jangan menggunakan harga future untuk memilih SL/TP setelah mengetahui hasil trade.
+
+==================================================
+12. TEST SETUP SECARA TERPISAH
+==================================================
+
+Jangan langsung membuat satu statistik gabungan.
+
+Buat hasil terpisah untuk:
+
+A:
+Resistance Rejection SELL
+
+B:
+Resistance Breakout + Retest BUY
+
+C:
+Support Rejection BUY
+
+D:
+Support Breakdown + Retest SELL
+
+Kemudian candle confirmation juga dipisahkan.
+
+==================================================
+13. STATISTIK BASELINE
+==================================================
+
+Untuk setiap setup tampilkan:
+
+- Total setup
+- Valid setup
+- Invalid setup
+- Total trades
+- Wins
+- Losses
+- Win rate
+- Loss rate
+- Average R:R
+- Expectancy
+- Profit factor
+- Net result
+- Maximum drawdown
+- Maximum consecutive wins
+- Maximum consecutive losses
+
+Jangan hanya menampilkan win rate.
+
+==================================================
+14. MARKET REGIME
+==================================================
+
+Pisahkan hasil berdasarkan M15:
+
+BULLISH
+BEARISH
+SIDEWAYS
+
+Untuk masing-masing kondisi tampilkan:
+
+- sample
+- trades
+- win rate
+- expectancy
+- profit factor
+- drawdown
+
+Tujuannya mengetahui apakah setup tertentu hanya bekerja pada kondisi market tertentu.
+
+==================================================
+15. SETUP TYPE
+==================================================
+
+Pisahkan hasil berdasarkan:
+
+- rejection
+- breakout
+- breakdown
+- retest
+- continuation
+
+Jangan menggabungkan semuanya menjadi satu angka.
+
+==================================================
+16. IN-SAMPLE / OUT-OF-SAMPLE
+==================================================
+
+Jangan melakukan optimasi terhadap seluruh dataset.
+
+Bagi data berdasarkan waktu.
+
+Gunakan pembagian temporal yang jelas, misalnya:
+
+IN-SAMPLE
+    periode awal
+
+VALIDATION
+    periode berikutnya
+
+OUT-OF-SAMPLE
+    periode paling akhir
+
+Gunakan tanggal aktual dataset yang tersedia.
+
+Jangan random shuffle data time-series.
+
+Jangan menggunakan OOS untuk tuning parameter.
+
+Jika walk-forward framework sudah tersedia, gunakan.
+
+Jika belum tersedia, cukup gunakan temporal split dan dokumentasikan.
+
+==================================================
+17. BASELINE TANPA OPTIMASI
+==================================================
+
+Ini sangat penting.
+
+Jangan melakukan:
+
+"ubah threshold → backtest → pilih hasil terbaik"
+
+pada tahap ini.
+
+Gunakan parameter baseline yang sudah ada.
+
+Tujuan tahap ini bukan mendapatkan hasil terbaik.
+
+Tujuannya adalah mendapatkan:
+
+    BASELINE PERFORMANCE
+
+yang jujur.
+
+==================================================
+18. NO SIGNAL
+==================================================
+
+Sistem wajib mendukung:
+
+NO SIGNAL
+
+Jika:
+
+- structure tidak jelas
+- S/R tidak jelas
+- breakout tidak confirmed
+- rejection tidak confirmed
+- retest tidak valid
+- candle confirmation tidak valid
+- candle belum CLOSE
+- R:R tidak memenuhi aturan
+- terdapat konflik structure
+- data tidak cukup
+
+maka:
+
+NO SIGNAL
+
+Jangan memaksa BUY/SELL.
+
+==================================================
+19. AUDIT DATA
+==================================================
+
+Sebelum backtest, tampilkan:
+
+DATASET
+------------------------------
+Symbol:
+M5 bars:
+M15 bars:
+M5 earliest:
+M5 latest:
+M15 earliest:
+M15 latest:
+Common period:
+Timezone:
+Duplicate:
+Invalid OHLC:
+Ordering errors:
+M5 integrity:
+M15 integrity:
+------------------------------
+
+Jika ada masalah fatal:
+    STOP
+
+Jangan menghasilkan statistik strategi dari data yang rusak.
+
+==================================================
+20. OUTPUT FILE
+==================================================
+
+Jika memungkinkan, simpan hasil ke:
+
+reports/
+    baseline_summary.json
+    baseline_trades.csv
+    baseline_statistics.csv
+    baseline_equity.csv
+
+Dan dokumentasikan hasil di:
+
+docs/BACKTEST_BASELINE.md
+
+Jangan menimpa data mentah:
+
+data/XAUUSD_m_M5.csv
+data/XAUUSD_m_M15.csv
+
+==================================================
+21. HASIL YANG HARUS DILAPORKAN
+==================================================
+
+Setelah selesai, tampilkan ringkasan seperti:
+
+BASELINE BACKTEST
+==============================
+
+Dataset:
+Symbol:
+Common period:
+
+M5:
+xxxxx bars
+
+M15:
+xxxxx bars
+
+--------------------------------
+SETUP A
+Resistance Rejection
+--------------------------------
+Trades:
+Win rate:
+Avg R:R:
+Expectancy:
+Profit Factor:
+Max Drawdown:
+
+--------------------------------
+SETUP B
+Resistance Breakout + Retest
+--------------------------------
+Trades:
+Win rate:
+Avg R:R:
+Expectancy:
+Profit Factor:
+Max Drawdown:
+
+--------------------------------
+SETUP C
+Support Rejection
+--------------------------------
+Trades:
+Win rate:
+Avg R:R:
+Expectancy:
+Profit Factor:
+Max Drawdown:
+
+--------------------------------
+SETUP D
+Support Breakdown + Retest
+--------------------------------
+Trades:
+Win rate:
+Avg R:R:
+Expectancy:
+Profit Factor:
+Max Drawdown:
+
+--------------------------------
+MARKET REGIME
+--------------------------------
+Bullish:
+Bearish:
+Sideways:
+
+--------------------------------
+CANDLE CONFIRMATION
+--------------------------------
+Engulfing:
+Rejection:
+Strong Body:
+Breakout/Breakdown:
+Retest:
+
+--------------------------------
+VALIDATION
+--------------------------------
+Look-ahead bias:
+Repainting:
+Data integrity:
+OOS result:
+Walk-forward:
+================================
+
+==================================================
+22. INTERPRETASI
+==================================================
+
+Jangan mengatakan:
+
+"strategi ini akurat"
+
+hanya karena win rate terlihat tinggi.
+
+Jangan mengatakan:
+
+"pattern terbaik"
+
+jika sample kecil.
+
+Jangan memilih setup hanya berdasarkan win rate.
+
+Jika sample terlalu kecil, tandai:
+
+    INSUFFICIENT SAMPLE
+
+Jika hasil in-sample bagus tetapi OOS buruk:
+
+    OVERFITTING RISK
+
+Jika setup konsisten tetapi jumlah sample masih kecil:
+
+    WATCHLIST
+
+Jika setup tidak menunjukkan edge:
+
+    DISABLED
+
+==================================================
+23. JANGAN LANJUT KE INDIKATOR
+==================================================
+
+Setelah baseline selesai:
+
+STOP.
+
+Jangan langsung menambahkan:
+
+ADX
+DMI
+ATR
+EMA
+VWAP
+atau indikator lainnya.
+
+Kita akan memakai hasil baseline sebagai pembanding pada eksperimen berikutnya.
+
+Urutan project tetap:
+
+REAL DATA
+↓
+DATA VALIDATION
+↓
+LOOK-AHEAD AUDIT
+↓
+BASELINE BACKTEST
+↓
+BASELINE STATISTICS
+↓
+OUT-OF-SAMPLE
+↓
+BARU RESEARCH CONFLUENCE
+
+==================================================
+TARGET TAHAP INI
+==================================================
+
+Target hanya satu:
+
+> Mendapatkan baseline performance yang jujur dari strategi XAUUSD M15 + M5 menggunakan data MT5/broker asli, tanpa synthetic data, tanpa look-ahead bias, tanpa optimasi berlebihan, dan tanpa menambahkan indikator baru.
+
+Jika semua sudah selesai, jangan membuat fitur baru.
+
+Laporkan hasil baseline dan masalah yang ditemukan.
 
 ```
 # 
