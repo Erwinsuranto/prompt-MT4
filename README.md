@@ -100,8 +100,437 @@
 ```
 
 ```
-# 
+# audit backtester + look-ahead bias
 ```
+Lanjutkan project XAUUSD berdasarkan roadmap yang sudah ada.
+
+KONDISI SAAT INI:
+- Repository sudah benar dan berada di branch main.
+- Remote origin sudah terhubung ke GitHub.
+- Working tree terakhir sudah clean.
+- Data REAL XAUUSD sudah tersedia:
+  - data/XAUUSD_M5.csv
+  - data/XAUUSD_M15.csv
+- Data berasal dari MT5/broker, bukan synthetic data.
+- Export sudah berhasil.
+- Integrity verification menunjukkan ERROR=0.
+- M5 → M15 consistency = 100%.
+- Data mencakup sekitar 2023-08 sampai 2026-08.
+- Test suite saat ini: 118 passed.
+- Python package harus dijalankan dengan PYTHONPATH=python pada Windows/Git Bash.
+
+TUJUAN TAHAP INI:
+
+Audit dan validasi BACKTESTER yang sudah ada.
+
+JANGAN:
+- membuat strategi baru
+- menambah indikator
+- mengoptimasi parameter
+- mengubah threshold hanya agar hasil lebih bagus
+- membuat synthetic market data
+- mengklaim akurasi tinggi
+- membuat auto-trading
+- membuat signal Telegram baru
+- menghapus test lama
+- merusak API/module yang sudah ada
+
+==================================================
+1. AUDIT STRUKTUR BACKTESTER
+==================================================
+
+Periksa seluruh kode yang berhubungan dengan:
+
+- python/xausr/backtest.py
+- python/xausr/baseline.py
+- python/xausr/models.py
+- python/xausr/indicators.py
+- python/xausr/continuation.py
+- python/xausr/filters.py
+- python/xausr/integrity.py
+- python/tests/*
+
+Cari entry point backtest yang sebenarnya digunakan project.
+
+Jelaskan secara internal terlebih dahulu:
+- data masuk dari mana
+- candle diproses bagaimana
+- bagaimana M15 digunakan
+- bagaimana M5 digunakan
+- bagaimana S/R dibentuk
+- bagaimana setup A/B/C/D dikenali
+- bagaimana confirmation dikenali
+- kapan entry dibuat
+- bagaimana SL/TP dibuat
+- bagaimana trade outcome dihitung
+
+Jangan langsung mengubah kode.
+
+==================================================
+2. LOOK-AHEAD BIAS AUDIT
+==================================================
+
+Ini adalah prioritas utama.
+
+Periksa apakah ada penggunaan informasi masa depan pada saat sebuah signal dibuat.
+
+Wajib audit:
+
+A. Market Structure
+- HH
+- HL
+- LH
+- LL
+- BOS
+- CHOCH
+
+Pastikan struktur pada timestamp T hanya menggunakan candle <= T yang memang sudah tersedia.
+
+B. Support / Resistance
+
+Pastikan S/R yang digunakan pada entry tidak dibangun menggunakan future candles.
+
+Contoh yang DILARANG:
+
+Jika signal terjadi pada 2024-01-10, sistem tidak boleh menggunakan swing high yang baru diketahui pada 2024-01-15 untuk menentukan resistance pada 2024-01-10.
+
+C. Candle Confirmation
+
+Pastikan candle confirmation harus sudah CLOSE.
+
+Tidak boleh:
+
+intrabar candle -> signal
+
+Yang diperbolehkan:
+
+candle close -> evaluate -> signal pada waktu berikutnya
+
+D. Breakout
+
+Breakout hanya valid setelah candle close melewati level.
+
+Jangan menggunakan future high/low untuk mengetahui apakah breakout berhasil.
+
+E. Retest
+
+Retest hanya boleh diketahui setelah retest benar-benar terjadi.
+
+Jangan mendeteksi retest menggunakan candle masa depan lalu membuat entry seolah-olah diketahui sebelumnya.
+
+F. SL / TP
+
+SL/TP pada saat entry tidak boleh dihitung menggunakan future price.
+
+G. Outcome
+
+Future candles hanya boleh digunakan SETELAH entry untuk menentukan apakah SL atau TP terkena.
+
+Itu adalah outcome, bukan input signal.
+
+==================================================
+3. BUAT TEST ANTI LOOK-AHEAD
+==================================================
+
+Tambahkan test regression yang secara eksplisit mendeteksi look-ahead.
+
+Gunakan prinsip causal data.
+
+Contoh konsep:
+
+Jika dataset sampai timestamp T dipotong, hasil signal sampai T harus sama dengan hasil ketika dataset lengkap tersedia.
+
+Future candle setelah T tidak boleh mengubah signal historis yang sudah terjadi.
+
+Buat test untuk minimal:
+
+1. future candle tidak mengubah signal historis
+2. future S/R tidak mempengaruhi signal sebelumnya
+3. confirmation tidak terjadi sebelum candle close
+4. entry tidak terjadi sebelum confirmation
+5. outcome boleh menggunakan future data hanya setelah entry
+
+Jangan membuat test palsu yang hanya memeriksa fungsi tanpa benar-benar menguji causal behavior.
+
+==================================================
+4. AUDIT TIMESTAMP
+==================================================
+
+Pastikan urutan event jelas:
+
+M15 candle close
+    ↓
+M15 structure/SR tersedia
+    ↓
+M5 candle close
+    ↓
+M5 reaction/confirmation
+    ↓
+signal/entry
+    ↓
+future candles hanya untuk outcome
+
+Periksa timezone dan timestamp comparison.
+
+Jangan menggeser timestamp hanya agar test lolos.
+
+==================================================
+5. AUDIT EMPAT SETUP
+==================================================
+
+Jangan mengubah definisinya.
+
+Setup A:
+Resistance Rejection
+→ bearish confirmation
+→ SELL
+
+Setup B:
+Resistance Breakout
+→ close above resistance
+→ retest
+→ bullish confirmation
+→ BUY
+
+Setup C:
+Support Rejection
+→ bullish confirmation
+→ BUY
+
+Setup D:
+Support Breakdown
+→ close below support
+→ retest
+→ bearish confirmation
+→ SELL
+
+Pastikan setiap setup hanya dievaluasi berdasarkan informasi yang sudah tersedia pada waktunya.
+
+==================================================
+6. JALANKAN TEST SUITE
+==================================================
+
+Pertama jalankan:
+
+PYTHONPATH=python python -m pytest -q
+
+Jika gagal, perbaiki hanya masalah environment/import/test infrastructure yang memang diperlukan.
+
+Jangan mengubah logic strategi hanya untuk membuat test pass.
+
+Setelah itu jalankan test yang relevan dengan backtester dan look-ahead.
+
+==================================================
+7. JALANKAN BACKTEST REAL DATA
+==================================================
+
+Setelah audit causal selesai dan test pass, jalankan baseline menggunakan:
+
+data/XAUUSD_M15.csv
+data/XAUUSD_M5.csv
+
+Gunakan data REAL yang sudah diexport.
+
+Jangan menggunakan synthetic/random data sebagai hasil penelitian.
+
+Jika command backtest membutuhkan parameter tertentu, baca help/source code terlebih dahulu dan gunakan interface yang sudah tersedia.
+
+Jangan membuat command baru yang mengubah definisi strategi.
+
+==================================================
+8. BASELINE SAJA
+==================================================
+
+Untuk tahap ini cukup baseline.
+
+Pisahkan:
+
+A_RESISTANCE_REJECTION
+B_RESISTANCE_BREAKOUT
+C_SUPPORT_REJECTION
+D_SUPPORT_BREAKDOWN
+
+Dan pattern:
+
+- engulfing
+- pin/rejection
+- strong_body
+- breakout
+- retest
+
+Jangan melakukan kombinasi indikator baru.
+
+==================================================
+9. STATISTIK
+==================================================
+
+Jika backtest berhasil, tampilkan minimal:
+
+- total samples
+- total signals
+- wins
+- losses
+- win rate
+- average R
+- expectancy
+- profit factor
+- maximum drawdown
+- consecutive wins
+- consecutive losses
+
+Pisahkan hasil berdasarkan:
+
+- setup A
+- setup B
+- setup C
+- setup D
+
+Dan jika engine mendukung:
+
+- bullish M15
+- bearish M15
+- sideways M15
+
+Jangan menyebut "akurasi tinggi" atau "strategi terbaik".
+
+Sample kecil harus diberi label sample kecil.
+
+==================================================
+10. OOS
+==================================================
+
+Jangan melakukan optimasi.
+
+Tetapkan split data yang jelas untuk evaluasi awal.
+
+Gunakan chronological split, bukan random split.
+
+Contoh prinsip:
+
+OLDER DATA
+→ IN-SAMPLE
+
+NEWER DATA
+→ OUT-OF-SAMPLE
+
+Jangan menggunakan OOS untuk tuning.
+
+Jika implementasi OOS belum tersedia dengan aman, jangan memaksakan optimasi. Cukup laporkan bahwa baseline engine sudah diaudit dan OOS framework perlu tahap berikutnya.
+
+==================================================
+11. JIKA MENEMUKAN LOOK-AHEAD
+==================================================
+
+Jika ditemukan look-ahead:
+
+- jangan menyembunyikannya
+- jangan hanya menonaktifkan test
+- identifikasi file dan fungsi
+- jelaskan mekanismenya
+- perbaiki dengan perubahan minimal
+- tambahkan regression test
+- jalankan seluruh test lagi
+
+Prioritas:
+VALIDITAS > HASIL BACKTEST
+
+==================================================
+12. GIT SAFETY
+==================================================
+
+Sebelum perubahan:
+
+git status --short --branch
+
+Setelah perubahan:
+
+git diff --stat
+git diff
+
+Pastikan tidak ada file data besar atau file sementara yang tidak sengaja masuk Git.
+
+Jangan commit atau push kecuali memang diperlukan oleh workflow project.
+
+==================================================
+13. OUTPUT AKHIR
+==================================================
+
+Laporkan dengan format:
+
+AUDIT RESULT
+--------------
+Repository:
+Branch:
+Working tree:
+
+TEST RESULT
+-----------
+Before:
+After:
+
+REAL DATA
+---------
+M5:
+M15:
+Period:
+
+LOOK-AHEAD AUDIT
+----------------
+Market structure:
+S/R:
+Confirmation:
+Breakout:
+Retest:
+Entry:
+SL/TP:
+Outcome:
+
+STATUS:
+PASS / FAIL / FIXED
+
+BASELINE
+--------
+Setup A:
+Setup B:
+Setup C:
+Setup D:
+
+OOS:
+PASS / NOT YET IMPLEMENTED
+
+PROBLEMS FOUND
+--------------
+...
+
+CHANGES MADE
+------------
+...
+
+NEXT STEP
+---------
+...
+
+PENTING:
+
+Jangan lanjut ke ADX, ATR, EMA, VWAP atau confluence research pada tahap ini.
+
+Kita harus memastikan terlebih dahulu bahwa backtester benar-benar causal dan tidak memiliki look-ahead bias.
+
+Target tahap ini:
+
+REAL DATA
+    ↓
+INTEGRITY ERROR=0
+    ↓
+CAUSAL BACKTEST
+    ↓
+NO LOOK-AHEAD
+    ↓
+REGRESSION TEST PASS
+    ↓
+BASELINE RESULT
+    ↓
+BARU LANJUT KE RESEARCH CONFLUENCE
 
 ```
 # 
