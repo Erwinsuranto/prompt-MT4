@@ -98,7 +98,364 @@
 ```
 # 
 ```
+STOP. Ada koreksi penting terhadap laporan sebelumnya.
 
+DATA REAL XAUUSD SUDAH TERSEDIA DAN SUDAH BERHASIL DIEKSPOR.
+
+Jangan lagi menyatakan "data real belum tersedia".
+
+Kondisi yang sudah TERBUKTI dari tahap sebelumnya:
+
+- Repository lokal: E:\mt5\mt-info
+- Branch: main
+- Remote: origin -> https://github.com/zenolambee/mt-info.git
+- data/XAUUSD_M5.csv SUDAH ADA
+- data/XAUUSD_M15.csv SUDAH ADA
+- M5 = 212625 bars
+- M15 = 70892 bars
+- M5 range = 2023-08-28 01:00:00 sampai 2026-08-26 23:55:00
+- M15 range = 2023-08-28 01:00:00 sampai 2026-08-26 23:45:00
+- integrity verification:
+  M5 ERROR=0
+  M15 ERROR=0
+- M5 -> M15 coverage = 100%
+- Tidak ada ERROR-level integrity problem.
+- Test suite sudah berhasil:
+  PYTHONPATH=python python -m pytest -q
+  -> 118 passed
+
+Masalah pada percobaan sebelumnya adalah environment/path yang berbeda, bukan ketiadaan data.
+
+==================================================
+1. JANGAN EXPORT DATA LAGI
+==================================================
+
+Jangan menjalankan mt5_export lagi.
+
+Jangan meminta CSV baru.
+
+Jangan menggunakan synthetic/random data.
+
+Gunakan CSV yang SUDAH ADA di:
+
+data/XAUUSD_M5.csv
+data/XAUUSD_M15.csv
+
+==================================================
+2. PASTIKAN CWD
+==================================================
+
+Semua command berikut harus dijalankan dari ROOT REPOSITORY:
+
+E:\mt5\mt-info
+
+Pastikan terlebih dahulu:
+
+pwd
+git branch --show-current
+git status --short --branch
+
+Kemudian:
+
+ls data
+
+Pastikan terlihat:
+
+XAUUSD_M5.csv
+XAUUSD_M15.csv
+
+Jika menggunakan Windows CMD, gunakan command yang sesuai Windows.
+Jika menggunakan Git Bash, gunakan command Unix/Git Bash.
+
+Jangan menggunakan path Linux:
+
+/root/mt-info
+
+karena sekarang kita sedang menguji repository Windows lokal.
+
+==================================================
+3. PYTHONPATH
+==================================================
+
+Gunakan:
+
+PYTHONPATH=python
+
+Karena sebelumnya tanpa PYTHONPATH muncul:
+
+ModuleNotFoundError: No module named 'xausr'
+
+Sedangkan:
+
+PYTHONPATH=python python -m pytest -q
+
+sudah berhasil:
+
+118 passed
+
+Pertahankan mekanisme ini.
+
+==================================================
+4. JALANKAN BASELINE REAL DATA
+==================================================
+
+Sebelum mengubah kode, baca help:
+
+PYTHONPATH=python python -m xausr.baseline --help
+
+Kemudian jalankan baseline menggunakan:
+
+data/XAUUSD_M5.csv
+data/XAUUSD_M15.csv
+
+Gunakan interface baseline yang SUDAH ADA.
+
+Jangan membuat interface baru jika tidak diperlukan.
+
+Jika command membutuhkan:
+
+--m5
+--m15
+--symbol
+--outdir
+
+gunakan path relatif dari ROOT repository.
+
+Contoh konsep:
+
+PYTHONPATH=python python -m xausr.baseline ^
+  --m5 data/XAUUSD_M5.csv ^
+  --m15 data/XAUUSD_M15.csv ^
+  --symbol XAUUSD ^
+  --outdir reports
+
+Sesuaikan dengan --help jika nama argumennya berbeda.
+
+==================================================
+5. AUDIT SEBELUM BACKTEST
+==================================================
+
+Jika baseline tetap mengatakan:
+
+"tidak ada data"
+
+JANGAN langsung mengubah strategi.
+
+Cari penyebab path/data loader.
+
+Periksa:
+
+- bagaimana baseline membaca file
+- default data directory
+- relative path calculation
+- current working directory
+- argument parser
+- data loader
+- file existence check
+
+Tambahkan diagnostic sementara jika diperlukan:
+
+- current working directory
+- resolved M5 path
+- resolved M15 path
+- exists()
+- file size
+
+Contoh informasi yang harus bisa dibuktikan:
+
+CWD = E:\mt5\mt-info
+M5 = E:\mt5\mt-info\data\XAUUSD_M5.csv
+M5 exists = True
+M15 = E:\mt5\mt-info\data\XAUUSD_M15.csv
+M15 exists = True
+
+Jangan menganggap data hilang hanya karena loader tidak menemukan path.
+
+==================================================
+6. JANGAN UBAH STRATEGI
+==================================================
+
+Jangan mengubah:
+
+- definisi Setup A
+- definisi Setup B
+- definisi Setup C
+- definisi Setup D
+- threshold
+- scoring
+- S/R logic
+- candle pattern
+- SL/TP
+
+Tujuan sekarang hanya memastikan baseline membaca DATA REAL yang benar.
+
+==================================================
+7. SETELAH DATA TERBACA
+==================================================
+
+Jalankan baseline terhadap seluruh dataset real.
+
+Kemudian tampilkan:
+
+DATA
+----
+M5 bars:
+M15 bars:
+M5 period:
+M15 period:
+
+BASELINE
+--------
+Setup A:
+Setup B:
+Setup C:
+Setup D:
+
+Jika setup menghasilkan 0 sample, laporkan 0.
+Jangan memaksakan signal.
+
+==================================================
+8. LOOK-AHEAD
+==================================================
+
+Setelah baseline berhasil membaca data real, lanjutkan audit causal yang sudah dibuat.
+
+Pastikan test:
+
+- future candle tidak mengubah historical signal
+- S/R tidak membaca future candle
+- confirmation hanya setelah CLOSE
+- breakout hanya setelah CLOSE
+- retest hanya setelah terjadi
+- entry setelah confirmation
+- future data hanya digunakan untuk trade outcome
+
+Jalankan:
+
+PYTHONPATH=python python -m pytest -q
+
+Target minimal tetap:
+
+118 passed
+
+Jika jumlah test bertambah, laporkan jumlah barunya.
+
+==================================================
+9. OOS
+==================================================
+
+Jangan optimasi parameter.
+
+Jika framework temporal split/walk-forward sudah tersedia, jalankan.
+
+Jika belum tersedia, jangan mengarang hasil OOS.
+
+Tulis:
+
+OOS = NOT YET RUN
+
+bukan "data tidak tersedia".
+
+==================================================
+10. GIT
+==================================================
+
+Jangan commit atau push.
+
+Setelah pemeriksaan:
+
+git status --short --branch
+
+Pastikan data CSV tidak sengaja diubah/dihapus.
+
+Jangan menghapus data real.
+
+==================================================
+OUTPUT WAJIB
+==================================================
+
+Laporkan:
+
+REPOSITORY
+----------
+CWD:
+Branch:
+Remote:
+Working tree:
+
+REAL DATA
+---------
+M5:
+M15:
+M5 bars:
+M15 bars:
+Period:
+Integrity:
+
+DATA LOADER
+-----------
+M5 path resolved:
+M15 path resolved:
+M5 exists:
+M15 exists:
+
+TEST
+----
+Before:
+After:
+
+LOOK-AHEAD
+----------
+Status:
+Tests:
+
+BASELINE
+--------
+A:
+B:
+C:
+D:
+
+OOS
+---
+Status:
+
+PROBLEMS
+--------
+...
+
+CHANGES
+-------
+...
+
+NEXT STEP
+---------
+...
+
+PENTING:
+
+Jangan lagi menulis "REAL DATA belum tersedia".
+
+Data real SUDAH TERSEDIA.
+
+Jika ada masalah, cari masalahnya di PATH / DATA LOADER / ENVIRONMENT terlebih dahulu.
+
+Target tahap sekarang:
+
+ROOT REPO
+   ↓
+data/XAUUSD_M5.csv
+data/XAUUSD_M15.csv
+   ↓
+DATA LOADER
+   ↓
+BASELINE
+   ↓
+CAUSAL / NO LOOK-AHEAD
+   ↓
+TEST PASS
+   ↓
+BARU ANALISIS HASIL
 ```
 # audit backtester + look-ahead bias
 ```
