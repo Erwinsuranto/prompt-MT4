@@ -42,7 +42,36 @@
 ```
 # 
 ```
+Ya, perbaiki tiga klaim dokumentasi yang keliru di docs/DATA.md:
 
+1. timezone EET/EEST
+2. penjelasan close-to-close derivation
+3. command path yang benar
+
+Perubahan ini hanya dokumentasi dan tidak boleh mengubah:
+- strategi
+- data CSV
+- backtester
+- signal logic
+- parameter
+- test logic
+
+Setelah dokumentasi diperbaiki:
+
+1. Jalankan seluruh test suite.
+2. Pastikan semua test PASS.
+3. Verifikasi git diff hanya berisi perubahan dokumentasi.
+4. Pastikan CSV XAUUSD M5/M15 tidak berubah.
+5. Jangan commit.
+6. Jangan push.
+
+Setelah selesai berhenti dan laporkan:
+- hasil test
+- file yang berubah
+- apakah CSV tetap identik
+- status git.
+
+Jangan lanjut ke optimasi atau confluence dulu.
 ```
 # DATA XAUUSD REAL
 ```
