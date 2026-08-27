@@ -74,7 +74,21 @@
 ```
 # 
 ```
+Lakukan final review terhadap pekerjaan yang baru selesai.
 
+Jangan mengubah kode, jangan membuat strategi baru, dan jangan commit/push.
+
+Periksa:
+1. Perubahan python/xausr/backtest.py
+2. test_causal_audit.py
+3. test_pattern_wiring.py
+4. reports/
+5. Pastikan 134 test yang sudah passed memang valid
+6. Pastikan tidak ada look-ahead bias atau wiring pattern yang salah
+7. Pastikan data XAUUSD M5/M15 asli digunakan
+8. Berikan kesimpulan apakah project siap masuk tahap berikutnya.
+
+Jangan melakukan tuning berdasarkan hasil OOS.
 ```
 # 
 ```
