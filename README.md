@@ -94,7 +94,171 @@
 ```
 # 
 ```
+KOREKSI ENVIRONMENT — JANGAN CLONE / JANGAN BUAT REPO KEDUA
 
+Repo utama dan data real sudah ada di mesin Windows saya:
+
+E:\mt5\mt-info
+
+Struktur yang benar:
+
+E:\mt5\mt-info\
+├── data\
+│   ├── XAUUSD_M5.csv
+│   └── XAUUSD_M15.csv
+├── python\
+├── docs\
+├── mq15\
+└── ...
+
+Repository tersebut sudah merupakan clone yang benar dari:
+
+https://github.com/zenolambee/mt-info.git
+
+JANGAN:
+- clone repository lagi
+- membuat repo kedua
+- membuat folder mt-info baru
+- membuat folder data kedua
+- membuat synthetic data
+- menganggap data real tidak tersedia
+- meminta saya commit CSV hanya agar VM dapat melihatnya
+
+Masalah saat ini hanya karena sesi Anda berjalan di Linux VM:
+
+/root/mt-info
+
+sedangkan CSV berada di mesin Windows saya:
+
+E:\mt5\mt-info\data\
+
+==================================================
+TUJUAN
+==================================================
+
+Kita harus menjaga SATU struktur repo saja.
+
+Repo utama:
+
+E:\mt5\mt-info
+
+Data:
+
+E:\mt5\mt-info\data\XAUUSD_M5.csv
+E:\mt5\mt-info\data\XAUUSD_M15.csv
+
+==================================================
+LANGKAH SEKARANG
+==================================================
+
+Jangan melakukan perubahan kode terlebih dahulu.
+
+Berikan saya diagnosis:
+
+1. Apakah session/environment Anda saat ini benar-benar Linux VM?
+2. Apakah /root/mt-info merupakan checkout repo yang terpisah dari Windows?
+3. Apakah environment ini memiliki mount/access ke E:\mt5\mt-info?
+4. Apakah ada cara resmi untuk menjalankan command langsung pada Windows repo tanpa membuat clone kedua?
+
+Jika tidak ada akses ke filesystem Windows, JANGAN menganggap data hilang.
+
+Tulis:
+
+REAL DATA STATUS:
+AVAILABLE ON WINDOWS REPO
+
+ENVIRONMENT STATUS:
+LINUX VM CANNOT ACCESS WINDOWS CSV
+
+==================================================
+REKOMENDASI
+==================================================
+
+Karena data real sudah tersedia di Windows repo, baseline sebaiknya dijalankan langsung dari:
+
+E:\mt5\mt-info
+
+menggunakan Git Bash / Windows Python.
+
+Command yang harus digunakan dari ROOT repo Windows:
+
+cd /e/mt5/mt-info
+
+git status --short --branch
+
+ls data
+
+Pastikan:
+
+data/XAUUSD_M5.csv
+data/XAUUSD_M15.csv
+
+kemudian:
+
+PYTHONPATH=python python -m pytest -q
+
+Expected current result:
+
+118 passed
+
+Kemudian:
+
+PYTHONPATH=python python -m xausr.baseline --help
+
+Setelah interface diketahui, jalankan baseline menggunakan:
+
+data/XAUUSD_M5.csv
+data/XAUUSD_M15.csv
+
+Jangan menggunakan:
+
+/root/mt-info/data/
+
+kecuali filesystem tersebut memang merupakan mount yang menunjuk langsung ke:
+
+E:\mt5\mt-info\data\
+
+==================================================
+ATURAN REPO
+==================================================
+
+Hanya boleh ada SATU working repository utama.
+
+Jangan membuat:
+
+/root/mt-info-copy
+/root/mt-info-new
+/root/mt-info-clone
+E:\mt5\mt-info\mt-info
+
+atau struktur repo bertingkat lainnya.
+
+Jangan memindahkan source code ke folder lain.
+
+Jangan mengubah struktur repository hanya untuk menyesuaikan Linux VM.
+
+==================================================
+SETELAH DIAGNOSIS
+==================================================
+
+BERHENTI.
+
+Jangan menjalankan baseline dari Linux VM jika CSV Windows tidak dapat diakses.
+
+Jangan membuat data pengganti.
+
+Jangan commit.
+
+Jangan push.
+
+Laporkan hanya:
+
+ENVIRONMENT
+REPO
+DATA ACCESS
+RECOMMENDED NEXT STEP
+
+Kita akan menjalankan baseline dari repo Windows yang memang memiliki data real.
 ```
 # 
 ```
