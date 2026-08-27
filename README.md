@@ -44,9 +44,100 @@
 ```
 
 ```
-# 
+# DATA XAUUSD REAL
 ```
+Lanjutkan ke tahap berikutnya berdasarkan roadmap.
 
+Commit causal coverage sudah selesai dan 177 test PASS.
+Jangan mengubah strategi yang sudah ada.
+
+Sekarang fokus HANYA pada REAL XAUUSD DATA PIPELINE.
+
+Tugas:
+
+1. Audit project dan xausr.mt5_export serta docs/DATA.md.
+2. Pastikan mekanisme export mengambil candle OHLC asli dari MT5/broker.
+3. Jangan membuat synthetic market data.
+4. Jangan melakukan tuning strategi.
+5. Jangan menambah indikator.
+6. Jangan melakukan auto-trading.
+
+Kita membutuhkan:
+- XAUUSD M5
+- XAUUSD M15
+- minimal 2 tahun
+- ideal 3 tahun jika histori broker tersedia.
+
+Jangan mengasumsikan symbol harus bernama XAUUSD.
+Deteksi symbol yang tersedia di MT5, misalnya:
+XAUUSD
+XAUUSDm
+XAUUSD.
+GOLD
+atau variasi broker lainnya.
+
+Siapkan prosedur export ke:
+
+data/XAUUSD_M5.csv
+data/XAUUSD_M15.csv
+
+Format:
+timestamp,open,high,low,close,volume
+
+Timezone harus eksplisit dan didokumentasikan.
+
+Setelah data tersedia, lakukan VALIDASI DATA:
+
+- jumlah candle
+- earliest timestamp
+- latest timestamp
+- duplicate
+- missing candle
+- invalid OHLC
+- timestamp ordering
+- timezone
+- gap
+- M5 consistency
+- M15 consistency
+
+Jangan mengisi missing candle dengan data buatan.
+Jangan menghapus candle hanya untuk memperbagus statistik.
+
+Setelah itu audit bahwa pipeline backtest tidak mengalami:
+- look-ahead bias
+- future candle leakage
+- repaint
+- S/R menggunakan future data
+- confirmation sebelum candle CLOSE
+- breakout sebelum candle CLOSE
+- retest menggunakan future information
+- entry timestamp yang terlalu awal.
+
+Jika data MT5/broker belum bisa diakses dari environment ini:
+
+JANGAN mencari jalan pintas.
+
+Berhenti pada tahap preparation dan jelaskan:
+1. Apa yang sudah siap.
+2. Apa yang belum tersedia.
+3. Symbol MT5 yang dibutuhkan.
+4. Cara export dari MT5.
+5. Di mana CSV harus ditempatkan.
+6. Command validasi yang harus dijalankan.
+
+Jika data REAL berhasil tersedia dan lolos integrity:
+berhenti setelah DATA INTEGRITY PASS.
+
+Jangan langsung optimasi strategi.
+
+Target:
+REAL DATA
+→ DATA INTEGRITY PASS
+→ BACKTEST READY
+→ STOP
+
+Setelah selesai, jalankan seluruh test suite dan laporkan hasilnya.
+Jangan commit atau push tanpa persetujuan saya.
 ```
 # 
 ```
