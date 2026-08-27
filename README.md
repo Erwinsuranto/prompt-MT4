@@ -106,7 +106,171 @@
 ```
 # 
 ```
+Lanjutkan dari kondisi project saat ini.
 
+JANGAN mengubah strategi.
+JANGAN menambah indikator.
+JANGAN mengubah threshold.
+JANGAN membuat synthetic data.
+JANGAN membuat auto-trading.
+
+Blocker saat ini sudah jelas:
+- Test suite: 118 tests OK
+- Compile: OK
+- Backtester: siap
+- Continuation engine: sudah aktif
+- Tetapi backtest real masih BLOCKED karena dataset belum tersedia di /root/mt-info/data/
+
+Sekarang fokus hanya pada IMPORT DATA REAL XAUUSD.
+
+1. Periksa isi:
+
+/root/mt-info/data/
+
+Cari apakah tersedia:
+
+XAUUSD_m_M5.csv
+XAUUSD_m_M15.csv
+
+Juga cari kemungkinan nama file lain seperti:
+
+XAUUSD_M5.csv
+XAUUSD_M15.csv
+
+Jangan membuat file baru berisi data palsu.
+
+2. Jika CSV belum ada di server, jangan melakukan backtest.
+
+Tampilkan dengan jelas:
+
+DATA M5: MISSING / FOUND
+DATA M15: MISSING / FOUND
+
+dan jelaskan file mana yang dibutuhkan.
+
+3. Karena sebelumnya saya sudah berhasil export data XAUUSD dari MT5, siapkan project agar dapat menerima CSV tersebut tanpa mengubah isi data.
+
+File yang akan digunakan:
+
+XAUUSD_m_M5.csv
+XAUUSD_m_M15.csv
+
+4. Setelah kedua file tersedia, validasi terlebih dahulu:
+
+- header
+- jumlah bar
+- earliest timestamp
+- latest timestamp
+- timezone
+- duplicate
+- timestamp ordering
+- invalid OHLC
+- zero/negative price
+- missing/gap
+- M5 interval
+- M15 interval
+- hubungan M5 → M15
+- apakah ada candle yang tidak masuk akal
+
+Jangan mengisi missing candle dengan data buatan.
+
+5. Jika ada gap karena weekend atau jam trading broker, bedakan:
+
+EXPECTED MARKET GAP
+
+dengan:
+
+UNEXPECTED DATA GAP
+
+Jangan menghapus data hanya untuk menghilangkan warning.
+
+6. Pastikan symbol tetap:
+
+XAUUSD.m
+
+jika itu memang symbol yang digunakan pada dataset.
+
+Jangan mengganti menjadi XAUUSD tanpa memeriksa data.
+
+7. Jika integrity check PASS, jalankan baseline yang SUDAH ADA:
+
+cd /root/mt-info
+
+python3 -m xausr.baseline \
+  --m5 ./data/XAUUSD_m_M5.csv \
+  --m15 ./data/XAUUSD_m_M15.csv \
+  --symbol XAUUSD.m \
+  --outdir ./reports
+
+8. Setelah baseline selesai, tampilkan:
+
+DATASET
+- M5 bars
+- M15 bars
+- periode
+- timezone
+- integrity result
+
+BACKTEST
+- total setup
+- CONFIRMED
+- NO SIGNAL
+- rejection
+- breakout
+- retest
+- continuation
+
+CONTINUATION STATE
+- BREAKOUT_DETECTED
+- BREAKOUT_CONFIRMED
+- WAIT_RETEST
+- RETEST_DETECTED
+- WAIT_CONFIRMATION
+- CONFIRMED_BUY
+- CONFIRMED_SELL
+- BREAKOUT_FAILED
+- RETEST_FAILED
+
+ANTI-BIAS
+- look-ahead
+- repaint
+- closed-candle confirmation
+- entry timing
+
+STATISTICS
+- win rate
+- loss rate
+- average R:R
+- expectancy
+- profit factor
+- max drawdown
+- consecutive wins
+- consecutive losses
+
+9. Jangan melakukan optimasi setelah baseline.
+
+Kita ingin melihat performa baseline apa adanya terlebih dahulu.
+
+10. Jika data belum tersedia, BERHENTI.
+
+Jangan:
+- membuat data pengganti
+- membuat synthetic CSV
+- mengklaim backtest berhasil
+- mengklaim strategi akurat
+- mengubah kode hanya agar backtest bisa jalan
+
+Setelah selesai, berikan status akhir:
+
+REAL DATA: READY / BLOCKED
+DATA INTEGRITY: PASS / FAIL
+BASELINE: RUN / BLOCKED
+LOOK-AHEAD: PASS / FAIL
+BACKTEST: READY / BLOCKED
+TESTS: ...
+GIT: ...
+
+Fokus tahap ini hanya memastikan DATA REAL → VALIDATION → BASELINE berjalan dengan benar.
 ```
 
 # 
