@@ -10,6 +10,122 @@
 ```
 # 
 ```
+Lanjutkan dari kondisi project saat ini.
+
+Jangan membuat strategi baru.
+Jangan menambah indikator.
+Jangan melakukan auto-trading.
+Jangan menggunakan synthetic data.
+
+Sekarang fokus hanya pada menjalankan baseline dengan DATA XAUUSD REAL.
+
+1. Periksa terlebih dahulu:
+
+/root/mt-info/data/
+
+Cari:
+
+XAUUSD_m_M5.csv
+XAUUSD_m_M15.csv
+
+Jika kedua file ADA:
+- jangan meminta saya melakukan hal lain
+- langsung validasi format dan integrity data
+- jalankan baseline backtest
+
+Jika salah satu file TIDAK ADA:
+- jangan membuat data pengganti
+- jangan menggunakan synthetic data
+- jangan mengklaim backtest berhasil
+- tampilkan file apa yang tersedia dan berhenti.
+
+2. Jika kedua CSV tersedia, jalankan:
+
+cd /root/mt-info
+
+python3 -m xausr.baseline \
+  --m5 ./data/XAUUSD_m_M5.csv \
+  --m15 ./data/XAUUSD_m_M15.csv \
+  --symbol XAUUSD.m \
+  --outdir ./reports
+
+3. Pastikan baseline benar-benar menggunakan:
+
+M15:
+- market structure
+- support/resistance
+- trend/regime
+
+M5:
+- reaction
+- breakout/breakdown
+- retest
+- candle confirmation
+- continuation state
+
+Gunakan prinsip:
+
+CONFIRM OR NO SIGNAL
+
+4. Setelah selesai, jangan langsung optimasi.
+
+Tampilkan hasil audit:
+
+- jumlah M5
+- jumlah M15
+- periode data
+- duplicate
+- missing/gap
+- timezone
+- alignment M5/M15
+- look-ahead check
+- repaint check
+- jumlah setup
+- jumlah CONFIRMED
+- jumlah NO SIGNAL
+- alasan signal ditolak
+- hasil per setup
+- hasil per regime M15
+- hasil continuation
+
+5. Khusus continuation, tampilkan:
+
+BREAKOUT_DETECTED
+BREAKOUT_CONFIRMED
+WAIT_RETEST
+RETEST_DETECTED
+WAIT_CONFIRMATION
+CONFIRMED_BUY
+CONFIRMED_SELL
+BREAKOUT_FAILED
+RETEST_FAILED
+
+dan jumlah masing-masing state.
+
+6. Jangan mengubah threshold atau parameter untuk memperbagus hasil.
+
+Kita ingin melihat baseline apa adanya terlebih dahulu.
+
+7. Setelah baseline selesai:
+
+- jalankan test suite
+- pastikan tidak ada regression
+- commit perubahan jika memang ada
+- push ke origin main
+
+Jika tidak ada perubahan kode, jangan membuat commit kosong.
+
+Terakhir berikan laporan ringkas:
+
+DATA STATUS
+BASELINE STATUS
+LOOK-AHEAD STATUS
+CONTINUATION STATUS
+BACKTEST STATUS
+TEST STATUS
+GIT STATUS
+
+Jangan menyebut sistem akurat/paling akurat sebelum hasil out-of-sample diuji.
 
 ```
 # audit real-data + validasi continuation end-to-end.
