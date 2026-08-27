@@ -50,7 +50,22 @@
 ```
 # 
 ```
+Saya setujui commit tersebut.
 
+Lanjutkan sekarang:
+1. Commit test_causal_gaps.py.
+2. Jangan tambah fitur atau coverage baru.
+3. Jangan ubah strategi.
+4. Jangan push ke remote.
+5. Setelah commit, jalankan:
+   PYTHONPATH=python python3 -m pytest -q
+6. Jalankan:
+   git status --short --branch
+   git log -1 --oneline
+7. Pastikan seluruh test PASS.
+8. Laporkan hasil akhir dan berhenti.
+
+Target: repository bersih dan test suite tetap PASS.
 ```
 # 
 ```
