@@ -54,7 +54,100 @@
 ```
 # 
 ```
+Lanjutkan project dari kondisi terakhir.
 
+STATUS SAAT INI:
+- Git sudah clean dan sinkron dengan origin/main.
+- pytest = 149 passed, 0 failed, 0 skipped.
+- Data XAUUSD M5 dan M15 real sudah tersedia.
+- Data integrity sudah diverifikasi.
+- Jangan membuat synthetic data.
+- Jangan auto-trading.
+- Jangan menambah indikator/confluence dulu.
+
+FOKUS TAHAP INI:
+Tutup causal coverage yang masih terbuka sebelum melakukan riset confluence.
+
+1. Audit causal coverage secara menyeluruh pada:
+   - is_resistance_breakout_close
+   - is_support_breakdown_close
+   - retest logic
+   - breakout/rejection classification
+   - pattern family wiring
+   - continuation logic
+   - M15 → M5 alignment
+
+2. Pastikan fungsi close-based benar-benar causal:
+   - hanya candle yang sudah CLOSE boleh digunakan;
+   - tidak boleh membaca candle masa depan;
+   - state machine tidak boleh mengetahui hasil candle berikutnya;
+   - entry tidak boleh terjadi sebelum confirmation;
+   - retest harus terjadi setelah breakout/breakdown;
+   - confirmation harus terjadi setelah retest/reaction yang relevan.
+
+3. Buat/sempurnakan regression test untuk setiap celah causal yang ditemukan.
+   Jangan menghapus test lama.
+   Jangan melemahkan assertion hanya supaya test pass.
+
+4. Jalankan seluruh test suite:
+   PYTHONPATH=python python3 -m pytest -q
+
+5. Jika semua test PASS, jangan langsung tuning strategi.
+
+6. Jalankan baseline pada DATA XAUUSD REAL yang sekarang sudah tersedia.
+
+Gunakan dataset:
+- data/XAUUSD_M5.csv
+- data/XAUUSD_M15.csv
+
+Gunakan logika baseline yang sudah ada:
+- M15 market structure
+- Support/Resistance
+- M5 rejection
+- M5 breakout/breakdown
+- retest
+- candle confirmation
+- CONFIRM OR NO SIGNAL
+
+Jangan menambah ADX, ATR, EMA, VWAP, atau indikator baru.
+
+7. Pisahkan hasil:
+- In-sample
+- Validation
+- Out-of-sample
+- Walk-forward jika engine sudah mendukungnya
+
+8. Laporkan minimal:
+- jumlah sample
+- signal/setup count
+- win rate
+- loss rate
+- expectancy
+- profit factor
+- average R
+- maximum drawdown
+- consecutive wins/losses
+- hasil A/B/C/D
+- hasil berdasarkan bullish/bearish/sideways M15
+- hasil rejection/breakout/retest/continuation
+
+9. Sangat penting:
+Jangan mengubah threshold hanya untuk memperbaiki statistik.
+Jangan memilih parameter berdasarkan OOS.
+Jangan mengklaim edge/akurasi jika statistik tidak mendukung.
+
+10. Jika hasil baseline tetap marginal atau NO EVIDENCE:
+nyatakan apa adanya dan jangan memaksakan strategi.
+
+11. Setelah selesai, tampilkan:
+- git status --short --branch
+- git diff
+- hasil pytest
+- ringkasan baseline
+- daftar masalah yang masih terbuka
+- rekomendasi SATU langkah berikutnya.
+
+Jangan commit/push pada tahap ini tanpa meminta persetujuan saya terlebih dahulu.
 ```
 # 
 ```
