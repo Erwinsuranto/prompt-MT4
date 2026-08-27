@@ -82,7 +82,111 @@
 ```
 # 
 ```
+Lanjutkan ke NEXT STEP.
 
+Jalankan baseline penuh menggunakan DATA REAL XAUUSD yang sudah tersedia.
+
+JANGAN:
+- mengubah strategi
+- mengubah threshold
+- melakukan optimasi
+- membuat synthetic data
+- mengubah hasil agar terlihat lebih bagus
+- commit
+- push
+- menghapus test
+
+Gunakan dataset real yang sudah ada:
+
+data/XAUUSD_m_M5.csv
+data/XAUUSD_m_M15.csv
+
+Jalankan baseline sesuai roadmap:
+
+M15 market structure
++
+M15 Support/Resistance
++
+M5 rejection
++
+M5 breakout/breakdown
++
+M5 retest
++
+M5 candle confirmation
++
+CONFIRM OR NO SIGNAL
+
+Sebelum baseline, pastikan input dan periode data yang digunakan benar.
+
+Kemudian jalankan baseline penuh dan simpan report.
+
+WAJIB pisahkan hasil:
+- Setup A — Resistance Rejection
+- Setup B — Resistance Breakout + Retest
+- Setup C — Support Rejection
+- Setup D — Support Breakdown + Retest
+
+Dan pattern family:
+- engulfing
+- pin/rejection
+- strong_body
+- breakout
+- breakdown
+- retest jika tersedia
+
+Untuk setiap hasil tampilkan:
+- n/sample
+- signal count
+- win/loss
+- win rate
+- average R
+- expectancy
+- profit factor
+- max drawdown
+- consecutive loss
+- verdict
+
+Pisahkan:
+- in-sample
+- validation
+- out-of-sample
+- walk-forward jika implementasinya sudah tersedia
+
+KHUSUS BREAKOUT n=0:
+
+Jangan menyimpulkan breakout buruk hanya karena n=0.
+
+Bandingkan dengan hasil trace sebelumnya dan pastikan:
+1. apakah breakout candidate memang ada;
+2. apakah candidate gugur di gate tertentu;
+3. apakah pattern wiring sudah benar;
+4. apakah n=0 merupakan karakteristik dataset atau bug.
+
+Jangan memperbaiki apa pun kecuali ditemukan bug nyata pada implementasi.
+
+Jika ditemukan bug:
+- jelaskan akar masalah;
+- lakukan perbaikan minimal;
+- jangan mengubah definisi strategi;
+- jalankan ulang test;
+- jalankan ulang baseline.
+
+Setelah selesai, berikan:
+
+1. DATASET YANG DIGUNAKAN
+2. BASELINE RESULT
+3. SETUP A/B/C/D
+4. PATTERN FAMILY
+5. BREAKOUT n=0 ANALYSIS
+6. IN-SAMPLE vs OOS
+7. TEST RESULT
+8. WORKING TREE STATUS
+9. SATU NEXT STEP TERBAIK
+
+Jangan klaim "akurasi tinggi" atau "strategi profitable" tanpa bukti statistik yang memadai.
+
+Setelah laporan selesai, BERHENTI dan tunggu instruksi berikutnya.
 ```
 # 
 ```
