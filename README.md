@@ -90,7 +90,235 @@
 ```
 # 
 ```
+Lanjutkan project /root/mt-info dari kondisi saat ini.
 
+Jangan mengubah roadmap dan jangan membuat strategi baru.
+
+TUJUAN:
+Lakukan FULL TEST + AUDIT project secara menyeluruh menggunakan kondisi project yang sekarang.
+
+PENTING:
+- Python command saat ini `python` tidak tersedia.
+- Gunakan `python3` jika tersedia.
+- Jika dependency/testing environment belum siap, perbaiki environment terlebih dahulu secara minimal.
+- Jangan membuat synthetic market data untuk menggantikan data XAUUSD asli.
+- Synthetic data hanya boleh digunakan oleh unit test jika memang sudah menjadi bagian test.
+- Jangan melakukan auto-trading.
+- Jangan menghapus data CSV asli.
+- Jangan menghapus test yang ada.
+- Jangan commit atau push apa pun.
+- Jangan mengubah kode hanya supaya test menjadi hijau tanpa memahami penyebabnya.
+
+LANGKAH 1 — AUDIT ENVIRONMENT
+
+Periksa:
+
+python3 --version
+python3 -m pip --version
+git status --short --branch
+find data -maxdepth 2 -type f -print
+find python -maxdepth 3 -type f -print
+find tests -maxdepth 3 -type f -print 2>/dev/null || true
+
+Jika pytest/dependency belum tersedia, install dependency yang memang diperlukan untuk menjalankan test project.
+
+Gunakan virtual environment jika struktur project sudah menggunakannya.
+
+LANGKAH 2 — FULL TEST
+
+Jalankan seluruh test suite.
+
+Gunakan command yang sesuai dengan environment, misalnya:
+
+PYTHONPATH=python python3 -m pytest -q
+
+Jika gagal karena dependency/module/environment, diagnosis dan perbaiki masalah environment tersebut terlebih dahulu.
+
+Jalankan kembali full test setelah perbaikan.
+
+Jangan berhenti hanya karena satu test gagal.
+
+LANGKAH 3 — AUDIT DATA
+
+Pastikan data real yang sekarang tersedia:
+
+data/XAUUSD_m_M5.csv
+data/XAUUSD_m_M15.csv
+
+Periksa:
+
+- file dapat dibaca
+- jumlah candle
+- earliest timestamp
+- latest timestamp
+- duplicate
+- ordering
+- invalid OHLC
+- missing candle
+- gap
+- timezone
+- M5 integrity
+- M15 integrity
+- M5 ↔ M15 consistency
+
+Data XAUUSD tersebut adalah data hasil export MT5/broker yang sudah tersedia.
+
+Jangan mengganti data tersebut dengan synthetic/random data.
+
+LANGKAH 4 — AUDIT BACKTEST
+
+Audit kode backtester untuk:
+
+- look-ahead bias
+- future candle leakage
+- repaint logic
+- entry sebelum confirmation candle CLOSE
+- S/R menggunakan future data
+- market structure menggunakan future data
+- breakout dinyatakan sebelum candle close
+- retest dinilai sebelum terjadi
+- SL/TP menggunakan informasi masa depan
+- timestamp entry yang salah
+
+Jika menemukan bug, jelaskan dahulu penyebabnya dan perbaiki secara minimal tanpa mengubah konsep strategi.
+
+LANGKAH 5 — AUDIT TEST CAUSAL
+
+Perhatikan file:
+
+python/tests/test_causal_audit.py
+
+File ini sebelumnya masih untracked.
+
+Jalankan test tersebut.
+
+Jangan menghapusnya hanya karena menyebabkan failure.
+
+Jika test tersebut memang valid, pertahankan.
+
+Jika ada masalah implementasi test, perbaiki test secara tepat tanpa melemahkan pemeriksaan causal/look-ahead.
+
+LANGKAH 6 — JALANKAN BASELINE
+
+Setelah full test dan data validation siap, jalankan baseline menggunakan DATA REAL:
+
+M15:
+- market structure
+- Support/Resistance
+
+M5:
+- rejection
+- breakout/breakdown
+- retest
+- candle confirmation
+
+Gunakan prinsip:
+
+CONFIRM OR NO SIGNAL
+
+Jangan menambah indikator baru.
+
+Jangan melakukan optimasi parameter hanya untuk meningkatkan win rate.
+
+LANGKAH 7 — STATISTIK
+
+Jika baseline dapat dijalankan dengan benar, laporkan:
+
+- jumlah candle M5
+- jumlah candle M15
+- periode data
+- jumlah setup
+- jumlah signal
+- jumlah NO SIGNAL
+- win rate
+- loss rate
+- average R:R
+- expectancy
+- profit factor
+- maximum drawdown
+- consecutive wins
+- consecutive losses
+
+Pisahkan jika tersedia:
+
+- bullish
+- bearish
+- sideways
+- resistance rejection
+- resistance breakout
+- support rejection
+- support breakdown
+- retest
+- continuation
+
+Jangan membuat angka statistik jika backtest tidak benar-benar menggunakan data real.
+
+LANGKAH 8 — JANGAN OPTIMASI
+
+Pada tahap ini JANGAN:
+
+- menambah indikator
+- mengubah strategi
+- mengubah threshold hanya untuk memperbagus hasil
+- melakukan parameter hunting
+- membuat auto-trading
+- membuat Telegram signal baru
+- melakukan commit
+- melakukan push
+
+Fokus hanya:
+
+DATA → TEST → CAUSAL AUDIT → BASELINE → REPORT
+
+LANGKAH 9 — LAPORAN AKHIR
+
+Berikan laporan dengan format:
+
+1. ENVIRONMENT
+   - Python version
+   - pytest status
+   - dependency status
+
+2. TEST RESULT
+   - total passed
+   - failed
+   - skipped
+   - error
+   - penyebab failure jika ada
+
+3. DATA
+   - M5 file
+   - M15 file
+   - jumlah candle
+   - periode
+   - integrity result
+
+4. CAUSAL / LOOK-AHEAD AUDIT
+   - PASS/FAIL
+   - masalah yang ditemukan
+   - file dan lokasi kode terkait
+
+5. BASELINE
+   - apakah berhasil dijalankan
+   - apakah menggunakan REAL XAUUSD data
+   - statistik jika valid
+
+6. PROBLEMS FOUND
+   - daftar masalah yang masih ada
+
+7. NEXT STEP
+   - hanya satu langkah berikutnya yang paling tepat berdasarkan hasil aktual
+
+ATURAN PALING PENTING:
+
+Jangan mengarang hasil.
+
+Jika test gagal, katakan gagal.
+Jika data tidak valid, katakan tidak valid.
+Jika baseline belum dapat dijalankan, katakan belum dapat dijalankan.
+Jika hasil belum cukup untuk menyimpulkan edge, jangan menyimpulkan edge.
+
+Setelah selesai, BERHENTI dan berikan laporan lengkap.
 ```
 # 
 ```
