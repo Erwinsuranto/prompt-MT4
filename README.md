@@ -66,7 +66,34 @@
 ```
 # 
 ```
+Lakukan FINAL VERIFICATION project ini.
 
+Jangan mengubah kode, jangan menambah fitur, jangan tuning strategi, dan jangan commit/push.
+
+1. Jalankan seluruh test suite:
+PYTHONPATH=python python3 -m pytest -q
+
+2. Periksa git status:
+git status --short --branch
+
+3. Pastikan:
+- semua test PASS
+- tidak ada failed/error
+- causal coverage tetap tertutup
+- tidak ada perubahan kode tambahan yang belum diperiksa
+- data CSV asli tetap utuh
+- reports/ jangan di-commit
+- jangan commit atau push apa pun
+
+4. Jika semua PASS, berikan laporan singkat:
+- jumlah test
+- failed/error/skipped
+- file kode yang berubah
+- status data CSV
+- status causal audit
+- apakah project siap masuk tahap berikutnya
+
+Berhenti setelah final verification. Jangan melakukan perubahan apa pun.
 ```
 # 
 ```
