@@ -78,7 +78,89 @@
 ```
 # 
 ```
+Lanjutkan dari hasil baseline terakhir.
 
+JANGAN mengubah strategi.
+JANGAN menambah indikator.
+JANGAN melakukan optimasi parameter.
+JANGAN commit atau push.
+
+Baseline real XAUUSD sudah selesai dan seluruh test:
+134 passed
+0 failed
+0 skipped
+
+Sekarang lakukan tahap berikutnya: STATISTICAL SIGNIFICANCE AUDIT.
+
+Tujuan:
+menentukan apakah hasil baseline yang sudah ada benar-benar berbeda dari noise/random expectation.
+
+Gunakan HASIL BASELINE YANG SUDAH ADA.
+Jangan membuat synthetic market data sebagai pengganti data real.
+
+Lakukan:
+
+1. Hitung expectancy R untuk setiap setup:
+   - A Resistance Rejection
+   - B Resistance Breakout + Retest
+   - C Support Rejection
+   - D Support Breakdown + Retest
+
+2. Hitung uncertainty/confidence interval untuk expectancy jika metodologi yang digunakan valid.
+
+3. Gunakan permutation/bootstrap test yang sesuai untuk menguji kestabilan hasil.
+
+4. Evaluasi apakah:
+   - expectancy berbeda secara berarti dari 0;
+   - PF sekitar 1 benar-benar menunjukkan edge atau hanya noise;
+   - hasil setup konsisten antara IN-SAMPLE, VALIDATION, dan OOS.
+
+5. Analisis sample size.
+   Jangan menyebut hasil signifikan jika sample tidak cukup.
+
+6. Analisis pattern family:
+   - engulfing
+   - pin/rejection
+   - strong_body
+   - breakout
+   - retest
+
+7. Untuk setiap setup/pattern berikan:
+   - sample
+   - expectancy
+   - confidence interval
+   - PF
+   - win rate
+   - max drawdown
+   - hasil IS
+   - hasil validation
+   - hasil OOS
+   - verdict
+
+Gunakan verdict:
+
+STRONG EVIDENCE
+WEAK EVIDENCE
+NO EVIDENCE
+INSUFFICIENT DATA
+
+Jangan menggunakan kata "profitable", "akurat", atau "edge" jika hasil statistik belum mendukung.
+
+Khusus OOS:
+jangan melakukan tuning berdasarkan hasil OOS.
+
+Jangan mengubah implementasi hanya karena statistik kurang bagus.
+
+Setelah selesai:
+1. tampilkan laporan statistik;
+2. tampilkan setup mana yang memiliki evidence terbaik;
+3. tampilkan setup mana yang tidak memiliki evidence;
+4. jelaskan apakah baseline layak dilanjutkan ke penelitian confluence;
+5. jalankan seluruh test lagi;
+6. tampilkan git status.
+
+Jangan commit/push.
+Setelah laporan selesai, berhenti.
 ```
 # 
 ```
