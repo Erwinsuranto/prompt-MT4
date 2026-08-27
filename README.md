@@ -86,6 +86,136 @@
 ```
 # 
 ```
+Lanjutkan dari hasil audit terakhir.
+
+JANGAN optimasi strategi dan JANGAN mengubah threshold hanya untuk menghasilkan trade.
+
+Temuan utama:
+- Setup A: marginal / watchlist
+- Setup B: disabled
+- Setup C: marginal / watchlist
+- Setup D: marginal / watchlist
+- Pattern family breakout menghasilkan n=0 trade
+- Dataset real XAUUSD sudah tersedia
+- Working tree masih memiliki data CSV dan test causal yang untracked
+- pytest belum tersedia pada environment VPS
+
+FOKUS UTAMA SEKARANG:
+
+TRACE MENGAPA BREAKOUT MENGHASILKAN 0 TRADE.
+
+Jangan berasumsi ini bug dan jangan langsung memperbaiki threshold.
+
+Telusuri pipeline breakout secara lengkap:
+
+1. Di mana BREAKOUT_UP / BREAKOUT_DOWN pertama kali dideteksi.
+2. Kondisi candle apa yang membuat breakout terdeteksi.
+3. Apakah breakout detection benar-benar menemukan kandidat pada data real.
+4. Berapa jumlah kandidat breakout sebelum filter.
+5. Berapa yang gugur pada setiap filter.
+6. Filter mana yang menyebabkan jumlah kandidat menjadi 0.
+7. Apakah kandidat hilang pada:
+   - S/R detection
+   - breakout close
+   - body/range requirement
+   - retest
+   - confirmation
+   - scoring
+   - R:R
+   - trend/M15 gate
+   - trade execution/backtest engine
+8. Pastikan tidak ada bug wiring antara:
+   BREAKOUT_UP / BREAKDOWN
+   dengan
+   PATTERN_FAMILY / setup classification.
+
+BUAT DIAGNOSTIC COUNTER.
+
+Contoh:
+
+breakout_candidates = ...
+breakout_close_pass = ...
+breakout_strength_pass = ...
+retest_candidates = ...
+retest_pass = ...
+confirmation_candidates = ...
+confirmation_pass = ...
+risk_reward_pass = ...
+final_trades = ...
+
+Lakukan hal yang sama untuk breakout UP dan breakout DOWN.
+
+PENTING:
+
+Jika ternyata:
+
+A) Tidak ada breakout candidate sama sekali:
+   periksa apakah breakout detector salah membaca data/SR.
+
+B) Ada breakout candidate tetapi semuanya gugur pada gate tertentu:
+   identifikasi gate tersebut dan jelaskan kenapa.
+
+C) Breakout sebenarnya ditemukan tetapi tidak pernah masuk trade:
+   audit wiring antara detector → pattern family → signal engine → backtester.
+
+D) Memang secara natural tidak ada breakout valid pada dataset:
+   jangan memaksakan trade. Laporkan bahwa n=0 adalah hasil valid dataset.
+
+JANGAN:
+
+- mengubah threshold hanya supaya muncul trade
+- membuat synthetic data
+- menghapus filter
+- melemahkan causal test
+- mengubah definisi strategi
+- menambah indikator
+- auto-trading
+- Telegram
+- commit
+- push
+
+CAUSAL SAFETY:
+
+Pastikan diagnostic tidak mengubah hasil backtest.
+
+Semua keputusan breakout harus tetap causal:
+hanya menggunakan informasi yang tersedia sampai candle tersebut CLOSE.
+
+PYTEST:
+
+Setelah investigasi breakout selesai, periksa dependency test.
+
+Jika pytest memang belum terinstall di VPS, install dependency minimal yang diperlukan atau gunakan environment project yang benar.
+
+Kemudian jalankan:
+
+PYTHONPATH=python python3 -m pytest -q
+
+Jalankan full test suite.
+
+Jangan menghapus test yang gagal.
+
+OUTPUT:
+
+Berikan laporan:
+
+1. BREAKOUT TRACE
+2. Jumlah kandidat pada setiap tahap
+3. Filter yang paling banyak menggugurkan kandidat
+4. Apakah 0 trade disebabkan BUG atau memang hasil dataset
+5. Jika BUG, perbaiki secara minimal dan causal-safe
+6. Jalankan ulang test setelah perbaikan
+7. Hasil full pytest
+8. Status working tree
+9. NEXT STEP tunggal yang paling tepat
+
+Jangan membuat kesimpulan bahwa breakout memiliki edge atau tidak memiliki edge hanya dari n=0.
+
+Tujuan tahap ini hanya:
+
+TRACE → IDENTIFY CAUSE → FIX BUG JIKA ADA → TEST ULANG
+
+Setelah selesai berhenti dan tunggu instruksi berikutnya.
 
 ```
 # 
