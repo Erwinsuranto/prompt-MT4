@@ -58,6 +58,37 @@
 ```
 # 
 ```
+Lanjutkan ke tahap Git.
+
+Kondisi saat ini sudah diverifikasi:
+- pytest: 149 passed, 0 failed, 0 skipped
+- reports/ tidak boleh masuk commit
+- CSV data jangan diubah
+- perubahan kode dan test yang sudah dibuat harus dipertahankan
+
+Tugas:
+1. Jalankan git diff untuk review perubahan kode.
+2. Jalankan git status --short.
+3. Pastikan reports/ dan file CSV tidak akan di-commit.
+4. Stage hanya perubahan project yang relevan:
+   - .gitignore
+   - python/xausr/backtest.py
+   - python/tests/test_break_close_causality.py
+   - python/tests/test_causal_audit.py
+   - python/tests/test_pattern_wiring.py
+5. Jalankan pytest sekali lagi:
+   PYTHONPATH=python python3 -m pytest -q
+6. Jika tetap 149 passed dan tidak ada error, buat commit dengan pesan:
+   "fix causal validation and pattern wiring"
+7. Setelah commit berhasil, push ke origin/main.
+8. Terakhir tampilkan:
+   git status --short --branch
+   git log -1 --oneline
+
+Jangan mengubah strategi.
+Jangan mengubah CSV.
+Jangan memasukkan reports/.
+Jangan melakukan auto-trading.
 
 ```
 # 
