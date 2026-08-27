@@ -62,7 +62,24 @@
 ```
 # 
 ```
+Sekarang rapikan status Git tanpa mengubah logika strategi.
 
+1. Periksa .gitignore yang ada.
+2. Tambahkan reports/ ke .gitignore jika belum ada.
+3. Jangan menghapus reports/ dari filesystem.
+4. Jangan menghapus atau mengubah data CSV.
+5. Pastikan tiga file test baru tetap dipertahankan:
+   - python/tests/test_causal_audit.py
+   - python/tests/test_pattern_wiring.py
+   - perubahan python/xausr/backtest.py
+6. Jalankan kembali:
+   PYTHONPATH=python python3 -m pytest -q
+
+7. Tampilkan:
+   git status --short --branch
+
+Jangan commit dan jangan push dulu.
+Berhenti setelah status Git dan hasil test ditampilkan.
 ```
 # 
 ```
