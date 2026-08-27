@@ -70,6 +70,37 @@
 ```
 # 
 ```
+Lanjutkan dari review terakhir.
+
+Perbaiki hanya dua hal kecil yang kamu temukan:
+
+1. Tutup celah causal coverage pada:
+   - is_resistance_breakout_close
+   - is_support_breakdown_close
+
+Buat body-level test yang benar-benar memastikan kedua fungsi tersebut tidak dapat melewatkan informasi masa depan.
+
+2. Setelah perubahan selesai:
+   - jalankan seluruh test suite
+   - pastikan semua test PASS
+   - lakukan git status
+   - jangan commit
+   - jangan push
+   - jangan tuning strategi
+   - jangan mengubah threshold strategi
+   - jangan membuat data synthetic sebagai bukti
+
+Untuk reports/, jangan commit dulu dan jangan hapus.
+Cukup laporkan statusnya.
+
+Di akhir berikan:
+- perubahan yang dibuat
+- hasil pytest lengkap
+- jumlah passed/failed/skipped
+- git status
+- apakah causal coverage sekarang sudah tertutup
+
+Berhenti setelah itu.
 
 ```
 # 
