@@ -34,7 +34,113 @@
 ```
 # 
 ```
+Lanjutkan dari hasil baseline terakhir.
 
+Jangan menambah indikator baru dulu.
+Jangan melakukan auto-trading.
+Jangan tuning untuk memperbagus hasil.
+Jangan commit atau push.
+
+Fokus tahap berikutnya adalah AUDIT CONTINUATION ENGINE.
+
+Hasil baseline menunjukkan continuation engine lebih baik daripada baseline umum:
+- sekitar 14.215 trade
+- expectancy sekitar +0,029R
+- PF sekitar 1,04
+- net sekitar +414R
+- maxDD sekitar 158,77R
+- OOS sekitar +0,013R dan masih WATCHLIST
+
+Jangan menganggap angka tersebut sebagai edge yang sudah terbukti.
+
+Tugas:
+
+1. Pecah continuation engine menjadi komponen:
+   - resistance breakout
+   - support breakdown
+   - retest
+   - candle confirmation
+   - M15 trend alignment
+   - market regime
+
+2. Hitung kontribusi masing-masing komponen secara TERPISAH.
+
+3. Bandingkan:
+   A. breakout tanpa retest
+   B. breakout + retest
+   C. breakout + retest + candle confirmation
+   D. breakdown tanpa retest
+   E. breakdown + retest
+   F. breakdown + retest + candle confirmation
+
+4. Pisahkan hasil:
+   - BUY continuation
+   - SELL continuation
+   - M15 bullish
+   - M15 bearish
+   - M15 sideways
+
+5. Audit apakah expectancy positif hanya berasal dari salah satu arah/setup.
+
+6. Periksa distribusi hasil trade:
+   - median R
+   - mean R
+   - percentile
+   - jumlah winner/loser
+   - largest winner
+   - largest loser
+   - consecutive losses
+   - drawdown duration
+
+7. Lakukan analisis temporal:
+   - per tahun
+   - per bulan
+   - per sesi jika data memungkinkan
+
+8. Wajib pisahkan:
+   - IN-SAMPLE
+   - VALIDATION
+   - OUT-OF-SAMPLE
+
+9. Jika memungkinkan lakukan walk-forward validation.
+
+10. Audit kembali:
+   - look-ahead bias
+   - future S/R leakage
+   - entry sebelum candle close
+   - retest menggunakan candle masa depan
+   - SL/TP menggunakan informasi masa depan
+   - overlap/double counting trade
+
+11. Jangan mengubah parameter strategi selama audit.
+
+12. Jika ditemukan komponen yang tidak memberikan kontribusi nyata, tandai:
+   DISABLED / WATCHLIST
+
+13. Jika continuation engine ternyata positif hanya karena satu periode, satu arah, atau beberapa trade ekstrem, nyatakan secara eksplisit dan jangan menyebutnya edge.
+
+Output harus menjawab:
+
+1. Komponen continuation mana yang benar-benar berkontribusi.
+2. Apakah breakout membutuhkan retest.
+3. Apakah candle confirmation menambah expectancy.
+4. Apakah BUY dan SELL mempunyai performa berbeda.
+5. Apakah M15 trend alignment membantu.
+6. Apakah hasil positif konsisten antarperiode.
+7. Apakah OOS mendukung hasil IS.
+8. Apakah masih ada tanda overfitting.
+9. Apakah continuation engine layak naik dari WATCHLIST menjadi kandidat edge.
+10. Apa satu langkah penelitian berikutnya.
+
+Tetap gunakan data XAUUSD real yang sudah tervalidasi.
+
+Setelah selesai:
+- jalankan seluruh test suite
+- laporkan hasil test
+- tampilkan git status
+- jangan commit
+- jangan push
+- berhenti dan tunggu instruksi berikutnya.
 ```
 # 
 ```
