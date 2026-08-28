@@ -38,7 +38,90 @@
 ```
 # 
 ```
+Lanjut ke tahap BASELINE BACKTEST.
 
+Gunakan hanya data XAUUSD real M5 + M15 yang sudah tervalidasi.
+
+Jangan:
+- menambah indikator baru
+- mengubah strategi
+- tuning parameter
+- menggunakan synthetic data
+- menggunakan OOS untuk tuning
+- membuat auto-trading
+- membuat Telegram signal
+- commit
+- push
+
+Tugas:
+
+1. Audit ulang backtester yang sekarang.
+2. Jalankan baseline sesuai roadmap:
+   - M15 market structure
+   - Support/Resistance
+   - M5 rejection
+   - M5 breakout/breakdown
+   - retest
+   - candle confirmation
+   - CONFIRM OR NO SIGNAL
+
+3. Uji 4 setup secara TERPISAH:
+   A. Resistance Rejection → SELL
+   B. Resistance Breakout + Retest → BUY
+   C. Support Rejection + Confirmation → BUY
+   D. Support Breakdown + Retest → SELL
+
+4. Untuk setiap setup hitung:
+   - total sample
+   - signal count
+   - win rate
+   - loss rate
+   - average R:R
+   - expectancy
+   - profit factor
+   - maximum drawdown
+   - consecutive wins
+   - consecutive losses
+
+5. Pisahkan hasil berdasarkan:
+   - M15 bullish
+   - M15 bearish
+   - M15 sideways
+   - rejection
+   - breakout
+   - retest
+   - continuation
+
+6. Wajib lakukan split:
+   - in-sample
+   - validation
+   - out-of-sample
+
+7. Jika memungkinkan lakukan walk-forward validation.
+
+8. Audit secara eksplisit:
+   - look-ahead bias
+   - repaint
+   - future S/R leakage
+   - entry sebelum candle CLOSE
+   - future candle digunakan untuk menentukan signal
+   - SL/TP menggunakan informasi masa depan
+
+9. Jangan mengubah parameter hanya karena hasil baseline kurang bagus.
+
+10. Jangan menyimpulkan "akurat" atau "profitable" hanya dari win rate.
+
+Buat laporan baseline lengkap dan simpan sebagai report.
+
+Setelah selesai:
+- jalankan seluruh test suite
+- pastikan semua test PASS
+- tampilkan git status
+- jangan commit
+- jangan push
+- berhenti dan tunggu instruksi berikutnya.
+
+Tujuan tahap ini hanya mengetahui performa BASELINE pada data XAUUSD real sebelum penelitian confluence dimulai.
 ```
 # 
 ```
