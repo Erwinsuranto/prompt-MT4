@@ -22,7 +22,439 @@
 ```
 # 
 ```
+Lanjutkan project dari kondisi terakhir saat ini.
 
+STATUS TERAKHIR:
+- 192 tests PASS di kedua runner.
+- Repository bersih dari tracked changes selain perubahan yang memang sudah ada dari tahap sebelumnya.
+- Data XAUUSD M5/M15 adalah data real broker dan checksum sudah diverifikasi.
+- Backtester sudah diaudit untuk causal validation.
+- Stage 4 robustness audit sudah selesai.
+- WATCHLIST tetap dipertahankan.
+- Belum ada setup yang boleh disebut ROBUST.
+- Belum ada commit/push baru kecuali commit yang sudah ada.
+- Jangan mengubah strategi hanya untuk memperbaiki statistik.
+
+TAHAP SEKARANG:
+Evidence & Edge Validation.
+
+TUJUAN:
+Cari tahu apakah kegagalan robustness berarti:
+1. benar-benar tidak ada edge,
+2. edge ada tetapi lemah,
+3. sample belum cukup,
+4. edge hanya muncul pada regime tertentu,
+5. edge hilang setelah biaya/slippage,
+6. hasil terlalu bergantung pada sedikit trade,
+7. atau definisi setup masih belum cukup teridentifikasi.
+
+JANGAN melakukan:
+- auto-trading,
+- optimasi parameter,
+- tuning berdasarkan hasil OOS,
+- menambah indikator baru,
+- mengubah threshold hanya agar hasil terlihat bagus,
+- synthetic data,
+- menghapus trade/outlier hanya karena memperburuk hasil,
+- look-ahead,
+- penggunaan data masa depan,
+- membuat klaim "akurasi tinggi".
+
+PRINSIP UTAMA:
+Jangan mencoba membuktikan bahwa strategi bagus.
+Coba buktikan apakah EDGE benar-benar ada.
+
+==================================================
+1. AUDIT SETUP SAAT INI
+==================================================
+
+Identifikasi implementasi aktual dari:
+
+A. Resistance Rejection
+B. Resistance Breakout + Retest
+C. Support Rejection
+D. Support Breakdown + Retest
+E. Continuation engine jika masih aktif/WATCHLIST
+
+Untuk masing-masing jelaskan secara eksplisit:
+
+- kondisi pembentukan setup,
+- candle yang digunakan,
+- timestamp informasi pertama yang tersedia,
+- timestamp confirmation,
+- timestamp entry,
+- bagaimana SL ditentukan,
+- bagaimana TP ditentukan,
+- kapan trade dianggap WIN/LOSS,
+- apakah ada kemungkinan future information masuk ke setup.
+
+Jangan mengubah implementasi sebelum audit selesai.
+
+==================================================
+2. EVIDENCE LEDGER
+==================================================
+
+Buat ledger per setup.
+
+Untuk setiap trade/signal catat minimal:
+
+- timestamp setup
+- setup type
+- M15 regime
+- S/R type
+- S/R strength jika tersedia
+- breakout/rejection/retest state
+- confirmation type
+- entry
+- SL
+- TP
+- outcome
+- R multiple
+- MAE jika tersedia
+- MFE jika tersedia
+- holding duration
+- biaya/slippage yang digunakan
+- apakah trade valid secara causal
+
+Pastikan satu trade dapat ditelusuri kembali ke candle yang membentuk keputusan.
+
+Jangan mengubah data asli.
+
+==================================================
+3. SAMPLE SUFFICIENCY
+==================================================
+
+Untuk setiap setup hitung:
+
+- total opportunities
+- valid signals
+- rejected/no-signal opportunities
+- wins
+- losses
+- win rate
+- average R
+- median R
+- expectancy
+- profit factor
+- maximum drawdown
+- consecutive losses
+- kontribusi top 5 winner
+- kontribusi top 5 loser
+
+Jangan hanya melihat win rate.
+
+Tandai secara eksplisit jika sample terlalu kecil untuk kesimpulan.
+
+Gunakan label:
+
+ROBUST EVIDENCE
+WEAK EVIDENCE
+INSUFFICIENT SAMPLE
+NO EVIDENCE
+
+Jangan menggunakan satu angka threshold arbitrer sebagai bukti robustness.
+
+==================================================
+4. EDGE STABILITY
+==================================================
+
+Pecah hasil berdasarkan waktu.
+
+Minimal:
+
+- tahun/periode awal
+- periode tengah
+- periode akhir
+
+Jika data memungkinkan gunakan beberapa blok waktu yang berurutan.
+
+Tujuannya mengetahui apakah edge:
+
+- konsisten,
+- menurun,
+- hanya muncul pada satu periode,
+- atau berubah regime.
+
+Jangan memilih periode yang paling bagus.
+
+==================================================
+5. MARKET REGIME
+==================================================
+
+Pisahkan hasil berdasarkan:
+
+- bullish
+- bearish
+- sideways
+
+Dan jika implementasi sudah menyediakan:
+
+- breakout regime
+- rejection regime
+- continuation regime
+- high volatility
+- low volatility
+
+Jangan menambah indikator baru.
+
+Tujuannya hanya mengetahui DI MANA edge yang sudah ada mungkin bekerja.
+
+==================================================
+6. COST / EXECUTION SENSITIVITY
+==================================================
+
+Jika backtester sudah memiliki model spread/slippage/cost, audit penggunaannya.
+
+Hitung jika memungkinkan:
+
+- gross R
+- net R
+- perubahan expectancy
+- perubahan profit factor
+
+Jika biaya belum dapat dimodelkan dengan valid, jangan mengarang nilainya.
+
+Laporkan keterbatasannya.
+
+==================================================
+7. TRADE CONCENTRATION
+==================================================
+
+Periksa apakah hasil strategi sebenarnya hanya berasal dari sedikit trade.
+
+Bandingkan:
+
+- seluruh trade
+- tanpa top 1 winner
+- tanpa top 3 winner
+- tanpa top 5 winner
+
+JANGAN menghapus trade dari hasil resmi.
+
+Ini hanya sensitivity analysis untuk mengetahui apakah edge terdiversifikasi atau bergantung pada outlier.
+
+==================================================
+8. CONTINUATION WATCHLIST
+==================================================
+
+Continuation engine tetap WATCHLIST.
+
+Jangan mengaktifkannya sebagai signal engine.
+
+Audit apakah hasil continuation berbeda secara material antara:
+
+- continuation setelah breakout
+- continuation setelah retest
+- continuation berdasarkan regime
+
+Jika evidence tidak cukup:
+
+WATCHLIST / INSUFFICIENT EVIDENCE
+
+Jangan memaksa kesimpulan.
+
+==================================================
+9. BASELINE VS SETUP
+==================================================
+
+Jangan menambah indikator.
+
+Bandingkan baseline dengan masing-masing setup yang sudah ada.
+
+Tujuan:
+
+Menentukan apakah struktur:
+
+M15 Structure
++
+S/R
++
+M5 Reaction
++
+Confirmation
+
+memiliki evidence yang lebih baik daripada sekadar variasi setup tanpa confirmation.
+
+Jika tidak ada baseline yang benar-benar comparable, jelaskan keterbatasannya daripada membuat pembanding palsu.
+
+==================================================
+10. OUT-OF-SAMPLE
+==================================================
+
+Pertahankan pembagian:
+
+IN-SAMPLE
+VALIDATION
+OUT-OF-SAMPLE
+
+Jangan melakukan tuning menggunakan OOS.
+
+Jika sample OOS terlalu kecil:
+
+tulis jelas:
+
+OOS INSUFFICIENT
+
+Jangan menyebut gagal hanya karena sample kecil.
+
+Jika memungkinkan lakukan walk-forward evaluation tanpa mengubah parameter berdasarkan hasil masa depan.
+
+==================================================
+11. CAUSALITY TEST
+==================================================
+
+Tambahkan regression/unit tests jika diperlukan untuk memastikan:
+
+- trade tidak dapat mengetahui candle masa depan,
+- S/R tidak menggunakan future swing,
+- confirmation hanya candle CLOSE,
+- entry selalu setelah confirmation,
+- retest tidak dinilai sebelum retest benar-benar terjadi,
+- outcome tidak memengaruhi pembentukan signal sebelumnya.
+
+Semua test baru harus tetap causal.
+
+==================================================
+12. OUTPUT WAJIB
+==================================================
+
+Buat laporan yang jelas dengan struktur:
+
+A. DATA
+- periode
+- jumlah candle M5
+- jumlah candle M15
+- integrity status
+
+B. SETUP EVIDENCE
+Tabel:
+
+Setup | Opportunities | Signals | Win Rate | Avg R | Expectancy | PF | Max DD | Evidence
+
+C. REGIME ANALYSIS
+Tabel hasil berdasarkan:
+- bullish
+- bearish
+- sideways
+- breakout
+- rejection
+- retest
+- continuation
+
+D. TIME STABILITY
+Jelaskan apakah hasil konsisten antar periode.
+
+E. COST SENSITIVITY
+Jelaskan dampak biaya jika model tersedia.
+
+F. TRADE CONCENTRATION
+Jelaskan ketergantungan terhadap winner besar.
+
+G. OOS
+Pisahkan hasil IS / Validation / OOS.
+
+H. CAUSALITY
+Laporkan apakah ada potensi look-ahead/repainting.
+
+I. FINAL CLASSIFICATION
+
+Untuk setiap setup pilih hanya salah satu:
+
+ROBUST EVIDENCE
+WEAK EVIDENCE
+INSUFFICIENT SAMPLE
+NO EVIDENCE
+
+J. REKOMENDASI
+
+Berikan keputusan untuk setiap setup:
+
+KEEP
+WATCHLIST
+DISABLED
+NEED MORE DATA
+
+==================================================
+13. ATURAN KEPUTUSAN
+==================================================
+
+Jangan menyebut setup ROBUST hanya karena:
+
+- win rate tinggi,
+- profit besar,
+- satu periode bagus,
+- sample kecil,
+- beberapa trade besar.
+
+Evidence harus mempertimbangkan:
+
+sample size
++
+stability
++
+OOS
++
+drawdown
++
+expectancy
++
+trade concentration
++
+regime stability
++
+causal correctness.
+
+Jika evidence belum cukup:
+
+jangan dipaksa menjadi GOOD atau BAD.
+
+Gunakan:
+
+INSUFFICIENT SAMPLE
+
+Jika tidak terlihat edge:
+
+NO EVIDENCE
+
+Jika edge ada tetapi tidak stabil:
+
+WEAK EVIDENCE / WATCHLIST
+
+Jika evidence konsisten lintas periode dan OOS:
+
+ROBUST EVIDENCE
+
+==================================================
+14. FILE SAFETY
+==================================================
+
+Jangan menghapus data asli.
+
+Jangan memodifikasi CSV original.
+
+Jangan mengubah strategi inti hanya untuk tahap audit ini.
+
+Jika perlu membuat file baru, gunakan nama yang jelas, misalnya:
+
+reports/evidence_edge_validation.*
+python/tests/test_evidence_edge_validation.py
+
+Pastikan tidak memasukkan dataset besar ke Git secara tidak sengaja.
+
+Sebelum selesai jalankan seluruh test suite.
+
+TARGET:
+
+Kita ingin menjawab pertanyaan:
+
+"Apakah Support/Resistance + Breakout/Rejection + Retest + Candle Confirmation benar-benar menunjukkan edge yang dapat dibuktikan secara causal dan stabil, atau kita sebenarnya hanya melihat noise?"
+
+Setelah laporan selesai:
+- jangan lanjut ke confluence,
+- jangan optimasi,
+- jangan auto-trading,
+- jangan push,
+- berhenti dan laporkan hasil akhir beserta rekomendasi tahap berikutnya.
 ```
 # 
 ```
