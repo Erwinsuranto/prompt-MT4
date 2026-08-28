@@ -18,7 +18,337 @@
 ```
 # 
 ```
+Lanjutkan dari kondisi terakhir project.
 
+STATUS TERAKHIR:
+- 208 tests passed di kedua runner.
+- Causal validation sudah ditambahkan.
+- Data XAUUSD M5/M15 real sudah tervalidasi.
+- Checksum CSV cocok dengan HEAD.
+- Backtester causal dan integrity check sudah PASS.
+- Stage robustness sudah selesai.
+- Tidak ada setup yang boleh disebut ROBUST tanpa evidence.
+- Continuation masih WATCHLIST.
+- Belum ada confluence research.
+- Belum ada tuning strategi.
+- Belum ada auto-trading.
+- Belum commit/push perubahan baru.
+
+REKOMENDASI TAHAP TERAKHIR:
+Sebelum confluence research, bangun benchmark drift-neutral.
+
+TUJUAN UTAMA:
+Menentukan apakah hasil setup saat ini benar-benar menunjukkan edge dibandingkan baseline yang netral terhadap arah/drift market.
+
+Jangan mencoba membuat strategi lebih profitable.
+Jangan menambah indikator.
+Jangan mengubah threshold strategi.
+Jangan melakukan tuning berdasarkan hasil benchmark.
+
+==================================================
+1. AUDIT IMPLEMENTASI SEBELUM CODING
+==================================================
+
+Periksa terlebih dahulu:
+
+- struktur backtester
+- data loader
+- trade ledger
+- outcome/R calculation
+- existing statistical utilities
+- existing reports
+- existing tests
+
+Jangan mengubah implementasi strategi jika tidak diperlukan.
+
+Jika ada fungsi/utilitas statistik yang sudah tersedia, gunakan kembali.
+
+==================================================
+2. DRIFT-NEUTRAL BENCHMARK
+==================================================
+
+Bangun benchmark yang dapat menjawab:
+
+"Apakah performa setup lebih baik daripada hasil yang dapat dijelaskan hanya oleh arah/drift harga?"
+
+Benchmark harus mempertahankan karakteristik data/trade yang relevan sebisa mungkin, tetapi tidak boleh menggunakan informasi masa depan.
+
+Minimal pertimbangkan benchmark berikut jika valid secara metodologis:
+
+A. Direction-neutral baseline
+- BUY/SELL direction tidak diberikan advantage berdasarkan future outcome.
+- Tujuannya mendapatkan distribusi performa baseline netral.
+
+B. Trade-timing-preserving benchmark
+- Pertahankan timestamp/opportunity dari trade aktual.
+- Jangan mengubah jumlah opportunity secara sembarangan.
+
+C. Return/R permutation benchmark
+- Gunakan permutation terhadap urutan outcome/R sesuai metodologi yang valid.
+- Pastikan permutation tidak mengubah data market asli.
+
+D. Drift-adjusted comparison
+- Ukur return yang dapat dijelaskan oleh directional drift pada periode terkait.
+- Jangan menggunakan future information untuk menentukan signal.
+
+Jangan membuat benchmark yang terlihat netral tetapi sebenarnya memakai hasil masa depan.
+
+Jika salah satu benchmark tidak metodologis valid untuk struktur backtester saat ini:
+JANGAN memaksakannya.
+Jelaskan alasannya dan gunakan benchmark yang valid saja.
+
+==================================================
+3. NULL HYPOTHESIS
+==================================================
+
+Definisikan secara eksplisit null hypothesis.
+
+Contoh konsep:
+
+H0:
+Performa observed setup tidak berbeda secara material dari baseline drift-neutral.
+
+H1:
+Performa observed setup menunjukkan evidence yang konsisten lebih baik daripada baseline drift-neutral.
+
+Jangan menganggap H1 benar.
+
+==================================================
+4. STATISTIK
+==================================================
+
+Untuk observed strategy dan benchmark hitung minimal:
+
+- sample size
+- mean R
+- median R
+- expectancy
+- standard deviation
+- profit factor jika meaningful
+- maximum drawdown
+- win rate jika meaningful
+- distribution of R
+- confidence interval untuk expectancy jika metodologinya valid
+- perbedaan observed vs benchmark
+
+Jika permutation/resampling digunakan:
+laporkan distribusi benchmark, bukan hanya satu angka.
+
+Jika memungkinkan hitung:
+
+- empirical p-value
+- percentile observed result terhadap benchmark distribution
+- confidence interval
+
+Jangan menggunakan p-value sebagai satu-satunya bukti edge.
+
+==================================================
+5. TRADE COUNT DAN DEPENDENCY
+==================================================
+
+Audit:
+
+- apakah benchmark memiliki jumlah trade yang comparable,
+- apakah trade saling overlap,
+- apakah ada dependency antar trade,
+- apakah multiple trade berasal dari event market yang sama.
+
+Jika independence tidak dapat diasumsikan:
+jangan menggunakan statistical test yang mensyaratkan independence tanpa penyesuaian.
+
+Dokumentasikan keterbatasannya.
+
+==================================================
+6. TIME / REGIME ROBUSTNESS
+==================================================
+
+Benchmark harus dievaluasi pada:
+
+- periode awal
+- periode tengah
+- periode akhir
+
+Dan jika data memungkinkan:
+
+- bullish
+- bearish
+- sideways
+
+Tujuannya memastikan observed edge bukan hanya akibat market drift pada satu periode.
+
+Jangan memilih periode terbaik.
+
+==================================================
+7. SETUP COMPARISON
+==================================================
+
+Bandingkan secara terpisah:
+
+A. Resistance Rejection
+B. Resistance Breakout + Retest
+C. Support Rejection
+D. Support Breakdown + Retest
+E. Continuation WATCHLIST
+
+Jangan menggabungkan semuanya menjadi satu angka sebelum masing-masing dianalisis.
+
+Untuk setiap setup:
+
+Observed
+vs
+Drift-neutral benchmark
+
+Tentukan:
+
+ROBUST EVIDENCE
+WEAK EVIDENCE
+INSUFFICIENT SAMPLE
+NO EVIDENCE
+
+Gunakan klasifikasi konservatif.
+
+==================================================
+8. IMPORTANT: NO STRATEGY TUNING
+==================================================
+
+Selama tahap ini:
+
+- jangan mengubah entry
+- jangan mengubah exit
+- jangan mengubah SL
+- jangan mengubah TP
+- jangan mengubah S/R
+- jangan mengubah confirmation
+- jangan menambah filter
+- jangan menambah indikator
+- jangan mengubah scoring
+- jangan memilih parameter terbaik
+
+Benchmark hanya untuk VALIDASI.
+
+==================================================
+9. REPORT
+==================================================
+
+Buat report yang jelas:
+
+# Drift-Neutral Benchmark
+
+## 1. Objective
+
+## 2. Null Hypothesis
+
+## 3. Benchmark Method
+
+## 4. Observed Strategy
+
+## 5. Benchmark Distribution
+
+## 6. Statistical Comparison
+
+Tabel:
+
+Setup | N | Observed Expectancy | Benchmark Expectancy | Difference | Percentile/P-value jika valid | Classification
+
+## 7. Time Stability
+
+## 8. Regime Stability
+
+## 9. Limitations
+
+## 10. Final Decision
+
+Untuk setiap setup:
+
+KEEP
+WATCHLIST
+DISABLED
+INSUFFICIENT EVIDENCE
+
+==================================================
+10. TESTING
+==================================================
+
+Tambahkan unit tests untuk memastikan benchmark:
+
+- deterministic jika seed diberikan,
+- tidak memodifikasi CSV asli,
+- tidak mengubah trade ledger asli,
+- tidak menggunakan future market information,
+- menghasilkan jumlah sample sesuai spesifikasi,
+- permutation benar-benar berubah ketika seed berbeda,
+- seed yang sama menghasilkan hasil yang sama,
+- edge case sample kecil ditangani dengan benar.
+
+Jalankan:
+
+PYTHONPATH=. python3 -m pytest -q
+
+dan runner test kedua yang sudah digunakan project.
+
+Target:
+0 failed
+0 error
+0 skipped karena perubahan ini.
+
+==================================================
+11. DATA SAFETY
+==================================================
+
+Jangan mengubah CSV asli.
+
+Jangan membuat synthetic market data.
+
+Permutation/resampling hanya boleh digunakan sebagai statistical null benchmark, bukan sebagai pengganti market data.
+
+Jangan memasukkan file output besar ke Git.
+
+Pastikan reports/ tetap sesuai aturan .gitignore yang sudah ada.
+
+==================================================
+12. GIT
+==================================================
+
+Setelah implementasi:
+
+- tampilkan git diff
+- tampilkan git status
+- pastikan tidak ada perubahan tidak sengaja
+- jangan commit
+- jangan push
+
+Berhenti setelah verifikasi selesai.
+
+==================================================
+HASIL AKHIR YANG SAYA INGINKAN
+==================================================
+
+Saya ingin jawaban objektif:
+
+Apakah observed setup memberikan evidence yang cukup bahwa performanya tidak sekadar dijelaskan oleh drift market?
+
+Jika YA:
+jelaskan setup mana dan seberapa kuat evidence-nya.
+
+Jika TIDAK:
+jelaskan bahwa evidence belum cukup.
+
+Jika sample terlalu kecil:
+gunakan INSUFFICIENT SAMPLE.
+
+Jangan membuat kesimpulan bullish hanya karena observed expectancy positif.
+
+Setelah benchmark selesai dan seluruh test PASS, BERHENTI.
+
+Jangan lanjut ke confluence research.
+
+Jangan menambah indikator.
+
+Jangan tuning.
+
+Jangan auto-trading.
+
+Jangan commit/push.
 ```
 # 
 ```
