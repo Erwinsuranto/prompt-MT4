@@ -14,7 +14,430 @@
 ```
 # 
 ```
+Lanjutkan dari kondisi project TERAKHIR.
 
+HASIL BENCHMARK TERAKHIR:
+- 257 tests passed.
+- 0 failed.
+- 0 error.
+- 0 skipped.
+- Drift-neutral benchmark sudah selesai.
+- Setup A Resistance Rejection = WATCHLIST.
+- Setup B Breakout+Retest = DISABLED.
+- Setup C Support Rejection = DISABLED.
+- Setup D Breakdown+Retest = INSUFFICIENT EVIDENCE.
+- Setup E Continuation Engine = WATCHLIST, belum diaktifkan.
+- CSV real XAUUSD M5/M15 tetap cocok dengan HEAD.
+- Belum commit.
+- Belum push.
+
+==================================================
+TUJUAN TAHAP INI
+==================================================
+
+Sekarang lakukan CONFLUENCE RESEARCH secara ilmiah.
+
+Tujuannya bukan membuat strategi lebih profitable.
+
+Tujuannya:
+
+> Menentukan apakah confirmation tambahan benar-benar memberikan informasi baru di atas baseline yang sudah ada.
+
+Jangan menganggap indikator populer otomatis berguna.
+
+Jangan tuning untuk mencari parameter terbaik.
+
+Jangan membuat auto-trading.
+
+Jangan mengaktifkan setup yang sebelumnya DISABLED.
+
+==================================================
+1. AUDIT BASELINE TERLEBIH DAHULU
+==================================================
+
+Audit implementasi baseline yang sekarang.
+
+Baseline harus tetap:
+
+M15:
+- market structure
+- Support/Resistance
+
+M5:
+- price reaction
+- candle confirmation
+- rejection/continuation sesuai setup
+
+Pastikan:
+- candle harus CLOSE,
+- tidak ada look-ahead,
+- tidak ada repaint,
+- S/R tidak membaca masa depan,
+- confirmation tidak membaca future candle.
+
+Jangan mengubah baseline sebelum eksperimen.
+
+==================================================
+2. BATASI SETUP YANG DITELITI
+==================================================
+
+Gunakan status benchmark sebagai gate.
+
+BOLEH diteliti:
+- Setup A Resistance Rejection = WATCHLIST
+- Setup E Continuation = WATCHLIST
+
+JANGAN diaktifkan:
+- Setup B = DISABLED
+- Setup C = DISABLED
+
+Untuk Setup D:
+- status tetap INSUFFICIENT EVIDENCE.
+- Jangan memaksanya menjadi signal.
+- Jika datanya cukup untuk exploratory analysis, boleh dianalisis secara deskriptif.
+- Jangan menaikkan status hanya karena hasil satu eksperimen.
+
+==================================================
+3. CANDIDATE CONFIRMATION
+==================================================
+
+Teliti satu per satu:
+
+A. ADX
+B. DMI (+DI/-DI)
+C. EMA trend/regime
+D. ATR
+E. ATR relatif terhadap historical ATR
+F. Candle range / ATR
+G. Bullish/Bearish Engulfing
+H. Pin Bar/Rejection
+I. Strong Body
+J. Breakout/Breakdown Candle
+K. Retest Confirmation
+L. VWAP jika data/timezone memungkinkan
+
+Jangan langsung menggabungkan semuanya.
+
+==================================================
+4. EXPERIMENTAL DESIGN
+==================================================
+
+Gunakan baseline sebagai CONTROL.
+
+Untuk setiap candidate:
+
+CONTROL:
+Baseline
+
+EXPERIMENT:
+Baseline + satu confirmation
+
+Contoh:
+
+Baseline
+vs
+Baseline + ADX
+
+Baseline
+vs
+Baseline + ATR
+
+Baseline
+vs
+Baseline + EMA
+
+dan seterusnya.
+
+Jangan melakukan parameter sweep besar.
+
+Gunakan parameter yang sudah terdokumentasi atau parameter canonical yang wajar.
+
+Jika parameter belum ada:
+gunakan nilai standar yang masuk akal untuk exploratory research,
+tetapi JANGAN memilih nilai berdasarkan hasil performa.
+
+==================================================
+5. INFORMATION GAIN
+==================================================
+
+Jangan hanya bertanya:
+
+"Apakah win rate naik?"
+
+Untuk setiap confirmation ukur:
+
+- sample count
+- signal count
+- expectancy
+- median R
+- mean R
+- win rate
+- profit factor jika meaningful
+- maximum drawdown
+- consecutive losses
+- distribution of R
+- baseline vs experiment
+- perubahan jumlah signal
+
+Yang paling penting:
+
+Apakah confirmation memberikan informasi tambahan?
+
+Jika confirmation hanya:
+- mengurangi jumlah trade,
+- tetapi tidak meningkatkan kualitas secara konsisten,
+
+maka jangan menganggapnya berguna.
+
+==================================================
+6. SAMPLE SIZE
+==================================================
+
+Jangan menarik kesimpulan kuat dari sample kecil.
+
+Jika sample terlalu kecil:
+
+INSUFFICIENT SAMPLE
+
+Jika hasil tidak konsisten:
+
+NO EVIDENCE
+
+Jika hasil menunjukkan peningkatan tetapi belum cukup kuat:
+
+WEAK EVIDENCE
+
+Jika hasil konsisten:
+
+CANDIDATE FOR VALIDATION
+
+Jangan gunakan istilah:
+"akurasi tinggi"
+"pasti lebih bagus"
+"indikator terbaik"
+
+==================================================
+7. IN-SAMPLE / OUT-OF-SAMPLE
+==================================================
+
+Semua confirmation yang terlihat menjanjikan harus diuji:
+
+- In-sample
+- Validation
+- Out-of-sample
+
+Jika memungkinkan:
+
+- Walk-forward
+
+Parameter tidak boleh dipilih menggunakan OOS.
+
+Jangan melakukan repeated tuning terhadap OOS.
+
+Jika confirmation bagus di IS tetapi gagal OOS:
+
+OVERFIT / DISABLED
+
+==================================================
+8. REGIME ANALYSIS
+==================================================
+
+Pisahkan hasil berdasarkan:
+
+- bullish
+- bearish
+- sideways
+
+Dan untuk setup yang relevan:
+
+- rejection
+- continuation
+- breakout
+- retest
+
+Tujuannya mengetahui apakah confirmation hanya berguna pada regime tertentu.
+
+Jangan menggabungkan seluruh kondisi menjadi satu angka.
+
+==================================================
+9. INTERACTION / CONFLUENCE
+==================================================
+
+Setelah single confirmation selesai, hanya ambil candidate yang menunjukkan evidence.
+
+Baru lakukan kombinasi terbatas:
+
+Baseline
++
+Confirmation A
++
+Confirmation B
+
+Contoh:
+
+Baseline + ADX + ATR
+
+Tetapi hanya jika:
+- A dan B masing-masing memiliki evidence,
+- kombinasi tidak dipilih hanya karena hasil tertinggi,
+- hasil tetap diuji OOS.
+
+Jangan melakukan exhaustive parameter optimization.
+
+==================================================
+10. NO SIGNAL RULE
+==================================================
+
+Tetap pertahankan:
+
+CONFIRM OR NO SIGNAL
+
+Jika:
+- structure tidak jelas,
+- S/R lemah,
+- confirmation konflik,
+- regime tidak sesuai,
+- candle belum close,
+- risk/reward tidak valid,
+
+maka:
+
+NO SIGNAL
+
+Jangan membuat filter hanya agar statistik terlihat lebih bagus.
+
+==================================================
+11. REPORT
+==================================================
+
+Buat report:
+
+# Confluence Research
+
+## 1. Baseline Definition
+
+## 2. Experimental Method
+
+## 3. Candidate Confirmation Results
+
+Tabel:
+
+Confirmation | Setup | N | Signal Count | Expectancy | PF | Max DD | OOS Result | Classification
+
+Classification hanya:
+
+- USEFUL CANDIDATE
+- WEAK EVIDENCE
+- NO EVIDENCE
+- INSUFFICIENT SAMPLE
+- OVERFIT / DISABLED
+
+## 4. Regime Analysis
+
+## 5. OOS Analysis
+
+## 6. Walk-Forward Analysis
+
+jika memungkinkan.
+
+## 7. Interaction Tests
+
+Hanya kombinasi confirmation yang memiliki evidence.
+
+## 8. Final Decision
+
+Untuk setiap confirmation:
+
+KEEP AS CANDIDATE
+WATCHLIST
+DISABLED
+
+==================================================
+12. STRICT ANTI-OVERFITTING
+==================================================
+
+DILARANG:
+
+- memilih parameter berdasarkan OOS,
+- mengulang tuning sampai menemukan hasil bagus,
+- memilih periode terbaik,
+- menghapus trade buruk,
+- menghapus market regime buruk,
+- mengubah entry agar hasil meningkat,
+- mengubah SL/TP berdasarkan hasil eksperimen,
+- menambah indikator yang tidak ada dalam eksperimen,
+- menggunakan synthetic market data.
+
+Jika ada ambiguity metodologis:
+jelaskan dan jangan memaksakan kesimpulan.
+
+==================================================
+13. TESTING
+==================================================
+
+Tambahkan test hanya untuk kode/framework yang memang diperlukan.
+
+Pastikan test memeriksa:
+
+- deterministic calculation,
+- no look-ahead,
+- candle-close requirement,
+- data immutability,
+- regime classification,
+- confirmation calculation,
+- baseline tidak berubah,
+- OOS tidak bocor ke training.
+
+Jalankan kedua runner yang sudah digunakan project.
+
+Target:
+
+0 failed
+0 error
+0 skipped
+
+==================================================
+14. GIT
+==================================================
+
+Setelah selesai:
+
+- git status
+- git diff HEAD
+- pastikan hanya perubahan yang berkaitan dengan tahap ini.
+- jangan commit.
+- jangan push.
+
+==================================================
+KEPUTUSAN AKHIR
+==================================================
+
+Saya ingin jawaban objektif:
+
+1. Confirmation mana yang benar-benar menambah informasi?
+2. Confirmation mana yang hanya mengurangi signal tanpa menambah kualitas?
+3. Confirmation mana yang gagal OOS?
+4. Confirmation mana yang cukup kuat menjadi candidate?
+5. Apakah ADX/DMI membantu?
+6. Apakah ATR membantu?
+7. Apakah EMA membantu?
+8. Apakah VWAP membantu?
+9. Candle confirmation mana yang paling konsisten?
+10. Apakah confluence meningkatkan kualitas Setup A?
+11. Apakah confluence memberikan bukti tambahan untuk Setup E?
+12. Apa yang tetap harus NO SIGNAL?
+
+Jangan mengubah status setup hanya karena satu eksperimen.
+
+Jangan mengaktifkan auto-trading.
+
+Jangan lanjut ke production.
+
+Setelah semua verifikasi selesai dan test PASS:
+
+BERHENTI.
+
+Tunggu instruksi berikutnya.
 ```
 # 
 ```
