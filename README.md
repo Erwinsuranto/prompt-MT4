@@ -26,6 +26,440 @@
 ```
 # 
 ```
+Lanjutkan project dari kondisi terakhir. Jangan mengulang audit yang sudah selesai dan jangan mengubah strategi tanpa alasan.
+
+KONDISI TERAKHIR:
+- Test suite: 192 passed.
+- Kedua runner test sudah PASS.
+- Data XAUUSD M5/M15 adalah data real dan checksum/CSV sudah diverifikasi terhadap HEAD.
+- Look-ahead/causal validation dan wiring audit sebelumnya sudah dilakukan.
+- Continuation engine sudah diaudit.
+- Belum perlu auto-trading.
+- Jangan menggunakan synthetic data sebagai bukti performa.
+- Jangan menambah indikator baru.
+- Jangan melakukan tuning parameter hanya untuk memperbagus hasil.
+- Jangan commit/push tanpa persetujuan.
+
+TAHAP SEKARANG:
+ROBUSTNESS AUDIT
+
+Tujuan tahap ini adalah menjawab:
+
+"Apakah edge/setup yang sudah ditemukan benar-benar robust, atau hasilnya hanya berasal dari periode tertentu, regime tertentu, outlier tertentu, atau kondisi data tertentu?"
+
+JANGAN langsung mengubah strategi.
+
+==================================================
+1. AUDIT PERIODE WAKTU
+==================================================
+
+Gunakan data XAUUSD real yang sudah tersedia.
+
+Pisahkan hasil berdasarkan periode waktu yang masuk akal, minimal:
+
+- per tahun
+- jika sample memungkinkan, per semester/kuartal
+- full period
+
+Untuk setiap periode laporkan:
+
+- jumlah setup
+- jumlah trade
+- win rate
+- average R
+- expectancy
+- profit factor
+- maximum drawdown
+- consecutive losses
+- net R
+
+Tujuannya bukan mencari periode terbaik, tetapi melihat apakah edge muncul secara konsisten.
+
+Jika sebuah setup hanya bekerja pada satu periode dan gagal pada periode lain, tandai sebagai:
+
+PERIOD-DEPENDENT
+
+==================================================
+2. REGIME AUDIT
+==================================================
+
+Pisahkan performa berdasarkan kondisi market yang SUDAH tersedia dari framework saat ini.
+
+Minimal:
+
+- bullish
+- bearish
+- sideways
+- breakout regime
+- rejection regime
+- continuation regime
+
+Jangan membuat indikator baru hanya untuk klasifikasi ini.
+
+Jawab:
+
+- Apakah edge hanya muncul pada satu regime?
+- Apakah setup tertentu buruk ketika market sideways?
+- Apakah continuation benar-benar berbeda dari rejection?
+- Apakah hasil tetap konsisten ketika regime berubah?
+
+==================================================
+3. BULLISH VS BEARISH SYMMETRY
+==================================================
+
+Bandingkan:
+
+BUY setup
+vs
+SELL setup
+
+Untuk masing-masing:
+
+- sample
+- win rate
+- average R
+- expectancy
+- profit factor
+- maximum drawdown
+- consecutive losses
+
+Jangan mengasumsikan BUY dan SELL memiliki karakteristik yang sama.
+
+Jika ada asymmetry yang kuat, laporkan.
+
+Jangan memperbaikinya dengan tuning.
+
+==================================================
+4. OUTLIER / WINNER CONCENTRATION AUDIT
+==================================================
+
+Periksa apakah performa keseluruhan bergantung pada beberapa trade winner terbesar.
+
+Hitung minimal:
+
+A. Full result
+
+B. Tanpa top 1 winner
+
+C. Tanpa top 3 winner
+
+D. Tanpa top 5 winner
+
+Bandingkan:
+
+- net R
+- expectancy
+- profit factor
+- drawdown
+
+Tujuan:
+
+Mengetahui apakah edge benar-benar tersebar di banyak trade atau hanya terlihat bagus karena beberapa winner ekstrem.
+
+Jika sebagian besar performa hilang setelah top winners dihapus, tandai:
+
+OUTLIER DEPENDENT
+
+Jangan menghapus trade tersebut dari dataset utama.
+
+==================================================
+5. LOSS CONCENTRATION AUDIT
+==================================================
+
+Periksa apakah kerugian terkonsentrasi pada:
+
+- periode tertentu
+- regime tertentu
+- setup tertentu
+- sesi/jam tertentu jika data mendukung
+
+Hitung:
+
+- consecutive losses
+- maximum losing streak
+- drawdown cluster
+- distribusi loss
+
+Tujuannya mengetahui kapan sistem paling rentan.
+
+==================================================
+6. TRADE DISTRIBUTION AUDIT
+==================================================
+
+Periksa distribusi seluruh trade.
+
+Jangan hanya melihat average.
+
+Laporkan jika memungkinkan:
+
+- median R
+- mean R
+- percentile R
+- jumlah winner besar
+- jumlah loser besar
+- distribusi holding time jika tersedia
+
+Cari tahu apakah expectancy berasal dari distribusi yang sehat atau sangat skewed.
+
+==================================================
+7. TRANSACTION COST / SLIPPAGE SENSITIVITY
+==================================================
+
+Jangan mengubah strategi.
+
+Uji sensitivity secara konservatif terhadap:
+
+- spread
+- slippage
+- biaya transaksi jika model tersedia
+
+Gunakan beberapa skenario biaya yang masuk akal.
+
+Contoh:
+
+BASE
+CONSERVATIVE
+HIGH COST
+
+Tujuan:
+
+Mengetahui apakah edge masih positif setelah biaya yang lebih realistis.
+
+Jangan membuat asumsi broker-specific yang tidak didukung data.
+
+Jika parameter biaya tidak dapat ditentukan secara valid, jangan mengarang angka. Jelaskan keterbatasannya.
+
+==================================================
+8. SERIAL / CLUSTER DEPENDENCY
+==================================================
+
+Pastikan hasil tidak terlihat bagus hanya karena banyak trade yang berasal dari event market yang sama.
+
+Gunakan audit dependency yang sudah ada.
+
+Periksa:
+
+- trade yang overlap
+- trade yang berasal dari breakout/event yang sama
+- continuation yang berasal dari parent event yang sama
+- cluster trade
+- exposure simultan jika dapat dihitung
+
+Laporkan:
+
+- raw trade count
+- independent/cluster-aware count jika framework sudah mendukung
+
+Jangan menghapus data hanya untuk memperbagus statistik.
+
+==================================================
+9. SETUP-BY-SETUP ROBUSTNESS
+==================================================
+
+Evaluasi terpisah:
+
+A. Resistance Rejection
+B. Resistance Breakout + Retest + Bullish Confirmation
+C. Support Rejection + Bullish Confirmation
+D. Support Breakdown + Retest + Bearish Confirmation
+E. Continuation
+
+Untuk masing-masing jawab:
+
+- Apakah edge stabil antarperiode?
+- Apakah edge stabil antar-regime?
+- Apakah bergantung pada outlier?
+- Apakah sensitif terhadap biaya?
+- Apakah sample cukup?
+- Apakah layak dilanjutkan?
+
+Gunakan status:
+
+ROBUST
+PROMISING
+PERIOD-DEPENDENT
+REGIME-DEPENDENT
+OUTLIER-DEPENDENT
+INSUFFICIENT SAMPLE
+NOT ROBUST
+
+Jangan menyebut "akurat" hanya berdasarkan win rate.
+
+==================================================
+10. SAMPLE SIZE CHECK
+==================================================
+
+Jangan menarik kesimpulan kuat dari sample kecil.
+
+Jika sample tidak cukup untuk menyimpulkan sesuatu:
+
+INSUFFICIENT SAMPLE
+
+Jangan memaksakan ranking setup.
+
+==================================================
+11. OUT-OF-SAMPLE / WALK-FORWARD
+==================================================
+
+Gunakan pembagian data yang sudah tersedia.
+
+Pisahkan:
+
+- In-Sample
+- Validation
+- Out-of-Sample
+
+Jika walk-forward framework sudah tersedia, gunakan.
+
+Jangan melakukan tuning menggunakan OOS.
+
+Jika hasil OOS tidak tersedia atau tidak valid, laporkan dengan jelas.
+
+Jangan mengubah parameter agar OOS terlihat lebih bagus.
+
+==================================================
+12. JANGAN MENAMBAH INDIKATOR
+==================================================
+
+Pada tahap ini:
+
+JANGAN menambahkan:
+
+- ADX
+- DMI
+- EMA
+- ATR
+- VWAP
+- indikator lain
+
+Confluence research dilakukan SETELAH robustness baseline selesai.
+
+Kita harus mengetahui apakah baseline yang sekarang sudah mempunyai edge yang cukup robust sebelum menambahkan confirmation baru.
+
+==================================================
+13. NO STRATEGY TUNING
+==================================================
+
+Jangan mengubah:
+
+- threshold
+- S/R logic
+- breakout threshold
+- retest logic
+- candle confirmation
+- SL/TP
+- scoring
+
+kecuali ditemukan bug nyata.
+
+Jika ditemukan bug:
+
+1. jelaskan bug
+2. tunjukkan bukti
+3. perbaiki secara minimal
+4. jalankan seluruh test
+5. jangan melakukan optimasi tambahan
+
+==================================================
+14. TEST REGRESSION
+==================================================
+
+Setelah audit:
+
+jalankan seluruh test suite.
+
+Target:
+
+- 0 failed
+- 0 error
+
+Bandingkan dengan baseline sebelumnya:
+
+192 passed
+
+Jika jumlah test berubah, jelaskan kenapa.
+
+Jangan menghapus test yang gagal hanya agar suite PASS.
+
+==================================================
+15. GIT
+==================================================
+
+Periksa:
+
+git status
+git diff
+git log -1
+
+Jangan commit.
+
+Jangan push.
+
+Jika ada perubahan yang dibuat karena bug/test baru, biarkan working tree sesuai kondisi aktual dan laporkan.
+
+==================================================
+OUTPUT WAJIB
+==================================================
+
+Berikan laporan ringkas tetapi lengkap:
+
+1. Dataset yang digunakan
+2. Periode data
+3. Jumlah sample
+4. Hasil full period
+5. Hasil per periode
+6. Hasil per regime
+7. BUY vs SELL
+8. Outlier sensitivity
+9. Loss concentration
+10. Transaction-cost sensitivity
+11. Cluster/dependency audit
+12. OOS / walk-forward
+13. Setup mana yang ROBUST
+14. Setup mana yang PERIOD-DEPENDENT
+15. Setup mana yang REGIME-DEPENDENT
+16. Setup mana yang OUTLIER-DEPENDENT
+17. Setup mana yang INSUFFICIENT SAMPLE
+18. Apakah baseline layak masuk ke tahap confluence research
+19. Jumlah test terakhir
+20. git status terakhir
+
+==================================================
+KEPUTUSAN AKHIR
+==================================================
+
+Jangan langsung melanjutkan ke optimasi.
+
+Gunakan keputusan:
+
+A. ROBUST ENOUGH
+→ baseline boleh masuk ke tahap Confluence Research.
+
+B. PROMISING BUT NOT ROBUST
+→ tetap WATCHLIST dan jangan tuning untuk memaksakan hasil.
+
+C. NOT ROBUST
+→ tandai setup terkait sebagai DISABLED/WATCHLIST.
+
+D. INSUFFICIENT SAMPLE
+→ jangan mengambil kesimpulan.
+
+Prinsip utama:
+
+DATA > ASSUMPTION
+ROBUSTNESS > WIN RATE
+OOS > IN-SAMPLE
+INDEPENDENT EVIDENCE > TRADE COUNT
+CONFIRMATION > PREDICTION
+NO SIGNAL > BAD SIGNAL
+
+Berhenti setelah laporan selesai.
+
+Jangan melakukan confluence research.
+Jangan menambah indikator.
+Jangan auto-trading.
+Jangan commit.
+Jangan push.
 
 ```
 # 
