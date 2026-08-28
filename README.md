@@ -30,7 +30,130 @@
 ```
 # 
 ```
+Lanjutkan penelitian dari hasil audit terakhir.
 
+Jangan menambah indikator.
+Jangan tuning parameter.
+Jangan mengubah strategi untuk memperbagus hasil.
+Jangan auto-trading.
+Jangan commit atau push.
+
+Fokus tahap ini hanya pada masalah OVERLAP / TRADE DEPENDENCY yang ditemukan.
+
+Temuan terakhir:
+- maksimum 42 posisi terbuka bersamaan
+- sekitar 16,9% entry berjarak <=15 menit dari entry sebelumnya
+- hasil agregat continuation engine terlihat berbeda ketika dihitung secara serial
+- median R sekitar -1,0029R
+- winner terbesar sekitar +8,20R
+- loser terbesar sekitar -5,95R
+- test suite 177 passed
+
+Tujuan:
+Menentukan apakah apparent edge continuation engine benar-benar berasal dari setup yang independen, atau hanya akibat clustering/overlap posisi pada episode market yang sama.
+
+Tugas:
+
+1. Audit definisi "trade" dan "position".
+
+2. Tentukan apakah beberapa entry yang berdekatan sebenarnya berasal dari:
+   - breakout yang sama
+   - retest yang sama
+   - S/R zone yang sama
+   - market episode yang sama
+   - continuation leg yang sama
+
+3. Buat analisis dengan tiga cara:
+
+A. RAW
+Gunakan seluruh trade sebagaimana backtester saat ini.
+
+B. SERIAL
+Hanya satu posisi aktif pada satu waktu.
+Entry baru tidak boleh dihitung jika masih ada posisi aktif.
+
+C. CLUSTERED
+Kelompokkan trade yang berasal dari episode market/setup yang sama.
+Jelaskan aturan clustering secara objektif dan tidak dibuat khusus agar hasil terlihat lebih buruk atau lebih baik.
+
+4. Bandingkan ketiga hasil:
+
+- total trade
+- total R
+- expectancy
+- profit factor
+- win rate
+- median R
+- average R
+- maximum drawdown
+- maximum losing streak
+- largest winner
+- largest loser
+- drawdown duration
+
+5. Pisahkan hasil:
+- BUY
+- SELL
+- breakout
+- breakdown
+- retest
+- continuation
+
+6. Buat analisis time clustering:
+- entry <=5 menit
+- <=15 menit
+- <=30 menit
+- <=60 menit
+
+Jangan menganggap entry yang dekat otomatis salah.
+Tujuannya hanya mengukur dependency.
+
+7. Audit apakah satu market move besar menghasilkan banyak trade yang semuanya dihitung sebagai bukti independen.
+
+Jika iya, jelaskan seberapa besar pengaruhnya terhadap statistik.
+
+8. Lakukan sensitivity analysis:
+Bandingkan hasil RAW vs SERIAL vs CLUSTERED tanpa mengubah parameter strategi.
+
+9. Sangat penting:
+Jangan memilih metode yang menghasilkan angka terbaik.
+
+Metode harus dipilih berdasarkan definisi metodologis yang paling benar untuk sistem ini.
+
+10. Periksa juga apakah ada:
+- duplicate signal
+- repeated signal pada zone yang sama
+- repeated retest
+- re-entry tanpa reset setup
+- breakout event yang menghasilkan beberapa trade
+- trade yang overlap hanya karena implementation detail
+
+Jika ditemukan bug, perbaiki bug tersebut.
+Jika bukan bug dan memang bagian dari desain, jangan mengubahnya diam-diam; jelaskan terlebih dahulu.
+
+11. Jalankan seluruh test suite setelah perubahan.
+
+Target hasil:
+
+Jawab dengan tegas:
+
+1. Apakah continuation engine masih positif setelah dependency dikontrol?
+2. Apakah PF sekitar 1,04 tetap bertahan?
+3. Apakah expectancy positif masih ada pada SERIAL?
+4. Apakah hasil positif hanya berasal dari beberapa market episode besar?
+5. Apakah RAW backtest terlalu optimistis karena overlap?
+6. Apakah ada bug duplicate/re-entry?
+7. Apakah continuation engine masih layak WATCHLIST atau harus diturunkan?
+
+Jika setelah audit ternyata edge hilang:
+jangan mencoba memperbaikinya dengan indikator baru.
+
+Jika edge tetap bertahan:
+barulah kita lanjut ke penelitian robustness.
+
+Jangan commit.
+Jangan push.
+Berhenti setelah laporan dan test selesai.
 ```
 # 
 ```
