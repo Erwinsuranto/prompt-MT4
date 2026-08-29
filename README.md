@@ -74,7 +74,66 @@
 ```
 # 
 ```
+Lanjutkan project mt-info dari kondisi repository SAAT INI.
 
+Jangan mengulang baseline yang sudah selesai. Jangan mengubah strategi trading, dataset, atau membuat synthetic data.
+
+Prioritas sekarang:
+
+1. Selesaikan perubahan bridge.py yang saat ini masih uncommitted.
+   - Perubahan tersebut sudah diverifikasi:
+     - versi final: 23 test OK
+     - full suite: 398 passed
+   - Pastikan test baru untuk regression Bug 3 dan Bug 4 tetap ada.
+   - Jalankan test yang relevan dan full test suite.
+   - Jika semuanya tetap PASS, commit perubahan tersebut.
+   - Gunakan commit message:
+     fix(bridge): retry undelivered signals and survive filesystem races
+
+2. Setelah commit berhasil, audit python/xausr/telegram.py.
+   Fokus hanya pada masalah yang sudah ditemukan:
+   - coverage sekitar 50%
+   - Exception handling pada send()
+   - kegagalan kirim Telegram jangan menyebabkan signal hilang tanpa retry
+   - periksa apakah ada filesystem/network race atau partial failure yang perlu ditangani
+   - jangan mengubah kontrak API yang sudah ada tanpa alasan
+   - jangan membuat behavior baru yang tidak diperlukan
+
+3. Tambahkan unit test yang benar-benar membuktikan bug/behavior yang ditemukan.
+   - Jangan membuat test dekoratif hanya untuk menaikkan coverage.
+   - Test harus menguji behavior nyata.
+   - Jangan membutuhkan koneksi Telegram/network nyata.
+   - Gunakan mock/fake dependency jika diperlukan.
+
+4. Jalankan:
+   - test telegram yang relevan
+   - full test suite
+
+5. Jangan commit perubahan telegram.py dulu jika masih ada failure atau behavior belum jelas.
+   Jika test semuanya PASS, laporkan perubahan dan tunggu instruksi saya sebelum commit.
+
+Strict rules:
+- Jangan menyentuh dataset XAUUSD.
+- Jangan membuat synthetic market data.
+- Jangan mengubah setup A/B/C/D.
+- Jangan menambah indikator trading.
+- Jangan melakukan auto-trading.
+- Jangan membuat Telegram signal baru.
+- Jangan mengubah threshold strategi.
+- Jangan mengklaim akurasi.
+- Jangan menggunakan network Telegram nyata untuk test.
+- Jangan menjalankan test Gorouter.app.
+- NVIDIA dan TokenHarbor.ai tidak perlu disentuh pada tahap ini.
+
+Di akhir, tampilkan ringkasan:
+1. commit bridge berhasil atau tidak
+2. file telegram.py yang berubah
+3. test yang ditambahkan
+4. hasil full test suite
+5. status git
+6. langkah berikutnya yang paling aman
+
+Kerjakan langsung dari repository /root/mt-info dan jangan berhenti hanya untuk meminta konfirmasi pada langkah yang sudah jelas di atas.
 ```
 # 
 ```
