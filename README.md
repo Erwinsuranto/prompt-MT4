@@ -8,7 +8,50 @@
 ```
 # 
 ```
+Lanjutkan dari state repository /root/mt-info saat ini.
 
+TUGAS TAHAP INI: FINALIZE + INTEGRITY CHECK + COMMIT + PUSH.
+Jangan menambah strategi baru, indikator baru, filter baru, threshold baru, atau mengubah hasil benchmark.
+
+Konteks hasil terakhir:
+- 375 passed pada kedua runner, 0 failed, 0 error, 0 skipped.
+- drift-neutral benchmark sudah selesai.
+- A Resistance Rejection = WATCHLIST.
+- B Breakout+Retest = DISABLED.
+- C Support Rejection = DISABLED.
+- D Breakdown+Retest = INSUFFICIENT EVIDENCE.
+- E Engine pooled = INSUFFICIENT EVIDENCE.
+- Tidak boleh mengubah keputusan tersebut tanpa bukti baru.
+- reports/ tetap git-ignored dan jangan dipaksa masuk commit.
+
+Kerjakan secara berurutan:
+
+1. Periksa git status dan git diff HEAD.
+2. Pastikan perubahan yang ada hanya perubahan yang memang berasal dari tahap benchmark/drift-neutral dan tidak ada accidental change.
+3. Jalankan test suite yang relevan sekali lagi sebagai final verification.
+4. Verifikasi tidak ada test yang dihapus, di-skip, atau dilemahkan.
+5. Verifikasi integritas CSV/report dan bahwa hasil benchmark konsisten dengan HEAD.
+6. Periksa tidak ada secret, credential, atau file sementara yang akan ikut commit.
+7. Tampilkan ringkasan file yang akan di-commit dan hasil test.
+8. Jika semuanya bersih, buat satu commit yang jelas untuk menyimpan checkpoint tahap ini.
+9. Push commit tersebut ke remote branch yang sedang digunakan.
+10. Setelah push berhasil, tampilkan:
+   - commit hash
+   - branch
+   - push status
+   - test result
+   - git status final
+
+PENTING:
+- Jangan melakukan refactor besar.
+- Jangan melakukan tuning.
+- Jangan menambah indikator/strategi.
+- Jangan mengubah baseline hanya agar hasil terlihat lebih bagus.
+- Jangan mengarang angka.
+- Jangan commit reports/ yang memang di-ignore.
+- Jika ada masalah sebelum commit/push, BERHENTI dan jelaskan masalahnya; jangan memperbaikinya dengan perubahan spekulatif.
+
+Tujuan tahap ini hanya satu: membuat checkpoint Git yang bersih dan dapat direproduksi sebelum VPS dipindahkan.
 ```
 # 
 ```
