@@ -42,6 +42,75 @@
 ```
 # 
 ```
+#property script_show_inputs
+
+input int BarsToExport = 10000;
+
+void OnStart()
+{
+   string symbol = Symbol();
+   ENUM_TIMEFRAMES timeframe = PERIOD_M5;
+
+   MqlRates rates[];
+   int copied = CopyRates(symbol, timeframe, 0, BarsToExport, rates);
+
+   if(copied <= 0)
+   {
+      Print("GAGAL mengambil data. Error = ", GetLastError());
+      return;
+   }
+
+   ArraySetAsSeries(rates, false);
+
+   string filename = "XAUUSD_M5_history.csv";
+
+   int handle = FileOpen(
+      filename,
+      FILE_WRITE | FILE_CSV | FILE_ANSI,
+      ','
+   );
+
+   if(handle == INVALID_HANDLE)
+   {
+      Print("GAGAL membuat file. Error = ", GetLastError());
+      return;
+   }
+
+   FileWrite(
+      handle,
+      "Time",
+      "Open",
+      "High",
+      "Low",
+      "Close",
+      "TickVolume",
+      "Spread",
+      "RealVolume"
+   );
+
+   for(int i = 0; i < copied; i++)
+   {
+      FileWrite(
+         handle,
+         TimeToString(rates[i].time, TIME_DATE | TIME_MINUTES),
+         rates[i].open,
+         rates[i].high,
+         rates[i].low,
+         rates[i].close,
+         rates[i].tick_volume,
+         rates[i].spread,
+         rates[i].real_volume
+      );
+   }
+
+   FileClose(handle);
+
+   Print("BERHASIL!");
+   Print("Symbol: ", symbol);
+   Print("Timeframe: M5");
+   Print("Jumlah candle: ", copied);
+   Print("File: ", filename);
+}
 
 ```
 # 
