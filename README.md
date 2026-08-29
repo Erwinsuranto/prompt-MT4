@@ -61,7 +61,33 @@
 
 ```
 # 
-```
+```Lanjutkan perbaikan check_data.py.
+
+Kondisi saat ini:
+- baseline 375 test tetap OK
+- bridge 23 test OK
+- telegram 19 test OK
+- integrity 12 test OK
+- total 440 test
+- perubahan saat ini hanya check_data.py dan tests/test_check_data.py
+- jangan menyentuh dataset XAUUSD, data/, mql5/, docs/, atau modul lain yang sudah stabil
+- jangan commit/push dulu
+
+Fokus:
+1. Baca implementasi check_data.py saat ini dan tests/test_check_data.py.
+2. Jalankan test_check_data secara penuh.
+3. Perbaiki implementasi berdasarkan kontrak test, bukan dengan melemahkan/menghapus test.
+4. Pastikan tiga exit code eksplisit tetap benar:
+   EXIT_OK=0, EXIT_DATA_BAD=1, EXIT_USAGE=2.
+5. Pastikan --load menangani file yang tidak ada dan data CSV/JSON yang malformed dengan exit code yang benar, tanpa traceback mentah.
+6. Pastikan --timeframe-order-issue menghasilkan keputusan deterministik sesuai kontrak test.
+7. Jangan mengubah format output/ringkasan yang sudah menjadi kontrak CLI kecuali memang diperlukan oleh test.
+8. Setelah fix, jalankan:
+   PYTHONPATH=python .venv/bin/python -m pytest -q tests/test_check_data.py
+   lalu full suite:
+   PYTHONPATH=python .venv/bin/python -m pytest -q
+9. Laporkan hasil test, file yang berubah, dan git diff --stat.
+10. Jangan commit atau push.
 
 ```
 # 
