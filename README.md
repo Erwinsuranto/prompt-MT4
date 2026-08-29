@@ -1,9 +1,51 @@
 # prompt-MT4
 
-
-
 # 
 ```
+
+```
+# 
+```
+
+```
+# 
+```
+Sekarang lakukan CHECKPOINT FINAL dan jangan mengubah desain/strategi/kode lagi.
+
+Tujuan tahap ini hanya mengamankan seluruh pekerjaan yang sudah selesai ke Git.
+
+1. Pastikan berada di repository /root/mt-info.
+2. Jalankan:
+   git status
+   git diff
+   git diff --stat
+3. Pastikan seluruh perubahan hasil pekerjaan benchmark/drift-neutral yang memang merupakan bagian dari pekerjaan ini ikut terdeteksi.
+4. Jangan membuat perubahan kode baru, jangan melakukan refactor, jangan menambah indikator, strategi, threshold, scoring, atau eksperimen baru.
+5. Jalankan test suite yang relevan sekali lagi hanya untuk memastikan checkpoint bersih.
+6. Jika semua test PASS, buat commit dengan pesan yang jelas, misalnya:
+   "Add drift-neutral benchmark and validated setup decisions"
+7. Push commit tersebut ke remote branch yang sedang digunakan.
+8. Setelah push, verifikasi:
+   git status
+   git log -1 --oneline
+   git remote -v
+9. Pastikan working tree bersih dan commit yang baru benar-benar sudah berada di remote.
+10. Laporkan secara ringkas:
+   - jumlah test terakhir
+   - commit hash
+   - branch
+   - apakah push berhasil
+   - apakah working tree clean
+
+PENTING:
+- Jangan mengubah hasil keputusan yang sudah ada.
+- Jangan menghapus test.
+- Jangan skip test.
+- Jangan membuat file eksperimen baru.
+- Jangan melakukan pekerjaan lanjutan setelah checkpoint.
+- Jika ada masalah autentikasi Git atau push gagal, BERHENTI dan jelaskan error-nya; jangan mengubah konfigurasi Git secara sembarangan.
+
+Berhenti setelah checkpoint Git berhasil dan working tree clean.
 
 ```
 # 
