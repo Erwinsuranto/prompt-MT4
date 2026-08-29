@@ -10,7 +10,57 @@
 ```
 # 
 ```
+Lanjutkan project dari kondisi repository saat ini.
 
+PENTING:
+- Jangan membuat atau mengarang data hasil eksperimen.
+- Jangan mengubah strategi, parameter, threshold, scoring, atau data historis yang sudah ada.
+- Jangan lanjut ke confluence/research sebelum benchmark drift-neutral selesai.
+- Semua angka/statistik harus berasal dari file/data dan runner yang benar-benar tersedia di filesystem.
+- Gunakan repository sebagai source of truth, bukan asumsi dari percakapan sebelumnya.
+
+Tugas sekarang:
+
+1. Verifikasi akses filesystem dan lokasi repository:
+   - pastikan /root/mt-info adalah repository yang benar
+   - cek git status
+   - identifikasi baseline/stage 1-4
+   - baca struktur code dan test yang sudah ada
+
+2. Audit benchmark yang baru dibuat:
+   - baca python/benchmark.py dan test terkait
+   - pastikan benchmark benar-benar drift-neutral
+   - pastikan tidak ada leakage/look-ahead
+   - pastikan benchmark tidak mengubah strategi trading
+   - pastikan seluruh input berasal dari DATA historis yang tersedia
+
+3. Implementasikan hanya framework benchmark yang memang dapat diverifikasi dari data.
+   Jika data atau baseline yang diperlukan tidak tersedia, STOP dan laporkan file apa yang kurang.
+   Jangan membuat placeholder yang seolah-olah merupakan hasil penelitian.
+
+4. Jalankan seluruh test suite dari root repository.
+   Target:
+   - semua test existing tetap PASS
+   - test benchmark PASS
+   - tidak ada test yang dihapus, di-skip, atau dilemahkan hanya agar PASS
+
+5. Setelah itu lakukan audit:
+   - git diff
+   - git status
+   - daftar file yang berubah
+   - checksum/data integrity jika relevan
+
+6. Jangan commit atau push dulu.
+
+Pada akhir pekerjaan berikan laporan singkat:
+- apa yang benar-benar diperiksa
+- apa yang benar-benar diubah
+- jumlah test PASS/FAIL
+- apakah benchmark valid dijalankan dari data nyata
+- apakah ada blocker
+- git status terakhir
+
+Jika akses shell/filesystem tidak tersedia pada sesi ini, jangan mengarang hasil. Berhenti dan nyatakan bahwa pekerjaan harus dilanjutkan pada sesi dengan akses filesystem repository.
 ```
 # 
 ```
