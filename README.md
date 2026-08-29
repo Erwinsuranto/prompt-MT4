@@ -94,6 +94,62 @@
 ```
 # 
 ```
+Lanjutkan setup project /root/mt-info di VPS baru.
+
+Tujuan tahap ini hanya memastikan environment VPS baru siap menjalankan project secara reproducible. JANGAN menambah strategi, indikator, rule keputusan, threshold, atau mengubah source code yang sudah ada.
+
+Kerjakan berurutan:
+
+1. Periksa repository:
+   - pwd
+   - git status
+   - git branch --show-current
+   - git log -1 --oneline
+   - git remote -v
+
+2. Periksa environment:
+   - python3 --version
+   - python3 -m pip --version
+   - pytest --version jika tersedia
+   - periksa apakah ada requirements.txt, pyproject.toml, atau konfigurasi dependency lain.
+
+3. Jika dependency Python belum tersedia, install dependency yang memang didefinisikan project secara minimal dan reproducible.
+   Jangan install dependency yang tidak diperlukan.
+
+4. Periksa struktur project dan pastikan file benchmark yang sudah ada tetap utuh, terutama:
+   - python/xausr/
+   - python/xausr/driftbench.py
+   - python/xausr/benchmark.py
+   - python/xausr/precompute.py
+   - python/xausr/backtest.py
+   - python/xausr/baseline.py
+   - python/xausr/experiments.py
+   - python/xausr/mql5/
+   - docs/DATA.md
+   - tests/
+
+5. Jalankan baseline test yang sama seperti sebelumnya dari root repository:
+   python3 -m pytest tests -q
+
+6. Bandingkan hasil dengan checkpoint sebelumnya:
+   375 passed, 0 failed, 0 error, 0 skipped.
+
+7. Jika hasil berbeda, JANGAN memperbaiki kode secara spekulatif. Investigasi penyebab environment/dependency terlebih dahulu dan laporkan perbedaannya.
+
+8. Jika hasil sama, buat laporan singkat bahwa VPS baru sudah reproducible dan siap untuk tahap berikutnya.
+
+9. Jangan melakukan git commit/push pada tahap ini kecuali memang ada perubahan file yang benar-benar diperlukan untuk memperbaiki environment. Jika tidak ada perubahan, biarkan working tree clean.
+
+PENTING:
+- Jangan menjalankan atau mengubah strategi trading.
+- Jangan membuat indikator baru.
+- Jangan mengubah threshold.
+- Jangan mengubah hasil benchmark.
+- Jangan memakai data sintetis untuk menggantikan data MT5.
+- Jangan mengklaim sinyal lebih akurat sebelum dataset XAUUSD tambahan benar-benar tersedia dan diuji.
+
+Berhenti setelah verifikasi selesai dan tampilkan hasil lengkap:
+environment, commit, test result, working tree, dan apakah VPS baru siap lanjut.
 
 ```
 # 
