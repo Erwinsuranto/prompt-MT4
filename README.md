@@ -50,7 +50,7 @@
 ```
 # 
 ```
-
+Ya, pertahankan perubahan tersebut. Jangan revert. Lanjutkan hanya pada langkah yang aman dan jangan mengubah data/, mql5/, bridge.py, telegram.py, integrity.py, backtest.py, atau modul benchmark/strategi. Setelah itu berhenti dan tunggu instruksi saya.
 ```
 # 
 ```
