@@ -54,7 +54,24 @@
 ```
 # 
 ```
+Lanjutkan audit check_data.py dari kondisi sekarang.
 
+Jangan mengubah data/, mql5/, docs/, README.md, bridge.py, telegram.py, integrity.py, backtest.py, atau modul benchmark/strategi.
+
+Tujuan hanya:
+1. Jalankan test_check_data.py dan full test suite.
+2. Pastikan hasil final tetap 440 passed, 0 failed, 0 error, 0 skipped.
+3. Review perubahan check_data.py dan test_check_data.py.
+4. Pastikan tidak ada synthetic market data yang dibuat.
+5. Pastikan script tetap membutuhkan CSV MT5 asli untuk validasi dataset.
+6. Jika semua benar, JANGAN commit dan JANGAN push.
+7. Tampilkan:
+   - hasil test
+   - git diff --stat
+   - git status
+   - apakah check_data.py aman untuk dipertahankan.
+
+Jangan membuat perubahan tambahan kecuali diperlukan untuk memperbaiki test yang gagal.
 ```
 # 
 ```
