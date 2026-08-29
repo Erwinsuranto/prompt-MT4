@@ -46,7 +46,122 @@
 ```
 # 
 ```
+#property script_show_inputs
 
+input string FileName = "XAUUSD_history.csv";
+
+void OnStart()
+{
+   datetime from = 0;
+   datetime to   = TimeCurrent();
+
+   if(!HistorySelect(from, to))
+   {
+      Print("GAGAL: HistorySelect");
+      return;
+   }
+
+   int total = HistoryDealsTotal();
+
+   Print("Jumlah deal history: ", total);
+
+   int handle = FileOpen(
+      FileName,
+      FILE_WRITE | FILE_CSV | FILE_ANSI,
+      ','
+   );
+
+   if(handle == INVALID_HANDLE)
+   {
+      Print("GAGAL membuka file. Error: ", GetLastError());
+      return;
+   }
+
+   FileWrite(
+      handle,
+      "Ticket",
+      "Time",
+      "Symbol",
+      "Type",
+      "Volume",
+      "Price",
+      "Profit",
+      "Commission",
+      "Swap"
+   );
+
+   for(int i = 0; i < total; i++)
+   {
+      ulong ticket = HistoryDealGetTicket(i);
+
+      if(ticket == 0)
+         continue;
+
+      string symbol = HistoryDealGetString(
+         ticket,
+         DEAL_SYMBOL
+      );
+
+      if(symbol != "XAUUSD.m")
+         continue;
+
+      datetime time = (datetime)HistoryDealGetInteger(
+         ticket,
+         DEAL_TIME
+      );
+
+      long type = HistoryDealGetInteger(
+         ticket,
+         DEAL_TYPE
+      );
+
+      double volume = HistoryDealGetDouble(
+         ticket,
+         DEAL_VOLUME
+      );
+
+      double price = HistoryDealGetDouble(
+         ticket,
+         DEAL_PRICE
+      );
+
+      double profit = HistoryDealGetDouble(
+         ticket,
+         DEAL_PROFIT
+      );
+
+      double commission = HistoryDealGetDouble(
+         ticket,
+         DEAL_COMMISSION
+      );
+
+      double swap = HistoryDealGetDouble(
+         ticket,
+         DEAL_SWAP
+      );
+
+      FileWrite(
+         handle,
+         ticket,
+         TimeToString(time, TIME_DATE | TIME_SECONDS),
+         symbol,
+         type,
+         volume,
+         price,
+         profit,
+         commission,
+         swap
+      );
+   }
+
+   FileClose(handle);
+
+   Print("================================");
+   Print("EXPORT SELESAI");
+   Print("File: ", FileName);
+   Print("Lokasi: MQL5\\Files\\");
+   Print("================================");
+}
 ```
 # 
 ```
