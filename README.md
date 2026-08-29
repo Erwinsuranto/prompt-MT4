@@ -82,7 +82,40 @@
 ```
 # 
 ```
+Lanjutkan project /root/mt-info dari kondisi saat ini.
 
+Fokus hanya memperbaiki bug pada python/xausr/bridge.py dan test yang berkaitan dengan bridge.
+
+Kondisi terakhir:
+- Ada perubahan: M python/xausr/bridge.py
+- Ada file baru: ?? python/tests/test_bridge.py
+- Sebelumnya ditemukan 3 failures dan 2 errors pada test suite.
+- Bug yang sedang ditangani berkaitan dengan partial write / malformed lines dan signal yang bisa ter-drop.
+- Jangan menyentuh dataset XAUUSD, benchmark, threshold, decision A/B/C/D/E, atau konfigurasi penelitian.
+- Jangan melakukan perubahan yang tidak diperlukan di luar area bridge.
+- Jangan menghapus test hanya agar suite menjadi hijau.
+- Pertahankan behavior API yang sudah benar.
+
+Tugas:
+1. Baca implementasi bridge.py secara lengkap.
+2. Baca python/tests/test_bridge.py dan test bridge lain yang relevan.
+3. Jalankan test yang relevan terlebih dahulu untuk mendapatkan failure/error aktual.
+4. Identifikasi akar masalah, bukan sekadar menyesuaikan test.
+5. Perbaiki implementasi bridge agar aman terhadap partial write, malformed/incomplete lines, dan kondisi input yang sebelumnya menyebabkan signal hilang tanpa retry.
+6. Pastikan error handling tidak membuat data valid ikut ter-drop.
+7. Tambahkan/perbaiki regression test untuk setiap bug yang benar-benar ditemukan.
+8. Setelah perubahan, jalankan test bridge terlebih dahulu, lalu full test suite:
+   python3 -m pytest tests -q
+9. Jangan commit atau push dulu.
+10. Laporkan dengan jelas:
+   - akar masalah
+   - file yang berubah
+   - test yang ditambahkan/diperbaiki
+   - hasil test bridge
+   - hasil full test
+   - apakah working tree clean atau masih ada perubahan.
+
+Berhenti setelah verifikasi selesai. Jangan mengerjakan dataset XAUUSD.
 ```
 # 
 ```
