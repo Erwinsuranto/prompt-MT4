@@ -6,7 +6,41 @@
 ```
 # 
 ```
+Lanjutkan project mt-info dari checkpoint repository yang sekarang.
 
+Konteks:
+- Ini VPS baru hasil clone repository mt-info.
+- Jangan membuat ulang atau mengubah desain project yang sudah ada.
+- Checkpoint terakhir sudah tervalidasi: 375 passed, 0 failed, 0 error, 0 skipped.
+- Commit terakhir yang menjadi baseline adalah 60fe529... ("feat: reproducible drift-neutral benchmark, plus its research scaffolding").
+- Keputusan benchmark terakhir harus tetap dipertahankan:
+  A Resistance Rejection = WATCHLIST
+  B Breakout+Retest = DISABLED
+  C Support Rejection = DISABLED
+  D Breakdown+Retest = INSUFFICIENT EVIDENCE
+  E Engine pooled = INSUFFICIENT EVIDENCE
+
+Tugas tahap ini:
+1. Verifikasi repository dan branch saat ini.
+2. Verifikasi commit HEAD dan remote origin.
+3. Periksa struktur project dan dependency yang dibutuhkan.
+4. Siapkan environment VPS baru tanpa mengubah source code secara tidak perlu.
+5. Jalankan test suite yang memang tersedia dari repository untuk memastikan baseline dapat direproduksi di VPS baru.
+6. Bandingkan hasil dengan checkpoint terakhir.
+7. Periksa git status dan pastikan tidak ada perubahan kode yang tidak disengaja.
+8. Jangan mengubah keputusan benchmark.
+9. Jangan menambah strategi/indikator baru pada tahap ini.
+10. Jangan mengklaim PASS berdasarkan percakapan sebelumnya; gunakan hasil runner aktual dari VPS ini.
+11. Jika ada dependency/environment issue, perbaiki hanya yang diperlukan untuk menjalankan project, lalu ulangi verifikasi.
+12. Setelah selesai, tampilkan ringkasan:
+   - commit HEAD
+   - branch
+   - hasil test aktual
+   - perubahan file
+   - apakah baseline identik dengan checkpoint sebelumnya
+   - rekomendasi tepat untuk tahap berikutnya.
+
+Kerjakan langsung di repository yang sedang aktif. Jangan hanya menjelaskan perintah; jalankan verifikasinya.
 ```
 # 
 ```
