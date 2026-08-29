@@ -78,7 +78,29 @@
 ```
 # 
 ```
+Lanjutkan project mt-info dari kondisi sekarang.
 
+Prioritas:
+1. Jangan mengubah dataset, threshold, strategy, indikator, keputusan A/B/C/D/E, atau baseline yang sudah terbukti.
+2. Jangan membuat data XAUUSD sintetis/palsu dan jangan mengklaim hasil yang belum bisa diverifikasi.
+3. Fokus hanya pada pekerjaan yang bisa dilakukan di VPS saat ini.
+4. Periksa kembali perubahan bridge.py dan tests/test_bridge.py yang saat ini masih uncommitted.
+5. Jalankan test suite lengkap dengan environment project:
+   PYTHONPATH=.venv/bin/python -m pytest -q
+   dan juga:
+   cd python && PYTHONPATH=. ../.venv/bin/python -m unittest discover -s tests
+   Gunakan command yang benar sesuai struktur project jika path tersebut berbeda.
+6. Pastikan perubahan bridge.py benar-benar memperbaiki partial-write handling, retry untuk sinyal yang belum terkirim, dan filesystem trace/malformed line handling tanpa merusak behavior yang sudah ada.
+7. Jangan commit atau push dulu.
+8. Setelah selesai, tampilkan:
+   - file yang berubah
+   - ringkasan perubahan
+   - hasil seluruh test
+   - apakah working tree clean atau masih ada perubahan
+   - apa next step yang paling aman.
+9. Jika ada masalah yang membutuhkan MT5/Windows atau dataset XAUUSD tambahan, jangan workaround dengan data sintetis. Berhenti pada blocker tersebut dan jelaskan persis apa yang dibutuhkan.
+
+Kerjakan langsung, satu tahap yang aman, lalu laporkan hasilnya.
 ```
 # 
 ```
