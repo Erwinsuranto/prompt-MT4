@@ -2,11 +2,66 @@
 
 
 
-
-
 # 
 ```
 
+```
+# 
+```
+
+```
+# 
+```
+Lanjutkan pekerjaan dari state repository AKTUAL ini. Jangan mengandalkan klaim PASS/FAIL dari percakapan sebelumnya.
+
+WAJIB:
+1. Pastikan current directory benar-benar /root/mt-info dan merupakan Git repository.
+2. Audit kondisi aktual:
+   - git status
+   - git diff
+   - git log -5 --oneline
+   - struktur python/ dan tests/
+   - docs/DATA.md
+   - data CSV yang menjadi baseline
+3. Baca kode nyata sebelum mengambil keputusan, terutama:
+   - python/xausr/backtest.py
+   - python/xausr/config.py
+   - python/xausr/continuation.py
+   - python/xausr/stats.py
+   - seluruh test yang relevan
+4. Jalankan test suite dari root repository dan laporkan hasil aktualnya.
+5. Lanjutkan Stage berikutnya sesuai arah pekerjaan sebelumnya: bangun benchmark drift-neutral yang benar-benar berbasis data dan kode aktual, bukan angka buatan atau asumsi.
+6. Benchmark harus memisahkan dengan jelas:
+   - descriptive/statistical evidence
+   - continuation behavior
+   - selection/survivor effects
+   - dependency/overlap effects
+   Jangan mengubah hasil menjadi klaim kausal hanya karena korelasi atau selection effect.
+7. Untuk setiap metrik/threshold yang digunakan, cari sumbernya dari kode/data aktual. Jika belum ada dasar yang sah, tandai sebagai INSUFFICIENT EVIDENCE, jangan mengarang angka.
+8. Pertahankan prinsip:
+   - tidak menambah indikator trading baru
+   - tidak tuning strategi berdasarkan hasil benchmark
+   - tidak memasukkan data sintetis
+   - tidak mengubah baseline tanpa alasan metodologis yang terdokumentasi
+   - jangan menggunakan/menjalankan Gorouter.app
+9. Tambahkan test untuk setiap perubahan yang memang diperlukan.
+10. Jalankan ulang seluruh test setelah perubahan.
+11. Periksa git diff secara menyeluruh untuk memastikan tidak ada perubahan yang tidak disengaja.
+12. Jangan commit atau push.
+13. Jika ada blocker, berhenti tepat pada blocker tersebut dan jelaskan file/baris/perintah yang dibutuhkan. Jangan membuat data atau hasil eksperimen palsu.
+
+TARGET AKHIR:
+hasilkan benchmark drift-neutral yang auditable dan reproducible dari repository ini, dengan output/report yang dapat ditelusuri kembali ke data dan kode aktual.
+
+Setelah selesai, tampilkan:
+- ringkasan perubahan
+- hasil test aktual
+- file yang berubah
+- git diff summary
+- keputusan setiap setup/engine beserta evidence-nya
+- blocker jika masih ada
+
+Kerjakan langsung di repository ini. Jangan hanya memberikan saran atau pseudocode.
 ```
 # 
 ```
