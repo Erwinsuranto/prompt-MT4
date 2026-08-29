@@ -70,7 +70,42 @@
 ```
 # 
 ```
+Lanjut dari status terakhir.
 
+Sekarang fokus hanya pada penyelesaian perubahan Telegram yang sudah diverifikasi.
+
+Kondisi saat ini:
+- Full pytest: 417 passed
+- unittest discovery: 417 OK
+- test_telegram.py: 19 tests OK
+- python/xausr/telegram.py masih modified
+- python/tests/test_telegram.py masih untracked
+- perubahan ini sudah diverifikasi dan memang terkait perbaikan Telegram
+- jangan menyentuh dataset XAUUSD, benchmark, strategi, atau modul lain
+- jangan membuat perubahan tambahan yang tidak diperlukan
+
+Tugas:
+1. Review diff hanya untuk:
+   - python/xausr/telegram.py
+   - python/tests/test_telegram.py
+2. Pastikan test baru memang menguji bug/perbaikan yang sebenarnya, bukan test dekoratif.
+3. Jika diff sudah benar, commit KEDUA file tersebut dalam satu commit.
+4. Gunakan commit message:
+   fix(telegram): stop token leaks and handle send failures
+5. Setelah commit, jalankan verifikasi:
+   - git status
+   - git log -1 --oneline
+   - pytest penuh
+   - unittest discovery penuh jika memang digunakan pada baseline
+6. Pastikan working tree bersih setelah commit.
+7. Jangan git push kecuali saya instruksikan.
+8. Laporkan dengan jelas:
+   - commit hash
+   - jumlah test yang PASS/FAIL
+   - git status akhir
+   - apakah ada perubahan lain yang tidak sengaja ikut ter-commit.
+
+Jangan mengubah kode lagi jika semua sudah benar. Jika sebelum commit ditemukan masalah nyata pada diff/test, perbaiki hanya masalah tersebut lalu ulangi test.
 ```
 # 
 ```
