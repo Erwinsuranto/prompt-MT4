@@ -90,7 +90,36 @@
 ```
 # 
 ```
+Kita lanjut project mt-info di VPS baru.
 
+Tujuan tahap ini hanya memastikan environment VPS baru siap dan baseline project bisa direproduksi IDENTIK dengan VPS sebelumnya.
+
+Kerjakan berurutan:
+
+1. Pastikan berada di /root/mt-info.
+2. Cek:
+   - git status
+   - git log -1 --oneline
+   - git remote -v
+   - python3 --version
+   - pip/python environment yang tersedia
+3. Baca struktur project dan requirements/dependency yang memang sudah ada.
+4. Install hanya dependency yang diperlukan untuk menjalankan test existing. Jangan menambah library yang tidak diperlukan.
+5. Jangan mengubah source code, strategi, indikator, threshold, dataset, konfigurasi keputusan, atau file benchmark.
+6. Jalankan test suite existing dari direktori yang benar.
+7. Jika test gagal karena dependency/environment, perbaiki environment saja tanpa mengubah logic project, lalu jalankan ulang.
+8. Setelah test selesai, bandingkan hasil dengan baseline sebelumnya:
+   - target: 375 passed, 0 failed, 0 error, 0 skipped
+   - commit harus tetap 60fe529 (atau commit HEAD yang sedang terpasang jika hash ternyata berbeda tetapi isi identik)
+9. Jangan commit/push apa pun karena tahap ini hanya validasi environment VPS baru.
+10. Berikan laporan akhir:
+   - environment
+   - commit HEAD
+   - hasil test
+   - apakah baseline berhasil direproduksi
+   - apakah VPS siap untuk tahap berikutnya.
+
+PENTING: jangan membuat perubahan pada strategi atau indikator. Jika ada masalah yang membutuhkan data MT5/XAUUSD tambahan, berhenti dan laporkan masalahnya, jangan membuat data sintetis atau mengganti dataset.
 ```
 # 
 ```
