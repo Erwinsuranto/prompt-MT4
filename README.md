@@ -86,7 +86,34 @@
 ```
 # 
 ```
+Lanjutkan project mt-info dari kondisi saat ini.
 
+Jangan mengubah baseline yang sudah terbukti stabil:
+- commit/HEAD tetap 60fe529
+- 375 tests harus tetap passed
+- jangan membuat perubahan hanya untuk memaksakan commit
+- jangan membuat dataset XAUUSD sintetis/palsu
+- jangan menjalankan atau bergantung pada MetaTrader5 di VPS Linux
+- jangan mengklaim hasil benchmark baru tanpa data nyata
+
+Tugas tahap berikutnya:
+1. Inspect seluruh repository dan dokumentasi yang ada.
+2. Identifikasi bagian project yang saat ini sudah siap dikembangkan tanpa membutuhkan dataset XAUUSD tambahan.
+3. Pilih SATU peningkatan paling bernilai yang bisa benar-benar dikerjakan dan diverifikasi di VPS ini.
+4. Implementasikan peningkatan tersebut secara production-quality dengan perubahan seminimal mungkin.
+5. Tambahkan/update test yang relevan.
+6. Jalankan test suite yang sesuai dan pastikan baseline tidak rusak.
+7. Tampilkan ringkasan:
+   - file yang berubah
+   - apa yang diimplementasikan
+   - test yang dijalankan dan hasilnya
+   - apakah perlu commit
+   - keputusan/next step berikutnya
+
+Penting:
+Jangan langsung mengubah banyak hal atau membuat fitur spekulatif.
+Sebelum coding, pahami arsitektur dan kondisi repository saat ini.
+Jika tidak ada peningkatan yang aman untuk dikerjakan tanpa data XAUUSD, jangan memaksakan perubahan; cukup laporkan blocker dan rekomendasikan satu langkah paling tepat berikutnya.
 ```
 # 
 ```
