@@ -100,9 +100,38 @@
 ```
 
 ```
-# 
+# Tahap 1: export histori XAUUSD lebih panjang → verify → jalankan ulang drift benchmark.
 ```
+Lanjutkan tahap berikutnya sesuai rekomendasi terakhir.
 
+Tujuan tahap ini:
+1. Periksa terlebih dahulu environment dan kondisi repo saat ini.
+2. Jangan mengubah strategi, threshold, rule keputusan, atau menambah indikator baru.
+3. Jangan mengarang data atau hasil eksperimen.
+4. Verifikasi apakah tool `xausr.mt5_export` dan sumber data XAUUSD tersedia di environment VPS ini.
+5. Jika tersedia, export histori XAUUSD yang lebih panjang dengan mode verifikasi (`--verify`) sesuai interface/tool yang benar-benar ada.
+6. Setelah export berhasil, periksa integritas data, rentang tanggal, jumlah sample, timezone, missing/duplicate data, dan pastikan tidak ada leakage.
+7. Jalankan ulang drift-neutral benchmark menggunakan dataset baru tersebut.
+8. Bandingkan hasil baru dengan baseline commit yang sekarang. Jangan mengubah baseline secara diam-diam.
+9. Fokus evaluasi khusus pada setup D Breakdown+Retest dan E Engine pooled karena keduanya sebelumnya `INSUFFICIENT EVIDENCE`.
+10. Untuk A Resistance Rejection, tetap pertahankan status `WATCHLIST` sampai ada bukti independen untuk mengubahnya.
+11. Jangan memasukkan setup baru dan jangan melakukan tuning hanya agar hasil terlihat lebih bagus.
+12. Jalankan test suite yang relevan setelah perubahan.
+13. Jika ada perubahan kode/data yang memang diperlukan, tampilkan file yang berubah dan alasan perubahan sebelum commit.
+14. Jika environment VPS ini tidak memiliki akses MT5/data XAUUSD yang diperlukan, BERHENTI dan laporkan blocker secara jelas. Jangan membuat data sintetis sebagai pengganti.
+
+Di akhir berikan laporan ringkas:
+- status environment
+- rentang histori XAUUSD
+- jumlah sample
+- hasil integrity/leakage check
+- hasil benchmark terbaru
+- keputusan A/B/C/D/E
+- perbandingan dengan baseline
+- test result
+- apakah aman untuk lanjut ke tahap berikutnya
+
+Jangan commit atau push sebelum saya instruksikan.
 ```
 
 # 
