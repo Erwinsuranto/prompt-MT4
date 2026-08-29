@@ -58,7 +58,23 @@
 ```
 # 
 ```
+Jangan commit atau push apa pun.
 
+Fokus hanya mengembalikan check_data.py ke kondisi sebelum patch terakhir yang menyebabkan test naik menjadi 29 errors.
+
+1. Tinjau git diff untuk:
+   - python/xausr/check_data.py
+   - python/tests/test_check_data.py
+2. Jangan ubah data/, mql5/, docs/, README.md, atau modul lain.
+3. Batalkan perubahan test_check_data.py jika itu hanya test yang baru dibuat untuk patch ini.
+4. Untuk check_data.py, pulihkan ke versi HEAD sebelum patch terakhir jika itu memang perubahan eksperimental.
+5. Jalankan kembali:
+   PYTHONPATH=python .venv/bin/python -m pytest -q
+6. Target harus kembali ke 440 passed, 0 failed, 0 error, 0 skipped.
+7. Setelah PASS, jangan commit dan jangan push.
+8. Laporkan git status dan hasil test saja.
+
+Jangan membuat data XAUUSD sintetis dan jangan mengubah dataset.
 ```
 # 
 ```Lanjutkan perbaikan check_data.py.
