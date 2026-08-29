@@ -66,7 +66,34 @@
 ```
 # 
 ```
+Lanjutkan pekerjaan di VPS 2 dari kondisi sekarang.
 
+Target tahap ini HANYA python/check_data.py dan test terkaitnya. Jangan menyentuh dataset XAUUSD, mt5_export, benchmark, bridge.py, telegram.py, atau modul lain.
+
+Tujuan:
+- Audit dan perbaiki check_data.py agar pemeriksaan data benar-benar aman dan deterministic.
+- Pertahankan kompatibilitas dengan struktur project yang sekarang.
+- Jangan membuat data sintetis.
+- Jangan mengklaim validitas/akurasi dataset yang belum tersedia.
+- Tambahkan atau perbaiki test yang memang diperlukan untuk check_data.py.
+- Test harus menguji perilaku nyata, bukan test dekoratif.
+- Jangan mengubah baseline 375 test, bridge 23 test, atau telegram 19 test kecuali perubahan check_data.py memang membutuhkan penyesuaian yang jelas dan terisolasi.
+
+Prosedur wajib:
+1. Baca check_data.py dan test terkait terlebih dahulu.
+2. Jalankan test yang relevan sebelum perubahan sebagai baseline.
+3. Implementasikan perbaikan minimal dan modular.
+4. Jalankan test check_data.py.
+5. Jalankan full suite:
+   PYTHONPATH=python .venv/bin/python -m pytest -q
+   dan verifikasi juga unittest discovery yang biasa dipakai project.
+6. Pastikan hasil akhir tidak ada failed/error/skipped yang tidak dijelaskan.
+7. Periksa git diff dan git status.
+8. JANGAN commit.
+9. JANGAN push.
+10. Laporkan file yang berubah, alasan perubahan, hasil test, dan status git akhir.
+
+Jika check_data.py ternyata sudah benar dan tidak ada bug nyata, jangan melakukan perubahan hanya demi menghasilkan diff. Cukup verifikasi dan laporkan hasilnya.
 ```
 # 
 ```
