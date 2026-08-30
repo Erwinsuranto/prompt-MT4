@@ -34,6 +34,43 @@
 ```
 # 
 ```
+Lanjutkan pekerjaan tanpa mengubah, memformat ulang, mengonversi, memindahkan, atau menghapus dataset apa pun di data/.
+
+Khususnya:
+- Jangan menyentuh data/XAUUSD_M5_history.csv.
+- Dataset tersebut adalah baseline/existing data dan formatnya harus dipertahankan persis.
+- Jangan membuat commit perubahan terhadap dataset.
+
+Fokus hanya pada implementasi check_data.py dan test_check_data.py yang sedang kita kerjakan.
+
+Tujuan:
+1. Pastikan check_data.py memiliki validasi yang kuat untuk:
+   - file tidak bisa dibaca
+   - file kosong/malformed
+   - header wajib
+   - timestamp invalid
+   - duplicate timestamp
+   - missing timestamp
+   - ordering timestamp
+   - gap timestamp
+   - M5/M15 timeframe mismatch
+2. Exit code harus tetap:
+   - 0 = tidak ada ERROR-level problem
+   - 1 = terdapat ERROR-level problem pada data
+   - 2 = usage/input tidak valid atau file tidak dapat dipakai
+3. --max-examples hanya membatasi jumlah contoh yang ditampilkan, tidak boleh mengubah verdict.
+4. Output harus deterministic.
+5. Jangan menjalankan atau mengubah integration test provider/Gorouter.
+6. Tambahkan/perbaiki unit test di python/tests/test_check_data.py untuk seluruh perilaku di atas.
+7. Jalankan test yang relevan saja.
+8. Setelah selesai, tampilkan:
+   - file yang berubah
+   - ringkasan perubahan
+   - hasil test
+   - git diff --check
+   - git status
+
+Jangan commit atau push dulu. Berhenti setelah verifikasi selesai agar saya yang melakukan review dan push.
 
 ```
 # 
