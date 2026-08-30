@@ -22,6 +22,39 @@
 ```
 # 
 ```
+Lanjutkan pekerjaan mt-info dari kondisi repository SEKARANG. Jangan mengulang pekerjaan check_data.py, dataset validation, real_data_causality, atau stats.py yang sudah selesai dan sudah dipush.
+
+Commit terakhir b87a42f sudah dipush, working tree bersih, total pytest 519 passed dan mutation verification untuk stats sudah lulus.
+
+Sekarang kerjakan tahap berikutnya: audit dan harden python/xausr/baseline.py.
+
+Tujuan:
+1. Baca baseline.py dan test yang sudah ada.
+2. Identifikasi coverage/perilaku baseline yang masih belum diuji.
+3. Tambahkan test yang benar-benar diperlukan, terutama:
+   - ordering trade/entry yang benar,
+   - perlindungan look-ahead,
+   - pemisahan in-sample dan out-of-sample,
+   - penggunaan hasil stats.py,
+   - kondisi/verdict COMBINED DISABLED ketika tidak ada edge.
+4. Jangan mengubah logic produksi kecuali ditemukan bug nyata.
+5. Jika menemukan bug nyata, perbaiki bug tersebut dan tambahkan regression test.
+6. Jangan menyentuh data/, mql5/, XAUUSD_M5_history.csv, bridge.py, telegram.py, integrity.py, backend.py, atau stats.py kecuali memang diperlukan untuk memahami kontrak baseline.
+7. Jangan menjalankan integration/provider test. Fokus pada unit/regression test lokal.
+8. Setelah selesai jalankan:
+   PYTHONPATH=python .venv/bin/python -m pytest -q
+   git diff --check
+9. Pastikan semua test lulus dan working tree bersih setelah commit.
+10. Commit dan push ke origin/main hanya jika perubahan memang sudah terverifikasi.
+11. Di akhir laporkan secara ringkas:
+   - file yang berubah,
+   - bug/coverage yang ditemukan,
+   - jumlah test,
+   - hasil pytest,
+   - commit hash,
+   - status push.
+
+Jangan berhenti hanya untuk meminta saya menentukan langkah berikutnya. Tentukan dan kerjakan tahap baseline ini sampai selesai.
 
 ```
 # 
