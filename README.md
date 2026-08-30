@@ -18,6 +18,86 @@
 ```
 # 
 ```
+Lanjutkan project NVIDIA API Proxy di /root/content-pilot dari kondisi TERAKHIR yang sekarang.
+
+Konteks:
+- Google Drive API sudah ENABLED.
+- OAuth consent screen sudah dikonfigurasi.
+- Test user sudah ditambahkan.
+- OAuth Client ID Web Application bernama "content pilot google drive" sudah dibuat.
+- Scope yang digunakan:
+  https://www.googleapis.com/auth/drive.file
+  https://www.googleapis.com/auth/userinfo.email
+  openid
+- Authorized redirect URI Google:
+  https://api.contentpilot.biz.id/api/storage/google_drive/callback
+- Domain production: api.contentpilot.biz.id
+- Public API berjalan di port internal 4000.
+- Caddy/reverse proxy digunakan untuk HTTPS.
+- .env seharusnya memiliki GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_DRIVE_REDIRECT_URI dan COOKIE_SECURE=true.
+- PostgreSQL + Redis/MinIO juga sudah disiapkan sesuai konfigurasi project.
+
+ATURAN PENTING:
+1. JANGAN mengubah provider/integrasi lain.
+2. JANGAN menjalankan atau mengubah Gorouter.app.
+3. Fokus HANYA pada Google Drive OAuth/storage integration.
+4. Jangan menebak nilai konfigurasi, URL, secret, route, atau nama file.
+5. Periksa kondisi project yang sebenarnya terlebih dahulu.
+6. Jangan meminta saya melakukan konfigurasi yang sebenarnya sudah selesai.
+7. Jangan commit perubahan ke git.
+8. Jangan menghapus data atau mereset database.
+9. Jika ada masalah, diagnosis berdasarkan output command/log yang nyata.
+10. Sebelum mengubah kode, jelaskan file yang akan diubah dan alasan perubahan tersebut.
+
+TUGAS SEKARANG:
+
+A. Audit kondisi project terlebih dahulu:
+- cek struktur project;
+- cek route Google Drive;
+- cek implementasi OAuth;
+- cek pembacaan GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET / GOOGLE_DRIVE_REDIRECT_URI;
+- cek apakah callback route benar-benar terdaftar;
+- cek status service/API;
+- cek Caddy/reverse proxy;
+- cek apakah HTTPS production mengarah ke port API yang benar;
+- cek environment tanpa pernah menampilkan nilai secret secara penuh.
+
+B. Verifikasi endpoint OAuth Google Drive:
+- pastikan endpoint authorization menghasilkan URL Google OAuth yang benar;
+- pastikan redirect_uri yang dikirim EXACTLY:
+  https://api.contentpilot.biz.id/api/storage/google_drive/callback
+- pastikan callback route dapat menerima authorization code;
+- pastikan state/CSRF protection benar;
+- pastikan token Google disimpan dengan aman;
+- pastikan setelah callback, koneksi Google Drive tersimpan sebagai koneksi akun user.
+
+C. Lakukan pengujian nyata yang aman:
+- health check API;
+- cek route Google Drive;
+- jika memungkinkan gunakan test user Google yang sudah terdaftar;
+- jangan melakukan tindakan destruktif terhadap Google Drive;
+- jangan upload/delete file pengguna kecuali memang diperlukan untuk test dan sudah jelas aman.
+
+D. Jika ada error:
+- tampilkan error sebenarnya;
+- cari akar masalah;
+- perbaiki hanya bagian Google Drive yang diperlukan;
+- restart service hanya jika diperlukan;
+- setelah perubahan, ulangi test.
+
+E. Setelah selesai, berikan laporan singkat:
+1. Google Drive OAuth: PASS/FAIL
+2. Authorization URL: PASS/FAIL
+3. Redirect URI: PASS/FAIL
+4. Callback: PASS/FAIL
+5. Token exchange: PASS/FAIL
+6. Penyimpanan koneksi: PASS/FAIL
+7. HTTPS/Caddy: PASS/FAIL
+8. API health: PASS/FAIL
+9. Jika FAIL, jelaskan tepat apa yang harus saya lakukan.
+
+MULAI DENGAN AUDIT DAN PEMERIKSAAN TERLEBIH DAHULU.
+JANGAN LANGSUNG MENGUBAH KODE.
 
 ```
 # 
