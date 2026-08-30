@@ -30,6 +30,34 @@
 ```
 # 
 ```
+Lanjutkan dari kondisi repository saat ini.
+
+Tujuan tahap ini adalah menyelesaikan dan memverifikasi perubahan check_data.py beserta test-nya.
+
+Aturan:
+- Jangan mengubah, memindahkan, menghapus, atau mengonversi data/XAUUSD_M5_history.csv.
+- Jangan mengubah dataset lama maupun file benchmark lain yang tidak terkait.
+- Pertahankan perubahan pada python/xausr/check_data.py dan python/tests/test_check_data.py.
+- Jangan menambahkan dependency baru jika tidak diperlukan.
+- Jangan menjalankan integration/provider test.
+- Fokus hanya pada unit test dan validasi check_data.
+
+Kerjakan:
+1. Review diff python/xausr/check_data.py dan python/tests/test_check_data.py secara menyeluruh.
+2. Pastikan exit code:
+   - 0 = tidak ada ERROR-level problem
+   - 1 = ada ERROR-level problem pada data
+   - 2 = input tidak dapat digunakan / argumen atau file bermasalah
+3. Pastikan validasi M5/M15, timestamp, duplicate, missing, ordering, gap, dan konsistensi cross-timeframe bekerja sesuai desain.
+4. Pastikan --max-examples hanya membatasi jumlah contoh yang ditampilkan dan tidak mengubah verdict.
+5. Jalankan test yang relevan.
+6. Jika ada kegagalan, perbaiki hanya source/test yang memang terkait.
+7. Setelah selesai, tampilkan:
+   - ringkasan perubahan
+   - test yang dijalankan dan hasilnya
+   - git diff --check
+   - git status
+8. Jangan commit atau push dulu. Berhenti setelah review akhir agar saya bisa memeriksa hasilnya.
 
 ```
 # 
