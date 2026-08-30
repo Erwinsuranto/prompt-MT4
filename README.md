@@ -14,7 +14,83 @@
 ```
 # 
 ```
+Lanjutkan project ini ke tahap IMPLEMENTASI STRATEGI ENTRY XAUUSD M5.
 
+Jangan mengulang audit dataset, check_data, coverage, atau pekerjaan yang sudah selesai. Jangan mengubah data/, baseline, integrity, atau file di luar scope tanpa alasan yang benar-benar diperlukan.
+
+Tujuan utama sekarang adalah membangun dan menguji strategi reversal yang saya inginkan:
+
+STRATEGI UTAMA:
+Support/Resistance Reversal + Valid Engulfing.
+
+Definisikan secara eksplisit dan deterministik:
+
+1. Support/resistance harus berasal dari struktur harga yang benar-benar relevan, bukan level acak.
+2. Reversal hanya dianggap valid jika harga benar-benar bereaksi/ditolak dari zona tersebut.
+3. Bullish reversal:
+   - harga berada/masuk zona support,
+   - terjadi rejection,
+   - muncul bullish engulfing yang benar-benar valid,
+   - candle engulfing harus sudah CLOSED,
+   - entry hanya setelah konfirmasi.
+4. Bearish reversal:
+   - harga berada/masuk zona resistance,
+   - terjadi rejection,
+   - muncul bearish engulfing yang benar-benar valid,
+   - candle engulfing harus sudah CLOSED,
+   - entry hanya setelah konfirmasi.
+5. Jangan menganggap candle sekadar overlap sebagai engulfing.
+6. Jangan menggunakan informasi candle masa depan/look-ahead bias.
+7. Jangan entry hanya karena menyentuh support/resistance.
+8. Jangan entry engulfing yang muncul di tengah range tanpa konteks support/resistance.
+9. Semua aturan harus dapat dihitung secara deterministik dari data OHLC.
+10. Pisahkan:
+    - zone detection
+    - rejection detection
+    - engulfing detection
+    - entry confirmation
+    - SL/TP
+    - backtest/reporting.
+
+Gunakan data XAUUSD M5 yang sudah ada di project.
+
+Sebelum mengubah kode:
+- baca struktur project yang relevan,
+- cari engine/backtest yang sekarang digunakan,
+- pahami format trade/output yang sudah ada,
+- jangan membuat engine kedua jika engine yang ada dapat diperluas.
+
+Kemudian implementasikan strategi secara modular.
+
+Tambahkan test unit untuk setiap aturan penting, termasuk kasus positif dan negatif:
+- valid support rejection
+- valid resistance rejection
+- bullish engulfing valid
+- bearish engulfing valid
+- engulfing palsu
+- rejection palsu
+- entry sebelum candle close harus ditolak
+- look-ahead harus mustahil
+- entry di tengah range harus ditolak
+- kombinasi support + bullish engulfing
+- kombinasi resistance + bearish engulfing.
+
+Setelah implementasi:
+1. jalankan seluruh test suite,
+2. jalankan backtest pada dataset XAUUSD M5 nyata,
+3. laporkan jumlah setup,
+4. win/loss,
+5. profit factor,
+6. expectancy,
+7. max drawdown,
+8. hasil in-sample dan out-of-sample secara terpisah,
+9. berikan contoh trade yang terdeteksi,
+10. pastikan tidak ada look-ahead bias.
+
+JANGAN mengejar angka profit atau memaksa win rate tinggi.
+Jika strategi ternyata tidak profitable, laporkan apa adanya.
+
+Yang paling penting: kita sedang mencari definisi setup reversal yang BENAR-BENAR sesuai dengan pola Support/Resistance + Engulfing yang saya inginkan, lalu mengukurnya pada data nyata.
 ```
 # 
 ```
