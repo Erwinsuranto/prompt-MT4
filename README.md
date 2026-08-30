@@ -38,7 +38,16 @@
 ```
 # 
 ```
+Sekarang lakukan verifikasi untuk perubahan terakhir.
 
+1. Jalankan hanya test yang berkaitan dengan python/tests/test_check_data.py.
+2. Jangan menjalankan test/integration untuk Gorouter.app.
+3. Jangan menjalankan provider/integration test lain yang tidak berkaitan dengan check_data.
+4. Pastikan seluruh test check_data lulus.
+5. Jika ada failure, analisis penyebabnya dan perbaiki hanya bagian yang diperlukan.
+6. Setelah perbaikan, jalankan ulang test yang relevan.
+7. Jangan membuat perubahan yang tidak diperlukan.
+8. Setelah semuanya lulus, tampilkan ringkasan hasil test dan status git.
 ```
 # 
 ```
