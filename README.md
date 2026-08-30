@@ -26,7 +26,32 @@
 ```
 # 
 ```
+Lanjutkan project dari kondisi TERKINI. Jangan mengulang pekerjaan check_data, dataset validation, causal/look-ahead testing, atau dokumentasi yang sudah selesai.
 
+Prioritas berikutnya adalah dua file yang saat ini masih uncommitted:
+- python/xausr/stats.py
+- python/tests/test_stats.py
+
+Kerjakan sebagai tahap berikutnya:
+1. Baca dan pahami diff/perubahan yang SUDAH ADA pada kedua file tersebut terlebih dahulu.
+2. Jangan menghapus atau mereset perubahan existing.
+3. Audit implementasi stats.py terhadap kode pemanggilnya dan test_stats.py.
+4. Identifikasi bug nyata, inkonsistensi API, edge case, atau statistik yang salah secara matematis.
+5. Perbaiki hanya masalah yang benar-benar terbukti.
+6. Tambahkan/perbaiki test yang diperlukan khusus untuk stats.py.
+7. Jangan menyentuh check_data.py, test_check_data.py, backtest.py, dataset data/, README/docs yang sudah selesai, atau modul lain yang tidak diperlukan.
+8. Jalankan test target stats terlebih dahulu, kemudian full pytest.
+9. Jalankan git diff --check.
+10. Jika semua lolos dan perubahan memang benar, commit perubahan stats dengan pesan yang jelas dan push ke origin/main.
+11. Terakhir laporkan:
+   - apa yang ditemukan
+   - apa yang diperbaiki
+   - test target
+   - hasil full pytest
+   - status git
+   - commit hash
+   - apakah sudah push
+Jangan berhenti hanya dengan review jika ada perbaikan yang jelas. Jangan membuat pekerjaan baru di luar scope ini.
 ```
 # 
 ```
