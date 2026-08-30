@@ -10,7 +10,76 @@
 ```
 # 
 ```
+Lanjutkan project dari kondisi repository SEKARANG. Jangan mengulang pekerjaan yang sudah selesai dan jangan melakukan perubahan pada bagian yang sudah tervalidasi tanpa alasan.
 
+Tujuan tahap berikutnya adalah membangun dan menguji RULE ENGINE untuk setup entry XAUUSD M5 yang benar-benar sesuai dengan target strategi:
+
+1. SUPPORT/RESISTANCE REVERSAL
+   - Deteksi zona support/resistance dari data yang tersedia.
+   - Harga harus benar-benar mencapai/masuk zona.
+   - Harus ada rejection yang terukur.
+   - Harus ada konfirmasi pembalikan sebelum entry.
+   - Bedakan reversal valid dari pullback biasa dan breakout.
+   - Jangan menggunakan data masa depan pada saat keputusan entry.
+
+2. TRUE ENGULFING
+   - Definisikan engulfing secara eksplisit berdasarkan OHLC/body.
+   - Bullish engulfing dan bearish engulfing harus punya aturan yang simetris.
+   - Wick saja tidak boleh dianggap body engulfing.
+   - Candle engulfing harus sudah CLOSED sebelum sinyal entry dinyatakan valid.
+   - Hindari false engulfing sesuai definisi matematika, bukan berdasarkan interpretasi visual.
+
+3. HIGH-QUALITY COMBINATION
+   Buat setup prioritas:
+   SUPPORT/RESISTANCE REVERSAL + TRUE ENGULFING CONFIRMATION.
+
+   Setup ini harus menghasilkan event entry yang deterministik dan dapat diaudit:
+   - timestamp/bar index
+   - arah BUY/SELL
+   - zona S/R
+   - candle rejection
+   - candle engulfing
+   - harga entry
+   - stop/reference invalidation
+   - alasan setup diterima/ditolak
+
+4. BACKTEST/VALIDATION
+   - Gunakan dataset real XAUUSD yang memang sudah tervalidasi.
+   - Jangan mengubah dataset.
+   - Jangan memasukkan informasi candle masa depan ke keputusan entry.
+   - Tambahkan unit test untuk kasus valid dan invalid.
+   - Tambahkan test yang sengaja mencoba mematahkan rule agar false positive tertangkap.
+   - Jangan mengubah statistik baseline yang sudah ada kecuali memang diperlukan oleh integrasi rule baru.
+
+5. MUTATION TEST
+   Setelah rule selesai, mutasikan kondisi penting:
+   - entry satu bar terlalu awal
+   - engulfing tidak benar
+   - harga belum mencapai zona
+   - rejection tidak valid
+   - breakout dianggap reversal
+   Setiap mutasi yang seharusnya invalid harus ditolak oleh test.
+
+6. IMPLEMENTASI
+   Cari arsitektur/module yang paling tepat di repository saat ini.
+   Jangan membuat satu file besar.
+   Pertahankan struktur modular yang sudah ada.
+
+7. VERIFIKASI
+   Jalankan test suite penuh.
+   Laporkan:
+   - file yang diubah
+   - rule final secara ringkas
+   - jumlah test sebelum/sesudah
+   - hasil test
+   - contoh beberapa setup yang terdeteksi dari real data
+   - apakah ada look-ahead bias
+   - git diff
+   - status working tree
+   Jangan commit/push sampai seluruh hasil verifikasi dilaporkan.
+
+PENTING:
+Jangan mengulang validasi dataset, leakage audit, atau pekerjaan yang sudah selesai hanya untuk mengisi langkah. Fokus sekarang adalah RULE ENGINE SUPPORT/RESISTANCE REVERSAL + TRUE ENGULFING dan validasinya.
 ```
 # 
 ```
