@@ -6,7 +6,125 @@
 ```
 # 
 ```
+LANJUTKAN PROJECT DARI KONDISI REPOSITORY SAAT INI. JANGAN MENGULANG PEKERJAAN YANG SUDAH SELESAI.
 
+Baca repository dan git history terlebih dahulu untuk memahami kondisi terakhir. Jangan membuat asumsi dan jangan meminta saya mengulang penjelasan yang sudah ada.
+
+KONDISI YANG SUDAH SELESAI:
+- Dataset XAUUSD M5 dan M15 sudah diverifikasi.
+- Validasi data sudah selesai.
+- Causality/look-ahead bias sudah diuji.
+- Backtest sudah diberi pengujian terhadap look-ahead.
+- Mutation tests untuk kebocoran data sudah dilakukan.
+- Test suite terakhir: 676 passed.
+- git diff --check bersih.
+- Working tree bersih.
+- Jangan mengulang audit tersebut kecuali ditemukan bukti konkret bahwa implementasinya rusak.
+
+TUJUAN UTAMA PROJECT:
+Kita ingin membangun strategi trading XAUUSD M5 yang mencari SETUP berkualitas sangat tinggi, bukan memperbanyak sinyal.
+
+FOKUS STRATEGI:
+1. SUPPORT / RESISTANCE
+   Cari level yang benar-benar menjadi area reaksi harga.
+   Jangan menganggap setiap high/low sebagai resistance/support.
+   Level harus mempunyai bukti rejection/reaksi harga yang nyata.
+   Prioritaskan level yang kemudian benar-benar menyebabkan harga berbalik.
+
+2. ENGULFING
+   Deteksi hanya engulfing yang benar-benar valid.
+   Jangan menggunakan definisi longgar yang menghasilkan banyak false signal.
+   Bedakan bullish engulfing dan bearish engulfing.
+   Pastikan candle engulfing memenuhi aturan struktur candle yang jelas.
+   Jangan memakai candle masa depan untuk menentukan bahwa candle sebelumnya adalah engulfing.
+
+3. KOMBINASI
+   Setup terbaik adalah ketika:
+   - harga datang ke area support/resistance yang valid,
+   - terjadi rejection/reaksi,
+   - kemudian muncul engulfing yang valid,
+   - lalu entry hanya setelah informasi candle yang diperlukan benar-benar tersedia.
+
+4. OPEN CANDLE / ENTRY
+   Kita perlu menentukan dengan sangat jelas:
+   - candle mana yang menjadi setup,
+   - candle mana yang menjadi confirmation,
+   - pada candle mana entry dianggap terjadi,
+   - harga open/close/high/low mana yang boleh digunakan,
+   - kapan SL dan TP ditentukan.
+
+   Jangan membuat entry yang secara tidak sengaja melihat candle setelah entry.
+
+5. NO LOOK-AHEAD
+   Semua keputusan harus causal.
+   Pada saat sistem berada di candle N, sistem hanya boleh mengetahui data sampai candle N.
+   Tidak boleh memakai:
+   - high/low candle masa depan,
+   - future swing,
+   - future support/resistance,
+   - future engulfing,
+   - hasil trade masa depan,
+   - data yang baru diketahui setelah entry.
+
+6. REAL-DATA FIRST
+   Gunakan dataset XAUUSD yang memang tersedia di repository.
+   Jangan membuat dataset sintetis untuk membuktikan strategi profitable.
+   Synthetic fixture hanya boleh digunakan untuk unit test.
+
+7. JANGAN MENGEJAR ANGKA PROFIT
+   Jangan mengubah aturan hanya supaya backtest terlihat profitable.
+   Yang kita cari adalah setup yang secara logis benar dan bisa diverifikasi secara causal.
+
+8. TARGET KUALITAS
+   Saya ingin sinyal sedikit tetapi berkualitas tinggi.
+   Jangan melakukan overtrading.
+   Lebih baik tidak ada sinyal daripada memaksakan sinyal yang tidak memenuhi syarat.
+
+TUGAS SEKARANG:
+
+A. Inspect implementasi trading/backtest yang sekarang.
+B. Tentukan bagian mana yang sudah mendukung konsep support/resistance + engulfing dan bagian mana yang belum.
+C. Jangan langsung coding jika arsitekturnya belum jelas.
+D. Buat definisi matematis/algoritmik yang tegas untuk:
+   - valid support,
+   - valid resistance,
+   - rejection,
+   - bullish engulfing,
+   - bearish engulfing,
+   - setup,
+   - confirmation,
+   - entry.
+E. Pastikan seluruh definisi causal dan tidak menggunakan future bars.
+F. Implementasikan perubahan secara modular dan mudah diuji.
+G. Tambahkan test untuk setiap aturan penting.
+H. Tambahkan test khusus yang sengaja mencoba memasukkan future information untuk memastikan sistem menolaknya.
+I. Jalankan seluruh test suite.
+J. Setelah itu jalankan backtest pada REAL XAUUSD M5 yang tersedia.
+K. Laporkan:
+   - jumlah setup,
+   - jumlah entry,
+   - win/loss,
+   - expectancy,
+   - profit factor,
+   - max drawdown,
+   - hasil in-sample,
+   - hasil out-of-sample,
+   - dan contoh setup yang terdeteksi.
+L. Jangan menyimpulkan strategi "100% menang". Yang harus 100% adalah KETEPATAN DEFINISI dan TIDAK ADA LOOK-AHEAD, bukan win rate.
+
+ATURAN PENTING:
+- Jangan mengulang pekerjaan yang sudah selesai.
+- Jangan menyentuh file di luar scope tanpa alasan teknis.
+- Jangan menghapus test lama.
+- Jangan melemahkan test agar menjadi PASS.
+- Jangan mengubah data asli.
+- Jangan menggunakan Gorouter.app.
+- NVIDIA dan TokenHarbor.ai boleh diuji bila memang diperlukan, tetapi jangan menjalankan test Gorouter.app.
+- Jika menemukan masalah, perbaiki akar masalahnya lalu tambahkan regression test.
+- Setelah selesai, tampilkan file yang diubah, test yang dijalankan, hasil test, dan git status.
+- Jika semua bersih, commit perubahan dan push ke origin/main.
+
+MULAI DARI KONDISI REPOSITORY SAAT INI. JANGAN MENGULANG AUDIT SEBELUMNYA.
 ```
 # 
 ```
