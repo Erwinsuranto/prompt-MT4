@@ -12,7 +12,129 @@
 ```
 # 
 ```
+ATURAN WAJIB WORK LOG / HASIL KERJA AI
 
+Mulai sekarang, setiap pekerjaan yang kamu lakukan di repository ini WAJIB meninggalkan hasil kerja yang bisa saya baca langsung dari repository.
+
+1. Buat dan gunakan folder khusus:
+
+   .ai-work/
+
+2. Jangan hanya menampilkan hasil di terminal/chat. Semua hasil penting pekerjaan harus disimpan sebagai file di .ai-work/.
+
+3. Untuk setiap task/prompt yang saya berikan, buat satu folder:
+
+   .ai-work/<nomor-task>-<slug-task>/
+
+   Contoh:
+
+   .ai-work/001-google-drive-oauth/
+   .ai-work/002-tls-cloudflare/
+   .ai-work/003-rdp-test/
+
+4. Minimal setiap task harus memiliki:
+
+   .ai-work/<task>/RESULT.md
+
+   Isi RESULT.md wajib mencakup:
+
+   - Tujuan task
+   - Kondisi awal
+   - File yang diperiksa
+   - File yang diubah
+   - Perubahan yang dilakukan
+   - Konfigurasi/env yang diperlukan
+   - Command yang dijalankan
+   - Hasil setiap verifikasi/test
+   - Error yang ditemukan
+   - Error yang sudah diperbaiki
+   - Masalah yang masih tersisa
+   - Status akhir: PASS / PARTIAL / FAILED
+   - Langkah berikutnya jika masih diperlukan
+
+5. Jika task membutuhkan audit, buat juga:
+
+   .ai-work/<task>/AUDIT.md
+
+   AUDIT.md harus menjelaskan:
+   - Apa yang diaudit
+   - Temuan
+   - Risiko/bug
+   - Bukti dari source code/config
+   - Rekomendasi
+   - Perbaikan yang benar-benar diterapkan
+   - Verifikasi setelah perbaikan
+
+6. Jika ada command penting atau output penting, simpan juga jika diperlukan:
+
+   .ai-work/<task>/COMMANDS.md
+
+   Jangan menyimpan secret/token/password asli di file hasil kerja.
+
+7. JANGAN pernah memasukkan:
+   - API key
+   - password
+   - OAuth client secret
+   - access token
+   - refresh token
+   - private key
+   - credential JSON
+   ke dalam .ai-work/.
+
+   Gunakan placeholder seperti:
+   <REDACTED>
+   <SECRET>
+   <TOKEN_REDACTED>
+
+8. Jika ada perubahan source code, RESULT.md harus mencantumkan path file yang berubah dan ringkasan perubahan secara jelas.
+
+9. Jika task belum selesai karena membutuhkan input saya, tetap buat RESULT.md dan tuliskan dengan jelas:
+   BLOCKED: <alasan>
+   REQUIRED FROM USER: <yang dibutuhkan>
+
+10. Setelah pekerjaan selesai, jalankan verifikasi yang relevan. Jangan mengklaim PASS jika belum benar-benar diverifikasi.
+
+11. Jangan mengubah file hanya untuk membuat laporan terlihat bagus. Folder .ai-work adalah dokumentasi nyata dari pekerjaan yang benar-benar dilakukan.
+
+12. Setelah membuat atau memperbarui .ai-work/, cek:
+
+   git status
+   git diff --stat
+
+   Pastikan tidak ada secret yang ikut tersimpan.
+
+13. Commit hasil kerja jika repository memang menggunakan git commit untuk workflow ini. Gunakan pesan commit yang jelas, contoh:
+
+   docs(ai-work): record task 001 google drive oauth
+
+14. JANGAN melakukan git push otomatis kecuali saya secara eksplisit meminta push.
+
+15. PENTING:
+   Repository ini akan diaudit oleh AI lain setelah pekerjaanmu selesai. Karena itu RESULT.md dan AUDIT.md harus cukup lengkap sehingga AI lain dapat memahami pekerjaan tanpa melihat terminal, screenshot, atau percakapan sebelumnya.
+
+16. Setiap kali saya memberikan prompt baru, anggap itu sebagai task baru dan lanjutkan nomor task secara berurutan.
+
+17. Jika folder .ai-work sudah ada, jangan menghapus hasil task sebelumnya. Tambahkan task baru.
+
+18. Setelah selesai, tampilkan ringkasan singkat di terminal/chat, tetapi sumber utama dokumentasi tetap file di .ai-work/.
+
+19. Sebelum menyatakan pekerjaan selesai, pastikan file hasil kerja sudah benar-benar tersimpan di repository.
+
+20. Untuk task yang memperbaiki bug:
+   - dokumentasikan bug awal
+   - akar masalah
+   - perubahan
+   - test sebelum/perbaikan bila tersedia
+   - test setelah perbaikan
+   - hasil akhir
+
+TUJUAN UTAMA:
+
+Saya ingin bisa memberikan repository ini kepada AI lain dan cukup mengatakan:
+
+"Audit hasil kerja AI terakhir di .ai-work, cek source code yang terkait, perbaiki jika diperlukan, lalu push jika saya meminta."
+
+AI berikutnya harus bisa memahami pekerjaan sebelumnya hanya dari repository dan folder .ai-work tanpa membutuhkan screenshot terminal.
 ```
 # 
 ```
