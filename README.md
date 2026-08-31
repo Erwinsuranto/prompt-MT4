@@ -1,8 +1,349 @@
 # prompt-MT4
 
+
+
 # 
 ```
 
+```
+# 
+```
+
+```
+# 
+```
+
+```
+# 
+```
+Lanjutkan project XAUUSD reversal dari kondisi repository SAAT INI. Jangan membuat ulang project dan jangan menghapus logic yang sudah terbukti.
+
+TUJUAN UTAMA
+Saya ingin membangun strategi reversal XAUUSD M5 yang hanya mengambil setup berkualitas tinggi berdasarkan kombinasi:
+
+1. SUPPORT / RESISTANCE yang benar-benar valid
+2. REJECTION nyata dari zona tersebut
+3. ENGULFING yang benar-benar valid
+4. Konfirmasi bahwa rejection + engulfing terjadi pada area S/R yang sama
+5. Entry hanya setelah setup benar-benar terkonfirmasi
+6. Semua logic harus CAUSAL dan bebas look-ahead bias
+
+PRINSIP PENTING
+Saya tidak mengejar jumlah sinyal. Lebih baik sedikit setup tetapi berkualitas tinggi.
+
+Jangan menganggap setiap swing high/low sebagai resistance/support.
+Jangan menganggap candle besar otomatis engulfing.
+Jangan menganggap wick otomatis rejection.
+
+Yang dicari adalah kondisi yang secara visual memang menyerupai reversal nyata pada chart XAUUSD M5.
+
+CONTOH SETUP YANG SUDAH DITEMUKAN
+Audit terakhir menemukan contoh:
+
+bar #1272 — 2023-09-01 15:00 BUY [accepted]
+
+SUPPORT:
+1943.44 – 1944.239
+
+REJECTION:
+bar #1270 14:50
+penetrated sekitar 17%
+
+ENGULFING:
+bar #1272 15:00 CLOSED
+
+ENTRY:
+1945.22
+
+INVALIDATION:
+1944.1
+
+STOP:
+1943.927
+
+TARGET:
+1947.806
+
+RR:
+2.0R
+
+PENTING:
+Contoh ini hanya digunakan sebagai contoh nyata bagaimana rule bekerja. Jangan hard-code angka atau index bar tersebut ke strategy.
+
+ATURAN SUPPORT / RESISTANCE
+
+Bangun pendeteksian zona secara causal.
+
+Zona harus berasal dari struktur harga yang SUDAH diketahui sebelum entry.
+
+Jangan menggunakan future candles untuk menentukan bahwa sebuah level adalah support/resistance pada saat setup terjadi.
+
+Support harus menunjukkan area dimana harga sebelumnya benar-benar mendapatkan respons bullish.
+
+Resistance harus menunjukkan area dimana harga sebelumnya benar-benar mendapatkan respons bearish.
+
+Perhatikan:
+- jumlah touch
+- jarak antar touch
+- rejection dari area
+- penetration
+- displacement setelah rejection
+- apakah zona masih relevan
+- apakah harga benar-benar bereaksi, bukan hanya menyentuh level
+
+Jangan membuat zona terlalu lebar sehingga hampir semua candle dianggap berada di zona.
+
+REJECTION
+
+Rejection harus benar-benar menunjukkan penolakan harga.
+
+Untuk BUY:
+- harga masuk/menembus support
+- kemudian gagal melanjutkan turun
+- close kembali di atas/area support
+- terdapat respons bullish yang bermakna
+
+Untuk SELL:
+- harga masuk/menembus resistance
+- kemudian gagal melanjutkan naik
+- close kembali di bawah/area resistance
+- terdapat respons bearish yang bermakna
+
+Bedakan rejection nyata dengan candle biasa yang kebetulan mempunyai wick.
+
+ENGULFING
+
+Gunakan definisi engulfing yang ketat.
+
+Bullish engulfing:
+- candle sebelumnya bearish
+- candle konfirmasi bullish
+- body candle bullish benar-benar engulf body candle bearish sebelumnya
+- bukan hanya wick yang lebih panjang
+- harus memenuhi threshold minimum yang masuk akal terhadap ukuran candle sebelumnya
+
+Bearish engulfing:
+- kebalikannya.
+
+Jangan menyebut candle sebagai engulfing hanya karena high/low candle lebih besar.
+
+KOMBINASI UTAMA
+
+Setup BUY ideal:
+
+1. Ada support valid
+2. Harga masuk / mengetes support
+3. Terjadi rejection nyata
+4. Kemudian muncul bullish engulfing yang valid
+5. Engulfing berada di zona support atau sangat dekat dengan zona
+6. Setup belum invalid
+7. Entry hanya menggunakan informasi yang tersedia pada saat candle engulfing SUDAH CLOSE
+
+Setup SELL:
+
+1. Ada resistance valid
+2. Harga masuk / mengetes resistance
+3. Terjadi rejection nyata
+4. Kemudian muncul bearish engulfing yang valid
+5. Engulfing berada di zona resistance atau sangat dekat dengan zona
+6. Setup belum invalid
+7. Entry hanya menggunakan informasi yang tersedia setelah candle engulfing SUDAH CLOSE
+
+ENTRY
+
+Jangan entry di tengah candle yang masih berjalan.
+
+Gunakan candle CLOSED sebagai confirmation.
+
+Entry harus didefinisikan secara deterministic dan reproducible.
+
+Jika memakai open candle berikutnya, pastikan tidak ada penggunaan data future.
+
+STOP / INVALIDATION
+
+Stop harus berasal dari struktur setup, bukan angka random.
+
+Untuk BUY:
+stop berada di bawah area invalidation/support/rejection yang relevan.
+
+Untuk SELL:
+stop berada di atas area invalidation/resistance/rejection yang relevan.
+
+Pisahkan:
+- invalidation level
+- stop price
+- target
+
+Jangan menyamakan ketiganya jika secara logika berbeda.
+
+TARGET
+
+Minimal evaluasi RR 2R.
+
+Jangan mengubah target setelah mengetahui hasil trade.
+
+Semua target harus ditentukan menggunakan informasi yang tersedia saat entry.
+
+NO LOOK-AHEAD BIAS
+
+Ini WAJIB.
+
+Jangan menggunakan:
+- candle masa depan
+- future swing confirmation
+- future high/low
+- outcome trade
+- future volatility
+- future zone
+- future ATR
+- future close
+- future penetration
+- hasil trade
+
+untuk menentukan apakah setup valid.
+
+Setiap rule harus bisa dijelaskan:
+"Pada saat candle entry ditutup, data apa saja yang sudah diketahui?"
+
+Buat test khusus untuk mendeteksi look-ahead.
+
+REAL DATA ONLY
+
+Gunakan dataset XAUUSD M5 yang sudah ada.
+
+Jangan membuat dataset sintetis sebagai bukti bahwa strategy profitable.
+
+Dataset utama:
+data/XAUUSD_m_M5.csv
+
+M15:
+data/XAUUSD_m_M15.csv
+
+XAUUSD_M5_history.csv adalah dataset berbeda dengan format/delimiter berbeda dan jangan diasumsikan identik dengan dataset utama.
+
+VALIDASI
+
+Jalankan seluruh test suite.
+
+Tambahkan regression test untuk:
+- valid support reversal
+- valid resistance reversal
+- valid bullish engulfing
+- valid bearish engulfing
+- rejection + engulfing combination
+- invalid engulfing
+- weak rejection
+- setup yang terjadi jauh dari S/R
+- penetration terlalu dalam
+- look-ahead mutation
+- entry sebelum candle confirmation close
+- stop/target yang menggunakan future data
+- data corruption
+
+Lakukan juga mutation testing khusus untuk memastikan jika future candle sengaja diberikan kepada detector, test benar-benar menangkapnya.
+
+REAL-DATA AUDIT
+
+Setelah unit test lolos, jalankan detector pada seluruh dataset XAUUSD M5.
+
+Laporkan:
+- total bar
+- total S/R zones
+- total rejection
+- total engulfing
+- total combined setups
+- BUY
+- SELL
+- accepted
+- rejected
+- alasan rejection
+
+Untuk setiap setup accepted, tampilkan audit trail seperti:
+
+bar index
+timestamp
+direction
+zone type
+zone low/high
+rejection bar
+engulfing bar
+entry
+invalidation
+stop
+target
+RR
+reason accepted
+
+PENTING:
+Jangan hanya menghasilkan angka statistik.
+Saya ingin bisa melihat apakah setup yang ditemukan memang secara visual masuk akal sebagai reversal XAUUSD.
+
+QUALITY CONTROL
+
+Jangan mengoptimalkan parameter hanya agar hasil backtest terlihat bagus.
+
+Jangan mengejar win rate 100%.
+
+Yang saya inginkan adalah rule yang:
+- masuk akal secara price action
+- konsisten
+- causal
+- reproducible
+- tidak repaint
+- tidak look-ahead
+- benar-benar mencari reversal pada S/R
+- menggunakan engulfing sebagai konfirmasi, bukan sebagai sinyal tunggal
+
+BACKTEST
+
+Setelah detector stabil, lakukan evaluasi real-data.
+
+Pisahkan:
+- in-sample
+- validation
+- out-of-sample
+
+Jangan menggabungkan hasil tersebut menjadi satu angka yang menyesatkan.
+
+Laporkan minimal:
+- trades
+- wins
+- losses
+- win rate
+- PF
+- expectancy
+- max drawdown
+- average R
+- total R
+
+Tetapi jangan menyebut strategy profitable hanya karena satu sample.
+
+OUTPUT AKHIR
+
+Sebelum mengubah code:
+1. audit implementation yang sekarang
+2. baca test yang sudah ada
+3. pahami reversal_rules.py dan reversal.py
+4. jangan menghapus test yang sudah lolos
+5. jangan mengubah dataset
+6. jangan menyentuh file di luar scope tanpa alasan
+
+Setelah perubahan:
+1. tampilkan file yang berubah
+2. jelaskan logic baru
+3. jalankan test
+4. jalankan real-data audit
+5. tampilkan contoh setup accepted
+6. tampilkan alasan setup rejected
+7. laporkan apakah ada indikasi look-ahead/repaint
+8. tampilkan git diff --check
+9. pastikan working tree bersih jika memang perubahan sudah di-commit
+
+JANGAN MEMBUAT CLAIM "100% AKURAT" ATAU "100% PROFIT".
+
+Target kita adalah membuat FILTER REVERSAL SE-KETAT MUNGKIN berdasarkan S/R + rejection + engulfing, lalu membuktikan kualitasnya dengan data real secara jujur.
+
+Mulai dengan AUDIT CODE SAAT INI terlebih dahulu. Jangan langsung menulis ulang strategy.
 ```
 # 
 ```
