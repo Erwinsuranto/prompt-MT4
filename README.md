@@ -26,7 +26,59 @@
 # 
 ```
 
+Lanjutkan dari hasil terakhir tanpa mengulang tahap 1–2.
 
+STATUS YANG SUDAH TERBUKTI:
+- Classifier final: IDENTICAL, 135 vs 135.
+- Baseline tetap sama; jangan mengubah atau melemahkan assertion yang sudah ada.
+- Full test terakhir: 797 passed.
+- git diff --check bersih.
+- git status bersih.
+- Tidak boleh menggunakan dataset sintetis sebagai bukti edge.
+- Gorouter.app JANGAN dijalankan.
+- Data utama/real-data yang sudah ada harus tetap menjadi sumber verifikasi.
+- Jangan menghapus test lama hanya agar test baru lolos.
+- Jangan mengubah angka hasil penelitian yang sudah terverifikasi.
+- Jangan membuat klaim edge yang lebih kuat daripada bukti statistik yang tersedia.
+
+TUJUAN SEKARANG:
+Lanjutkan roadmap tahap 3–6 yang Anda sebutkan pada respons terakhir, yaitu mengangkat klasifikasi S/R + engulfing menjadi modul yang benar-benar dapat diuji.
+
+ATURAN KERJA:
+1. Baca ulang seluruh kode dan test yang saat ini ada sebelum melakukan perubahan.
+2. Identifikasi dengan jelas apa yang dimaksud tahap 3, 4, 5, dan 6 berdasarkan roadmap yang sudah Anda buat.
+3. Kerjakan SATU tahap secara konkret terlebih dahulu, jangan langsung membuat perubahan besar ke semua tahap.
+4. Pertahankan perilaku baseline.
+5. Pisahkan production logic dan test/helper dengan struktur yang jelas; jangan menumpuk semuanya dalam satu file.
+6. Gunakan fixture yang deterministik untuk unit test, tetapi jangan menggunakan fixture sintetis sebagai bukti statistik edge terhadap market.
+7. Untuk klaim berbasis real-data, gunakan data real yang sudah tersedia dan jangan menggantinya dengan data buatan.
+8. Pastikan tidak ada look-ahead, repaint, future-data leakage, atau penggunaan informasi setelah titik keputusan.
+9. Untuk setiap aturan temporal, gunakan indexing yang eksplisit dan test boundary/off-by-one.
+10. Jangan mengubah definisi setup hanya demi meningkatkan WR/PF.
+11. Jika ada bagian roadmap yang secara statistik belum cukup kuat, tandai sebagai INSUFFICIENT SAMPLE, bukan dipaksa menjadi KEEP.
+12. Jangan commit/push sebelum seluruh verifikasi tahap ini selesai dan saya memberikan persetujuan.
+
+VERIFIKASI WAJIB SETELAH IMPLEMENTASI:
+- Jalankan test yang relevan.
+- Jalankan full test suite.
+- `git diff --check`
+- `git status`
+- Periksa diff untuk memastikan tidak ada test lama yang dihapus/dilemahkan.
+- Pastikan Gorouter.app tidak dijalankan.
+- Laporkan file yang berubah.
+- Laporkan jumlah test sebelum vs sesudah.
+- Laporkan hasil test secara lengkap.
+- Jelaskan apakah hasil classifier tetap IDENTICAL terhadap baseline.
+- Jelaskan secara eksplisit apakah ada perubahan perilaku production code.
+
+JANGAN BERHENTI hanya karena unit test hijau. Setelah implementasi, lakukan audit singkat terhadap kemungkinan look-ahead/repaint dan boundary error.
+
+Mulai sekarang dengan:
+A. inspeksi roadmap tahap 3–6 dan kode saat ini,
+B. tentukan tepat apa yang akan dikerjakan pada tahap 3,
+C. implementasikan tahap 3,
+D. verifikasi,
+E. berhenti dan laporkan hasil sebelum melanjutkan tahap 4.
 
 ```
 # 
