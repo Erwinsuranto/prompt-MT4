@@ -2,9 +2,183 @@
 
 
 
+
 # 
 ```
 
+
+
+```
+
+# 
+```
+
+
+
+```
+# 
+```
+
+
+
+```
+
+# 
+```
+
+
+
+```
+# 
+```
+Lanjutkan project mt-info dari hasil tahap 2 terakhir.
+
+JANGAN mengubah dataset utama, jangan membuat dataset sintetis sebagai bukti edge, jangan menjalankan Gorouter.app, dan jangan menghapus atau melemahkan test yang sudah ada.
+
+HASIL TAHAP 2 YANG HARUS DIJADIKAN BASELINE:
+- S/R reversal + true engulfing: n=135, WR=40.0%, expectancy=+0.1216R, PF=1.199
+- S/R rejection tanpa engulfing: n=8149, WR=33.4%, expectancy=-0.0785R, PF=0.885
+- true engulfing tanpa S/R level: n=2508, WR=33.1%, expectancy=-0.0729R, PF=0.894
+
+KESIMPULAN:
+Edge sementara hanya muncul ketika dua kondisi bertemu:
+1. harga benar-benar berada pada S/R yang terbukti sebagai area reversal;
+2. terjadi TRUE ENGULFING yang benar-benar mengonfirmasi reversal.
+
+Sekarang lanjutkan tahap 3–6 dengan fokus membuat klasifikasi ini menjadi modul yang benar-benar dapat diuji pada data historis.
+
+TUJUAN UTAMA:
+Bangun classifier/setup detector untuk XAUUSD M5 yang sangat ketat terhadap:
+S/R reversal + TRUE ENGULFING.
+
+JANGAN mengoptimalkan agar hasil backtest terlihat bagus.
+JANGAN mengubah aturan hanya karena hasil statistik jelek.
+JANGAN menggunakan future bars/look-ahead/repaint.
+Semua keputusan setup harus hanya menggunakan informasi yang memang sudah tersedia pada saat candle entry selesai.
+
+TAHAP 3 — PERBAIKI DEFINISI S/R REVERSAL
+
+Buat aturan eksplisit untuk membedakan:
+
+A. TRUE S/R REVERSAL
+- level/zone berasal dari struktur harga yang memang sudah terbentuk sebelum entry;
+- harga datang kembali ke zone;
+- terjadi rejection/reversal nyata dari zone;
+- jangan menganggap satu wick saja sebagai support/resistance;
+- jangan menggunakan peak/trough yang baru diketahui setelah entry;
+- zone harus memiliki bukti historis yang cukup;
+- penetration ke zone harus diukur;
+- candle yang melakukan rejection harus tetap konsisten dengan data yang tersedia saat itu.
+
+B. S/R REJECTION PALSU
+- harga menyentuh zone tetapi tidak benar-benar membalik;
+- harga hanya konsolidasi/berhenti sebentar lalu melanjutkan arah sebelumnya;
+- jangan diklasifikasikan sebagai reversal.
+
+Buat fungsi/module yang jelas untuk klasifikasi ini dan tambahkan test unit untuk edge case.
+
+TAHAP 4 — DEFINISI TRUE ENGULFING
+
+Jangan memakai definisi engulfing yang terlalu longgar.
+
+Pisahkan minimal:
+- bullish true engulfing
+- bearish true engulfing
+- body engulfing
+- full candle/range engulfing jika memang relevan
+- false/partial engulfing
+
+Untuk TRUE ENGULFING:
+- candle kedua harus benar-benar memenuhi aturan engulfing yang telah ditetapkan;
+- body candle sebelumnya harus benar-benar tertutup/terengulf sesuai definisi;
+- jangan menganggap candle hanya karena wick melewati candle sebelumnya sebagai true engulfing;
+- arah engulfing harus sesuai dengan arah reversal S/R;
+- candle entry tidak boleh menggunakan informasi candle masa depan.
+
+Dokumentasikan definisinya di code dan README.
+
+TAHAP 5 — GABUNGKAN MENJADI SETUP FINAL
+
+Buat classifier dengan kondisi:
+
+LONG:
+S/R SUPPORT REVERSAL
++
+TRUE BULLISH ENGULFING
++
+tidak invalid
++
+semua informasi tersedia pada saat entry.
+
+SHORT:
+S/R RESISTANCE REVERSAL
++
+TRUE BEARISH ENGULFING
++
+tidak invalid
++
+semua informasi tersedia pada saat entry.
+
+Jika salah satu komponen tidak terpenuhi:
+NO TRADE.
+
+Jangan mencari trade hanya karena engulfing.
+Jangan mencari trade hanya karena S/R.
+Keduanya wajib terpenuhi.
+
+Tambahkan alasan penolakan secara eksplisit, misalnya:
+- no_s_r
+- weak_s_r
+- no_reversal
+- penetration_too_deep
+- no_engulfing
+- partial_engulfing
+- wrong_direction
+- invalid_after_confirmation
+- lookahead_blocked
+
+Dengan begitu setiap candle/setup dapat diaudit.
+
+TAHAP 6 — VALIDASI OUT-OF-SAMPLE DAN MUTATION TEST
+
+Buat pengujian yang membuktikan classifier tidak menggunakan future information.
+
+Minimal uji:
+1. future candle diubah -> keputusan entry sebelumnya tidak boleh berubah;
+2. candle setelah setup dihapus -> klasifikasi setup tetap sama;
+3. peak/trough masa depan tidak boleh mengubah zone yang sudah digunakan;
+4. timestamp/index harus tetap konsisten;
+5. replay data satu candle demi satu candle harus menghasilkan keputusan yang sama dengan batch processing;
+6. walk-forward/out-of-sample harus benar-benar memisahkan data yang digunakan untuk membentuk zone dari data evaluasi;
+7. tambahkan mutation tests untuk mencoba memasukkan look-ahead/repaint dan pastikan test menangkapnya.
+
+PENTING:
+Jangan sekadar membuat assertion yang cocok dengan implementasi.
+Test harus benar-benar membuktikan bahwa aturan S/R + engulfing bekerja.
+
+SETELAH IMPLEMENTASI:
+- jalankan seluruh pytest;
+- tampilkan jumlah test;
+- tampilkan statistik baseline dan statistik classifier baru;
+- tampilkan jumlah setup LONG dan SHORT;
+- tampilkan rejection reasons;
+- tampilkan expectancy, WR, PF, max drawdown;
+- pisahkan in-sample dan out-of-sample;
+- jangan menyembunyikan setup yang kalah;
+- jangan mengubah stop/target hanya untuk menaikkan WR;
+- jangan mengklaim strategi 100% jika data tidak membuktikannya.
+
+Jika ada konflik antara aturan lama dan aturan baru, pertahankan aturan yang mencegah look-ahead/repaint dan jelaskan konflik tersebut sebelum mengubahnya.
+
+Sebelum selesai:
+1. tampilkan file yang diubah;
+2. tampilkan ringkasan logic baru;
+3. jalankan pytest;
+4. pastikan git diff --check bersih;
+5. pastikan working tree dan dataset tidak rusak;
+6. jangan commit/push dulu sebelum seluruh hasil verifikasi ditampilkan.
+
+KERJAKAN SEKARANG LANGSUNG, jangan hanya memberikan rencana.
 ```
 # 
 ```
