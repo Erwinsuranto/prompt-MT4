@@ -8,6 +8,78 @@
 ```
 # 
 ```
+Lanjutkan dari state repository saat ini.
+
+Tujuan tahap berikutnya:
+validasi apakah reversal strategy benar-benar menemukan setup yang saya cari pada XAUUSD M5 REAL DATA, yaitu:
+
+1. SUPPORT/RESISTANCE REVERSAL
+   - Harga benar-benar datang ke area support/resistance yang valid.
+   - Harus ada bukti rejection/reversal yang nyata.
+   - Jangan menganggap setiap sentuhan level sebagai reversal.
+   - Bedakan rejection yang benar dari sekadar pullback/continuation.
+   - Level harus dibentuk hanya dari informasi yang tersedia sebelum candle entry.
+   - Tidak boleh memakai future candle, future high/low, repaint, atau look-ahead.
+
+2. TRUE ENGULFING
+   - Deteksi bullish/bearish engulfing yang benar-benar memenuhi definisi rule.
+   - Body candle kedua harus benar-benar meng-engulf body candle sebelumnya sesuai aturan yang sudah dibuat.
+   - Jangan melonggarkan definisi hanya supaya jumlah setup bertambah.
+   - Verifikasi arah, posisi candle, dan hubungan open/close secara eksplisit.
+   - Semua data yang digunakan untuk keputusan entry harus tersedia pada saat entry.
+
+3. COMBINATION
+   Prioritaskan setup ketika:
+   SUPPORT/RESISTANCE REVERSAL + TRUE ENGULFING
+   terjadi bersama.
+
+   Buat klasifikasi minimal:
+   A = S/R reversal + true engulfing
+   B = S/R reversal tanpa engulfing
+   C = true engulfing tanpa S/R reversal
+   D = setup lain / tidak valid
+
+4. REAL-DATA AUDIT
+   Jalankan terhadap dataset XAUUSD M5 yang benar-benar ada di repository.
+   Jangan membuat dataset sintetis untuk membuktikan edge.
+
+5. ANTI LOOK-AHEAD / REPAINT
+   Tambahkan adversarial test:
+   - ubah candle masa depan setelah setup terdeteksi;
+   - hasil keputusan pada candle entry harus tetap sama.
+   - pastikan future candle tidak dapat mengubah status setup yang sudah diputuskan.
+   - audit seluruh dependency/index yang digunakan reversal detector.
+
+6. WALK-FORWARD
+   Pisahkan data berdasarkan waktu.
+   Jangan melakukan optimasi parameter menggunakan seluruh dataset lalu mengklaim hasil out-of-sample.
+   Laporkan hasil in-sample dan out-of-sample secara terpisah.
+
+7. HASIL YANG SAYA BUTUHKAN
+   Buat laporan nyata yang berisi:
+   - jumlah setup A/B/C/D
+   - jumlah BUY dan SELL
+   - win/loss
+   - profit factor
+   - expectancy
+   - maximum drawdown
+   - hasil in-sample
+   - hasil out-of-sample
+   - jumlah setup yang gagal
+   - contoh beberapa setup nyata lengkap dengan timestamp, harga entry, level S/R, candle engulfing, stop, target, dan alasan valid/invalid.
+
+PENTING:
+- Jangan mengubah test yang sudah benar hanya untuk membuat hasil terlihat bagus.
+- Jangan menghapus test.
+- Jangan menggunakan synthetic data sebagai bukti edge.
+- Jangan menjalankan atau menggunakan Gorouter.app.
+- NVIDIA dan TokenHarbor boleh digunakan bila memang diperlukan, tetapi tahap ini seharusnya dapat berjalan dari repository/data lokal.
+- Jangan mengklaim strategi 100% profitable. Yang kita cari adalah rule yang objektif, reproducible, bebas look-ahead/repaint, lalu ukur performanya pada data nyata.
+- Jika menemukan bug pada implementasi, perbaiki bug tersebut dan tambahkan regression test.
+- Setelah selesai, jalankan seluruh test suite dan tampilkan git diff --check serta git status.
+- Jangan commit/push sebelum saya perintahkan.
+
+Mulai dengan membaca implementasi reversal yang sekarang dan test-nya. Jangan langsung mengubah kode. Pertama jelaskan audit plan dan bagian mana yang akan diperiksa, lalu kerjakan tahapannya.
 
 ```
 # 
