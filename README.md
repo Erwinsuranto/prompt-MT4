@@ -18,7 +18,72 @@
 ```
 # 
 ```
+Lanjutkan pekerjaan tepat dari state terakhir.
 
+Tahap 3 sudah selesai dan diverifikasi:
+- full suite: 1067 passed
+- test_sr_reversal: 63 passed
+- git diff --check: CLEAN
+- git status: tidak ada file baru selain perubahan yang memang sudah ada
+- Gorouter.app JANGAN dijalankan
+- dataset utama real-data tetap menjadi sumber bukti
+- jangan gunakan dataset sintetis sebagai bukti edge
+- jangan melemahkan atau menghapus test lama
+- jangan mengubah aturan yang sudah terbukti hanya agar hasil terlihat lebih baik
+- anti-look-ahead tetap wajib dijaga.
+
+Sekarang lanjut ke TAHAP 4: setup_classifier.py.
+
+Tujuan tahap ini adalah mengangkat klasifikasi setup yang sudah tervalidasi menjadi modul classifier yang benar-benar dapat dipakai runner, tanpa mengubah definisi setup yang sudah terbukti pada tahap sebelumnya.
+
+Sebelum coding:
+1. Baca dan pahami seluruh implementasi terkait:
+   - python/xausr/sr_reversal.py
+   - python/xausr/reversal.py
+   - python/xausr/reversal_report.py
+   - python/xausr/setup_classifier.py jika sudah ada
+   - test yang terkait classifier/reversal/real-data
+   - README dan config yang relevan.
+2. Trace dependency dan alur data dari bar OHLC sampai classifier.
+3. Jangan menebak kontrak API. Ikuti kontrak yang sudah dipakai kode/test.
+4. Identifikasi dengan jelas bagian yang masih placeholder/TODO dan bagian yang sudah merupakan aturan final.
+
+Implementasi TAHAP 4:
+- Buat/selesaikan setup_classifier.py secara modular.
+- Classifier harus memakai hasil setup S/R + engulfing yang sudah dibuktikan, bukan membuat definisi setup baru.
+- Pertahankan pemisahan antara:
+  - setup detection,
+  - classification,
+  - validation/reporting.
+- Tidak boleh membaca data masa depan untuk menentukan klasifikasi pada bar saat ini.
+- Semua window/look-ahead harus eksplisit dan hanya boleh digunakan pada tahap evaluasi/validasi, bukan sebagai input classifier live.
+- Jangan menggunakan hasil out-of-sample untuk mempengaruhi aturan in-sample.
+- Jangan hard-code angka/index yang hanya berasal dari satu dataset.
+- Jangan menghapus rejection reason yang sudah ada.
+- Jika classifier menerima setup yang tidak valid/ambigu, hasilkan status yang eksplisit, jangan diam-diam menganggapnya valid.
+
+Test:
+- Tambahkan test yang benar-benar mengunci kontrak classifier.
+- Gunakan fixture real-data yang sudah tersedia bila memungkinkan.
+- Bila perlu fixture baru, buat minimal dan deterministik.
+- Pastikan test menangkap anti-look-ahead.
+- Pastikan boundary/index behavior diuji.
+- Pastikan classifier konsisten dengan runner lama.
+- Jangan menghapus atau melemahkan assertion test lama.
+
+Verifikasi wajib:
+1. Jalankan test yang relevan terlebih dahulu.
+2. Jalankan full suite.
+3. `git diff --check`
+4. `git status`
+5. Pastikan tidak ada perubahan dataset utama.
+6. Pastikan Gorouter.app tidak dijalankan.
+7. Laporkan file yang berubah dan alasan masing-masing.
+8. Laporkan jumlah test sebelum/sesudah.
+9. Jangan commit/push dulu.
+
+PENTING:
+Jangan lanjut ke tahap 5 setelah tahap 4 selesai. Berhenti setelah verifikasi dan tampilkan laporan hasilnya. Jika menemukan ambiguity pada kontrak classifier, telusuri kode dan test terlebih dahulu; jangan membuat asumsi yang mengubah definisi strategi.
 
 
 ```
