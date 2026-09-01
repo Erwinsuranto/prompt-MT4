@@ -18,7 +18,11 @@
 # 
 ```
 
-
+Lanjutkan dari posisi sekarang. Jangan ulang test yang sudah selesai.
+Kerjakan satu item roadmap yang masih terbuka: validation + experiments pada data XAUUSD nyata sesuai gate 6-syarat di docs/CONFLUENCE.md.
+Jangan mengubah aturan/threshold hanya untuk membuat hasil terlihat bagus.
+Setelah selesai, laporkan hasil eksperimen dan apakah gate terpenuhi.
+Jangan commit/push dulu.
 
 ```
 # 
