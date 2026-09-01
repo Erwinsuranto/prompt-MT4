@@ -9,11 +9,135 @@
 
 
 ```
-
 # 
 ```
 
 
+
+```
+# 
+```
+
+
+
+```
+# 
+```
+
+
+
+```
+
+# adversarial test + walk-forward validation.
+```Lanjutkan tepat dari state terakhir ke TAHAP 5.
+
+STATE TERAKHIR:
+- Tahap 4 setup_classifier.py sudah selesai.
+- Full suite: 1102 passed, 0 failed.
+- test_setup_classifier.py: 120 passed.
+- TestResolveRejectedLevel: 24 passed.
+- test_reversal_real_data.py: 66 passed.
+- git diff --check: CLEAN.
+- Dataset utama tidak berubah.
+- Gorouter.app tidak dijalankan.
+- Belum commit/push.
+
+JANGAN mengulang atau merombak Tahap 4 yang sudah lolos.
+
+TUJUAN TAHAP 5:
+Uji classifier dan pipeline reversal terhadap adversarial cases serta validasi walk-forward, untuk memastikan hasil tidak muncul karena leakage, look-ahead, boundary error, atau kebetulan pembagian data.
+
+Sebelum coding:
+1. Baca implementasi Tahap 4 dan test yang sudah ada.
+2. Pahami kontrak setup_classifier.py, runner, reversal logic, rejection reasons, dan pembagian in-sample/validation/out-of-sample.
+3. Jangan membuat definisi setup baru.
+4. Jangan mengubah threshold/aturan strategi hanya untuk memperbaiki angka hasil test.
+5. Jangan menggunakan data masa depan sebagai input classifier.
+6. Jangan menggunakan hasil out-of-sample untuk menentukan aturan classifier.
+
+IMPLEMENTASI TAHAP 5:
+
+A. ADVERSARIAL TESTS
+Tambahkan test untuk kondisi yang sengaja mencoba menjatuhkan classifier, minimal mencakup:
+
+- candle boundary / index boundary
+- data kosong dan data terlalu pendek
+- duplicate/tidak berurutan
+- level S/R yang ambigu
+- support/resistance yang sangat dekat
+- engulfing yang borderline
+- rejection yang borderline
+- missing/NaN value jika kontrak data mengizinkan
+- perubahan satu candle masa depan tidak boleh mengubah keputusan pada bar sebelumnya
+- perubahan data setelah cutoff tidak boleh mempengaruhi hasil sebelum cutoff
+- memastikan classifier tidak membaca field/indeks yang berada di masa depan
+- memastikan rejection reason tetap deterministik dan tidak hilang
+- memastikan hasil tidak berubah hanya karena representasi input yang ekuivalen.
+
+B. WALK-FORWARD VALIDATION
+Bangun/selesaikan mekanisme walk-forward yang mengikuti kontrak project yang sudah ada.
+
+Aturan penting:
+- setiap fold hanya boleh memakai masa lalu untuk keputusan yang dibuat pada periode berikutnya;
+- tidak boleh random shuffle;
+- tidak boleh train/tune menggunakan masa depan;
+- boundary antar-fold harus eksplisit;
+- setiap fold harus dapat diaudit: train/fit window, validation/test window, dan indeks awal/akhir;
+- tidak boleh terjadi overlap yang membuat masa depan masuk ke input keputusan;
+- jika sample terlalu kecil, laporkan sebagai insufficient sample, jangan dipaksa menjadi PASS.
+
+C. REGRESSION PROTECTION
+Pastikan classifier final tetap konsisten dengan runner lama.
+
+Bandingkan:
+- setup yang terdeteksi;
+- classification result;
+- rejection reason;
+- LONG/SHORT;
+- outcome/metric yang memang sudah menjadi kontrak.
+
+Jika ada perbedaan, jangan langsung mengubah baseline. Cari penyebabnya terlebih dahulu dan dokumentasikan apakah perbedaan tersebut bug atau memang perubahan kontrak yang sudah disepakati.
+
+D. TESTING
+Tambahkan test yang cukup untuk mengunci semua aturan di atas.
+
+Jangan:
+- menghapus test lama;
+- melemahkan assertion;
+- mengganti real-data evidence dengan synthetic evidence;
+- membuat fixture sintetis terlihat sebagai bukti edge performance.
+
+Fixture sintetis hanya boleh dipakai untuk menguji invariant/edge-case mekanis.
+
+VERIFIKASI WAJIB:
+1. Jalankan test baru Tahap 5.
+2. Jalankan test reversal/classifier yang relevan.
+3. Jalankan FULL SUITE.
+4. Jalankan `git diff --check`.
+5. Jalankan `git status`.
+6. Pastikan dataset utama tidak berubah.
+7. Pastikan Gorouter.app tidak dijalankan.
+8. Audit perubahan untuk memastikan tidak ada look-ahead/leakage.
+9. Laporkan jumlah test sebelum dan sesudah.
+10. Laporkan semua file yang berubah dan alasan perubahan.
+11. Laporkan hasil setiap fold walk-forward.
+12. Jika ada fold insufficient sample, tampilkan jelas dan jangan menyamarkannya sebagai pass.
+13. JANGAN commit/push.
+
+PENTING:
+Tahap 5 harus berhenti setelah verifikasi.
+Jangan lanjut ke Tahap 6.
+Jangan mengubah aturan strategi hanya agar metrik menjadi lebih bagus.
+
+Jika semua test lulus, tampilkan ringkasan:
+- full suite
+- test baru
+- adversarial coverage
+- walk-forward fold results
+- leakage/look-ahead checks
+- git diff/status
+
+Lalu BERHENTI.
 
 ```
 # 
