@@ -23,7 +23,18 @@
 ```
 # 
 ```
+Lanjutkan dari progres terakhir. JANGAN mengulang test, scan, atau verifikasi yang sudah berhasil dilakukan.
 
+Gunakan hasil dan file yang sudah ada dari sesi sebelumnya sebagai checkpoint. Bagian tie_scan.py yang sedang dikerjakan juga lanjutkan dari posisi sekarang, bukan mulai ulang dari awal.
+
+Setelah tie scan selesai, langsung lanjut ke pekerjaan/tahap berikutnya sesuai roadmap yang sudah kita sepakati. Jangan menjalankan ulang full suite atau test lama kecuali memang diperlukan untuk memverifikasi perubahan baru.
+
+Pertahankan semua hasil yang sudah valid. Sebelum menjalankan sesuatu, cek dulu apa yang sudah selesai agar tidak membuang waktu mengulang pekerjaan.
+
+Jangan commit/push dulu. Beri laporan singkat:
+1. apa yang dilanjutkan,
+2. apa yang sudah selesai,
+3. apa langkah berikutnya.
 
 
 ```
