@@ -11,7 +11,30 @@
 ```
 # 
 ```
+Lanjutkan dari posisi terakhir.
 
+JANGAN mengulang test/scan yang sudah lulus. Jangan mengubah threshold atau aturan hanya untuk memperbaiki hasil.
+
+Sekarang lanjutkan roadmap ke pekerjaan berikutnya yang memang masih terbuka setelah validation/experiment confluence real-data. Gunakan checkpoint dan hasil test yang sudah ada.
+
+Sebelum coding:
+1. cek status pekerjaan saat ini,
+2. identifikasi item roadmap berikutnya yang benar-benar belum selesai,
+3. kerjakan item tersebut sampai tuntas,
+4. tambahkan test yang diperlukan hanya untuk perubahan baru.
+
+Tetap jaga anti-look-ahead, causalitas, dan integritas data.
+Jangan menjalankan Gorouter.app.
+Jangan commit/push dulu.
+
+Setelah selesai, laporkan:
+- item roadmap yang dikerjakan,
+- file yang berubah,
+- test baru yang dijalankan,
+- hasil test,
+- item roadmap berikutnya.
+
+Jangan berhenti hanya karena satu langkah kecil selesai; lanjutkan ke langkah berikutnya selama masih aman dan jelas dari roadmap.
 
 
 ```
