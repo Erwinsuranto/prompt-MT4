@@ -6,7 +6,18 @@
 # 
 ```
 
+Lanjut dari state repository saat ini. JANGAN mengulang test yang sudah lulus dan JANGAN menjalankan ulang full suite tanpa alasan.
 
+Fokus ke tahap berikutnya setelah Stage-5/export:
+1. Audit singkat implementasi live market-data ingestion yang sudah ada.
+2. Tentukan sumber data live yang memang akan menjadi input server.
+3. Hubungkan pipeline live market -> Context -> strategy/reversal engine dengan arsitektur yang sudah ada.
+4. Pastikan data live hanya menjadi input baru, tanpa mengubah hasil historical/backtest yang sudah tervalidasi.
+5. Jangan mengerjakan live order execution dulu; pisahkan tahap market-data ingestion dari execution.
+6. Tambahkan test minimal untuk boundary, timestamp/order bar, duplicate tick/bar, stale data, dan reconnect.
+7. Jalankan hanya test yang relevan dengan perubahan.
+8. Jika semua lulus, tampilkan file yang berubah, hasil test, dan roadmap tahap berikutnya.
+9. Jangan commit/push sebelum diminta.
 
 ```
 # 
