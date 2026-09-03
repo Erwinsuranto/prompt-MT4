@@ -40,7 +40,115 @@
 ```
 # 
 ```
+Lanjutkan project mt-info dari kondisi saat ini.
 
+TAHAP: RISK & POSITION MANAGEMENT
+
+Live order execution sudah selesai dan sudah diverifikasi:
+- execution tests: 265 passed
+- full suite: 1,724 passed
+- default tetap DRY-RUN
+- real broker/MT5 belum boleh digunakan dalam test
+
+Sekarang implementasikan layer Risk & Position Management secara modular di atas execution layer yang sudah ada.
+
+TUJUAN:
+Signal tidak boleh langsung menjadi order. Alurnya harus:
+
+strategy signal
+→ risk validation
+→ position sizing
+→ SL/TP validation
+→ position/order limits
+→ approved order intent
+→ execution adapter
+
+ATURAN WAJIB:
+1. Jangan mengubah atau melemahkan strategy rules yang sudah ada.
+2. Jangan memaksakan signal baru.
+3. Jangan menambahkan indikator/strategi baru.
+4. Jangan mengubah hasil backtest hanya agar terlihat lebih bagus.
+5. Jangan menggunakan look-ahead, repaint, future candle, atau future information.
+6. Jangan menggunakan data sintetis sebagai bukti edge.
+7. Jangan menjalankan real broker/real MT5 order.
+8. Semua test harus menggunakan mock/paper/fake execution.
+9. DRY-RUN tetap menjadi default.
+10. Live trading harus tetap explicit opt-in.
+11. Jangan menghapus atau menurunkan test yang sudah ada.
+12. Jangan mengulang audit besar yang sudah selesai; fokus hanya pada risk/position layer dan regression yang relevan.
+
+RISK LAYER MINIMAL HARUS MENANGANI:
+- maximum risk per trade
+- position sizing berdasarkan risk dan jarak SL
+- minimum/maximum quantity
+- minimum/maximum stop distance
+- validasi SL/TP terhadap entry dan side
+- maximum open positions
+- maximum exposure
+- duplicate position/order protection
+- symbol validation
+- invalid/zero/negative quantity protection
+- invalid price protection
+- stale signal/order protection jika timestamp tersedia
+- kill switch/risk lock
+- account/risk state yang tidak valid → reject
+- jika risk calculation tidak dapat dipercaya → reject, bukan memaksa order
+
+POSITION STATE:
+Buat state yang jelas untuk:
+- no position
+- pending/opening
+- open
+- closing
+- closed
+- rejected
+
+Pastikan state transition aman dan idempotent.
+
+IMPORTANT:
+Risk manager harus menjadi gate sebelum execution.
+Jika signal valid tetapi risk check gagal, hasil akhirnya harus NO ORDER / REJECTED, bukan dipaksa masuk.
+
+TEST WAJIB:
+Tambahkan test untuk:
+- normal valid trade
+- BUY dan SELL
+- sizing berdasarkan risk
+- invalid SL
+- invalid TP
+- SL terlalu dekat
+- SL terlalu jauh
+- quantity terlalu kecil
+- quantity terlalu besar
+- exposure limit
+- maximum position limit
+- duplicate order
+- duplicate position
+- kill switch aktif
+- stale signal
+- invalid price
+- invalid account/risk state
+- boundary values
+- idempotency
+- rejection tidak pernah memanggil real execution
+- dry-run tetap aman
+
+Pastikan test membuktikan bahwa risk rejection benar-benar menghentikan execution.
+
+VERIFIKASI:
+1. Jalankan test khusus risk/position management.
+2. Jalankan regression suite yang relevan.
+3. Laporkan jumlah test passed/failed.
+4. Pastikan tidak ada existing test yang rusak.
+5. Jangan lanjut ke paper trading/simulation pada tahap ini.
+
+Setelah implementasi dan semua test PASS:
+- tampilkan ringkasan file yang berubah
+- tampilkan hasil test
+- jangan melakukan perubahan di luar scope tahap ini
+- jika semuanya bersih, commit dan push ke repository main.
+
+Berhenti setelah tahap Risk & Position Management selesai.
 ```
 # 
 ```
