@@ -44,6 +44,52 @@
 ```
 # 
 ```
+Lanjut dari state repository SAAT INI.
+
+STATUS:
+- Live market feed sudah selesai.
+- Live pipeline sudah selesai.
+- Test yang relevan sudah lulus.
+- Historical/backtest harus tetap untouched.
+- Sekarang masuk tahap TERAKHIR: LIVE ORDER EXECUTION.
+- Jangan mengulang test lama yang sudah lulus kecuali test tersebut memang terdampak perubahan.
+- Jangan mengerjakan ulang market-data ingestion atau classifier/reversal sebelumnya.
+
+TUGAS SEKARANG:
+1. Audit terlebih dahulu seluruh code yang berkaitan dengan live order execution dan adapter broker/exchange yang sudah ada.
+2. Jangan langsung membuat asumsi provider/broker. Gunakan abstraction/interface yang sudah ada di repository.
+3. Pisahkan dengan tegas:
+   market data -> strategy decision -> risk/validation -> order intent -> execution adapter -> order result.
+4. Implementasikan live order execution secara modular.
+5. Wajib ada safety guard:
+   - dry-run/paper mode sebagai default
+   - live trading harus explicit opt-in
+   - symbol validation
+   - quantity validation
+   - price/side/order-type validation
+   - duplicate-order/idempotency protection
+   - stale-data protection
+   - timeout/retry yang aman
+   - kill switch
+   - maximum position/order limits
+   - jangan pernah mengirim order hanya karena data tick masuk; order harus berasal dari validated strategy decision.
+6. Simpan audit trail untuk setiap order intent, request, response, rejection, cancellation, dan error tanpa membocorkan secret/API key.
+7. Pastikan reconnect/retry tidak menyebabkan order terkirim dua kali.
+8. Buat test khusus execution dan safety guard. Gunakan mock/paper adapter; JANGAN mengirim order sungguhan ke broker/exchange.
+9. Jalankan hanya test yang relevan dengan perubahan.
+10. Setelah semuanya lulus:
+   - tampilkan ringkasan implementasi
+   - tampilkan file yang berubah
+   - tampilkan hasil test
+   - tampilkan status dry-run/live
+   - jelaskan apa yang masih diperlukan sebelum live trading sungguhan.
+11. Setelah verifikasi selesai, lakukan git add, git commit, dan git push ke branch/repository yang sedang digunakan.
+12. Jangan meminta persetujuan lagi untuk commit/push; instruksi saya sekarang adalah LANGSUNG PUSH.
+13. Jangan menghapus atau merusak perubahan yang sudah ada.
+14. Jangan menjalankan full suite lama hanya untuk mengulang verifikasi.
+
+PENTING:
+Live execution harus tetap aman dan default-nya DRY-RUN. Jangan pernah menggunakan credential produksi atau mengirim order nyata dalam test.
 
 ```
 
