@@ -36,7 +36,150 @@
 ```
 # 
 ```
+Lanjutkan project mt-info dari kondisi saat ini.
 
+TAHAP: PAPER TRADING / END-TO-END SIMULATION
+
+Yang SUDAH selesai dan jangan diulang:
+- live feed / candle engine
+- live strategy pipeline
+- live order execution layer
+- Risk & Position Management
+- seluruh test sebelumnya harus tetap dipertahankan
+- default execution tetap DRY-RUN
+- belum ada real broker/MT5 order
+
+Sekarang buat layer PAPER TRADING yang menjalankan seluruh pipeline secara end-to-end tanpa mengirim order nyata.
+
+ALUR:
+Market/Replay Data
+→ Candle Builder
+→ Strategy/Signal
+→ Risk Manager
+→ Paper Execution
+→ Virtual Position
+→ SL/TP monitoring
+→ PnL
+→ Trade Journal
+→ Equity/Risk State
+
+ATURAN PENTING:
+1. Paper trading harus menggunakan data market nyata/historical yang tersedia di repo atau replay feed yang sudah ada.
+2. Jangan menggunakan synthetic data sebagai bukti performa.
+3. Jangan mengubah strategy rules untuk memperbagus hasil.
+4. Jangan menambahkan indikator atau strategi baru.
+5. Jangan menggunakan look-ahead/repaint/future candle.
+6. Keputusan hanya boleh menggunakan informasi yang tersedia sampai candle keputusan.
+7. Entry hanya setelah confirmation candle benar-benar CLOSED.
+8. Risk Manager wajib menjadi gate sebelum paper order.
+9. Jika strategy tidak menghasilkan signal → NO TRADE.
+10. Jika risk menolak → NO TRADE.
+11. Jangan memaksa signal agar frekuensi trade meningkat.
+12. Jangan memasukkan trend strategy hanya untuk menambah trade. Tunggu hasil validasi strategi yang ada.
+13. Paper execution harus benar-benar terpisah dari real execution.
+14. Tidak boleh ada network call/order broker nyata dari test paper trading.
+15. DRY-RUN tetap default.
+
+PAPER EXECUTION:
+Implementasikan adapter khusus paper/fake execution yang:
+- menerima approved order intent
+- membuat virtual order
+- membuat virtual position
+- mengisi entry berdasarkan aturan yang eksplisit dan causal
+- menyimpan entry time/price/side/quantity/SL/TP
+- memonitor candle berikutnya untuk SL/TP
+- menangani posisi BUY dan SELL
+- menangani exit
+- menghitung realized/unrealized PnL
+- memperbarui virtual equity
+- mencatat alasan entry/exit/rejection
+- mencegah duplicate order/position
+- mengikuti position/risk limits yang sudah dibuat
+
+TRADE JOURNAL MINIMAL:
+- trade_id
+- signal_id jika tersedia
+- symbol
+- side
+- entry_time
+- entry_price
+- exit_time
+- exit_price
+- quantity
+- stop_loss
+- take_profit
+- risk_amount
+- pnl
+- pnl_R
+- exit_reason
+- status
+
+PERFORMANSI:
+Paper engine harus menghasilkan statistik yang dapat diaudit:
+- total trades
+- wins/losses
+- win rate
+- net PnL
+- average PnL
+- average R
+- profit factor jika datanya valid
+- max drawdown
+- consecutive wins/losses
+- exposure
+- rejected signals/orders
+- no-trade count
+
+JANGAN:
+- mengklaim strategi profitable hanya karena paper simulation berjalan
+- mengoptimalkan parameter berdasarkan hasil simulation ini
+- memilih subset trade yang menguntungkan saja
+- menghapus losing trades
+- mengubah historical data
+- mengubah timezone/timestamp untuk memperbagus hasil
+
+TEST WAJIB:
+Tambahkan test untuk:
+- complete BUY lifecycle
+- complete SELL lifecycle
+- entry setelah candle close
+- SL hit
+- TP hit
+- position remains open
+- exit handling
+- PnL calculation
+- R-multiple calculation
+- equity update
+- duplicate order protection
+- duplicate position protection
+- risk rejection → no paper order
+- no signal → no trade
+- multiple signals across candles
+- BUY/SELL symmetry
+- boundary cases
+- causal replay / no look-ahead
+- paper execution tidak pernah memanggil real execution adapter
+- deterministic replay
+
+VALIDASI:
+1. Jalankan test khusus paper trading.
+2. Jalankan regression test yang relevan.
+3. Pastikan test lama tetap PASS.
+4. Jika ada discrepancy, perbaiki implementasi tanpa melemahkan test.
+5. Jangan mengubah strategy berdasarkan hasil simulation.
+6. Tampilkan statistik simulation hanya sebagai hasil observasi, bukan bukti jaminan profit.
+
+PENTING:
+Jika hasil paper simulation menunjukkan strategi hanya menghasilkan setup valid pada kondisi sideways, jangan menambahkan trend strategy. Catat temuan tersebut sebagai hasil observasi dan biarkan strategi tetap selektif.
+
+SETELAH SELESAI:
+- tampilkan file yang dibuat/diubah
+- tampilkan jumlah test PASS/FAIL
+- tampilkan hasil paper simulation jika tersedia
+- pastikan tidak ada real order
+- jangan lanjut ke production hardening pada prompt ini
+- jika semua PASS dan working tree bersih, commit dan push ke repository main.
+
+BERHENTI setelah Paper Trading / End-to-End Simulation selesai.
 ```
 # 
 ```
