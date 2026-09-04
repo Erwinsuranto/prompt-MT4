@@ -32,7 +32,72 @@
 ```
 # 
 ```
+Kita melanjutkan repository mt-info setelah VPS sempat mati/restart.
 
+JANGAN melakukan audit besar seluruh repository.
+JANGAN mengulang pekerjaan yang sudah selesai.
+JANGAN langsung coding fitur baru.
+
+TUGAS HANYA:
+1. Masuk ke repository mt-info.
+2. Cari file dokumentasi/prompt .md yang paling relevan dan PALING TERAKHIR untuk project ini.
+3. Baca prompt/task terakhir tersebut beserta hasil/status yang ditulis di dalamnya.
+4. Tentukan apakah tahap terakhir yang dikerjakan adalah:
+   - Paper Trading / End-to-End Simulation,
+   - Risk & Position Management,
+   - atau tahap lain.
+5. Cek status implementasi berdasarkan file, test, git history, dan dokumentasi yang relevan saja.
+6. Jangan melakukan full repository audit.
+
+SETELAH ITU CEK DEPENDENCY ENVIRONMENT:
+- Python version
+- virtual environment jika digunakan
+- requirements.txt / pyproject.toml / poetry / uv jika ada
+- dependency Python yang dibutuhkan project
+- Node/npm/pnpm hanya jika memang digunakan oleh mt-info
+- package/dependency yang diperlukan untuk menjalankan test dan engine
+- command entrypoint yang digunakan project
+
+Tujuan pengecekan dependency:
+Menentukan apakah semua kebutuhan untuk menjalankan repository mt-info di VPS ini sudah terinstall.
+
+Jika ada dependency yang memang tercantum sebagai requirement project tetapi belum terinstall:
+- install hanya dependency yang memang diperlukan
+- jangan menambahkan dependency baru berdasarkan asumsi
+- jangan mengubah source code hanya untuk mengatasi environment
+- jangan mengubah requirements/lockfile kecuali memang diperlukan dan sesuai project
+
+VALIDASI:
+- gunakan test command yang memang sudah didefinisikan project
+- jalankan test yang relevan untuk memastikan environment bekerja
+- jangan melakukan real trading
+- jangan mengirim order broker/MT5 nyata
+- jangan melakukan backtest besar
+- jangan melakukan optimization
+- jangan mengubah strategy
+- jangan menghapus atau melemahkan test
+- jangan menjalankan Gorouter.app
+- NVIDIA/TokenHarbor tidak perlu disentuh kecuali memang merupakan dependency langsung mt-info
+
+PENTING:
+Kalau prompt .md terakhir menunjukkan Paper Trading / End-to-End SUDAH selesai, jangan mengulang implementasinya.
+Kalau ternyata belum selesai, jelaskan bagian tepat yang belum selesai dan jangan langsung mengerjakannya.
+
+OUTPUT AKHIR HARUS JELAS:
+1. File .md terakhir yang ditemukan
+2. Judul/tahap terakhir
+3. Status tahap tersebut: COMPLETE / INCOMPLETE
+4. Bukti dari repository/test/git yang mendukung status tersebut
+5. Dependency environment yang sudah terinstall
+6. Dependency yang belum terinstall, jika ada
+7. Test yang dijalankan dan hasilnya
+8. Apakah VPS sekarang READY untuk melanjutkan tahap berikutnya
+9. Jika READY, sebutkan SATU tahap berikutnya saja
+
+BERHENTI setelah laporan tersebut.
+Jangan commit.
+Jangan push.
+Jangan membuat fitur baru.
 ```
 # 
 ```
