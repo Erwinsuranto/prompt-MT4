@@ -28,7 +28,127 @@
 ```
 # 
 ```
+Lanjutkan project mt-info dari kondisi terakhir.
 
+Paper Trading / End-to-End SUDAH selesai dan sudah di-push ke main:
+- commit: 71c3e8f
+- full suite: 2.352 PASS / 0 FAIL
+- paper tests: 273 PASS
+- 211.100 real XAUUSD M5 bars
+- 133 signals / 130 filled / 3 refused
+- unresolved: 0
+
+JANGAN mengulang implementasi paper trading.
+JANGAN lanjut ke production hardening atau live shadow dulu.
+
+Sekarang lakukan SATU tahap:
+PAPER TRADING FINDINGS FIX / VALIDATION
+
+Fokus HANYA pada 3 temuan yang sudah ditemukan pada paper simulation:
+
+1. RISK BOOK
+Temuan:
+- risk_on_closed / book_close belum memperbarui posisi secara benar
+- akibatnya trade pertama menempati max_open_positions sepanjang simulation
+- 129 dari 130 signal tertolak
+
+Audit lifecycle position secara causal:
+signal → risk approval → paper fill → position open → candle progression → SL/TP/exit → position close → risk book release.
+
+Perbaiki hanya jika memang bug nyata.
+Pastikan posisi yang sudah CLOSED benar-benar dilepas dari open-position book.
+Pastikan max_open_positions dihitung berdasarkan posisi yang benar-benar masih open pada saat keputusan.
+Tambahkan regression tests untuk lifecycle tersebut.
+
+2. STOP-OUT COST / RISK BUDGET
+Temuan:
+- stop-out + biaya round-trip dapat melebihi budget nominal 0,5%.
+
+Audit perhitungan risk:
+- initial risk
+- quantity
+- SL distance
+- spread/fee/round-trip cost jika memang sudah dimodelkan
+- realized loss
+
+Jangan mengubah strategy untuk memperbagus hasil.
+Jangan menghilangkan biaya.
+Jangan menurunkan threshold secara arbitrer.
+
+Tentukan behavior yang benar:
+jika estimated worst-case loss + known execution cost melebihi risk budget, risk manager harus REJECT, atau sizing harus dikurangi secara mathematically justified jika architecture memang mendukungnya.
+
+Tambahkan test boundary untuk kasus ini.
+
+3. LOOK-AHEAD
+Temuan:
+- scanning ke depan dapat mengubah win rate secara salah
+- ditemukan kasus target datang ribuan bar setelah stop pada implementasi scanning.
+
+Audit seluruh paper simulation exit resolution.
+Exit hanya boleh ditentukan dari candle yang terjadi SETELAH entry.
+Pada setiap candle, engine hanya boleh mengetahui data sampai candle tersebut.
+Tidak boleh mencari candle masa depan terlebih dahulu untuk menentukan exit.
+
+Gunakan deterministic causal replay:
+bar N → decision
+bar N+1 → update
+bar N+2 → update
+dst.
+
+Tambahkan adversarial/mutation tests yang membuktikan:
+- mengubah future candle tidak boleh mengubah decision/entry pada bar sebelumnya
+- future data tidak boleh diketahui saat menentukan exit
+- hasil simulation tidak berubah karena data masa depan yang belum terjadi
+- SL/TP collision pada satu candle mengikuti aturan yang sudah ditentukan repository, jangan membuat asumsi baru.
+
+VALIDASI HASIL:
+Setelah perbaikan:
+1. Jalankan test khusus risk.
+2. Jalankan test khusus paper.
+3. Jalankan test causal/look-ahead yang relevan.
+4. Jalankan full suite.
+5. Pastikan tidak ada test lama yang dilemahkan/dihapus.
+6. Jangan menggunakan synthetic data sebagai bukti edge.
+7. Jangan melakukan parameter optimization.
+8. Jangan menambahkan trend strategy.
+9. Jangan mengubah strategy rules hanya untuk memperbagus win rate.
+10. Jangan melakukan real broker/MT5 execution.
+11. Jangan masuk Live Shadow pada tahap ini.
+
+SETELAH TEST PASS:
+Jalankan ulang paper simulation dengan REAL XAUUSD M5 yang sama untuk memperoleh hasil setelah bug fix.
+
+Laporkan:
+- total signals
+- filled
+- refused
+- win/loss
+- win rate
+- total R
+- average R
+- profit factor jika valid
+- max drawdown
+- final balance/equity
+- biaya
+- jumlah posisi concurrent
+- alasan rejection
+- unresolved trades
+
+PENTING:
+Hasil simulation hanya observasi, BUKAN bukti profit atau jaminan edge.
+
+Jika setelah fix strategi ternyata hanya menghasilkan setup valid pada sideways, JANGAN menambahkan trend strategy. Catat sebagai temuan dan tetap NO TRADE pada kondisi yang tidak sesuai.
+
+Jika ditemukan bug yang memerlukan perubahan di luar tiga area di atas, jangan mengerjakannya diam-diam. Laporkan sebagai remaining issue.
+
+Jika seluruh validation PASS dan working tree bersih:
+- commit perubahan
+- push ke origin/main
+- verifikasi SHA lokal = origin/main
+
+Berhenti setelah tahap ini.
+Jangan lanjut ke Live Shadow atau Production Hardening.
 ```
 # 
 ```
