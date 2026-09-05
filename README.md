@@ -24,7 +24,35 @@
 ```
 # 
 ```
+Ya, mulai implementasi desain yang sudah kamu tetapkan.
 
+Fokus HANYA pada Area 2 — stop-out execution cost vs risk budget.
+
+Implementasikan:
+- config.py: execution_cost_usd = 0.20
+- risk.py: effective stop distance harus memperhitungkan execution cost secara causal
+- reject trade jika worst-case effective risk melebihi risk budget
+- pertahankan geometry-only R calculation
+- jangan ubah strategy signal/rules
+- jangan mengubah paper exit karena Area 3 sudah diverifikasi tidak bermasalah
+- jangan mengubah risk-book lifecycle karena Area 1 sudah terbukti bukan bug live
+
+Tambahkan/update test boundary yang diperlukan.
+
+Kemudian:
+1. jalankan test baru/relevan
+2. jalankan full regression suite
+3. rerun simulation 211.100 bar XAUUSD M5
+4. bandingkan hasil sebelum/sesudah
+5. jangan optimasi parameter
+6. jangan menambah trend strategy
+7. jangan melakukan real order
+8. jangan menganggap hasil simulation sebagai jaminan profit
+
+Jika semua PASS, commit dan push ke origin/main.
+Verifikasi SHA lokal sama dengan origin/main.
+
+Berhenti setelah itu.
 ```
 # 
 ```
