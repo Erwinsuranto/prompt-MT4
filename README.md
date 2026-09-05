@@ -20,7 +20,157 @@
 ```
 # 
 ```
+Lanjutkan project mt-info dari commit terakhir yang sudah terverifikasi.
 
+TAHAP SEKARANG:
+LIVE SHADOW MODE
+
+Yang SUDAH SELESAI — JANGAN DIULANG:
+- strategy / reversal engine
+- M15 structure + M5 confirmation
+- live feed / candle builder / live pipeline
+- live execution layer
+- risk & position management
+- Paper Trading / End-to-End Simulation
+- findings validation paper trading
+- full regression suite sebelumnya
+- commit terakhir sudah tersinkron ke origin/main
+
+Tujuan tahap ini:
+Jalankan seluruh pipeline menggunakan LIVE MARKET DATA di VPS dan menghasilkan keputusan shadow secara real-time, tetapi TIDAK BOLEH mengirim order nyata.
+
+ARSITEKTUR:
+LIVE MARKET FEED
+→ CLOSED CANDLE
+→ CONTEXT
+→ STRATEGY
+→ SIGNAL
+→ RISK
+→ SHADOW DECISION
+→ SHADOW JOURNAL
+
+ATURAN MUTLAK:
+1. Shadow mode harus membaca live market data yang memang sudah didukung oleh project.
+2. Jangan bergantung pada MT5 Windows/laptop.
+3. Jangan menggunakan historical CSV sebagai live feed.
+4. Jangan mengirim order ke broker.
+5. Jangan memanggil real execution adapter.
+6. Jangan memasang posisi nyata.
+7. Default mode harus tetap aman/non-trading.
+8. Jika feed terputus/stale/invalid → NO TRADE.
+9. Hanya gunakan candle yang SUDAH CLOSED untuk signal.
+10. Tidak boleh look-ahead atau repaint.
+11. Jangan menambahkan indikator baru.
+12. Jangan menambahkan trend strategy.
+13. Jangan melonggarkan threshold.
+14. Jangan memaksa signal.
+15. Jika kondisi market tidak sesuai strategy → NO TRADE.
+16. Jika strategy memang hanya valid pada sideways, biarkan trending menghasilkan NO TRADE.
+17. Jangan mengubah strategy berdasarkan hasil shadow.
+
+SHADOW DECISION:
+Untuk setiap closed M5 candle yang relevan, catat:
+- timestamp
+- symbol
+- OHLC
+- market/context state jika tersedia
+- signal: BUY / SELL / NONE
+- reason
+- setup/context yang digunakan
+- risk decision: APPROVED / REJECTED
+- rejection reason
+- hypothetical entry
+- hypothetical SL
+- hypothetical TP
+- quantity/risk jika dihitung
+- data freshness
+- pipeline latency jika tersedia
+
+PENTING:
+Shadow harus menggunakan pipeline strategy yang SAMA dengan paper/live engine yang sudah divalidasi.
+Jangan membuat versi strategy kedua khusus shadow.
+
+SAFETY:
+Tambahkan hard guard agar:
+- shadow mode tidak dapat mengirim order
+- shadow mode tidak dapat mengakses real execution adapter
+- tidak ada broker/network order endpoint yang dipanggil
+- jika konfigurasi mencoba live execution, shadow mode tetap menolak
+- setiap shadow run memiliki mode yang eksplisit
+
+TEST WAJIB:
+Tambahkan test untuk:
+- live closed candle → shadow decision
+- open/incomplete candle tidak menghasilkan signal
+- stale feed → NO TRADE
+- invalid/missing candle → NO TRADE
+- duplicate candle tidak diproses dua kali
+- duplicate signal tidak menghasilkan duplicate action
+- BUY shadow
+- SELL shadow
+- NO TRADE
+- risk rejection
+- strategy rejection
+- shadow tidak memanggil real execution
+- shadow tidak membuat real position
+- future candle mutation tidak mengubah decision candle sebelumnya
+- restart/reconnect tidak menyebabkan duplicate decision
+- deterministic behavior pada input yang sama
+
+LIVE RUNTIME:
+Buat entrypoint/command yang jelas untuk menjalankan shadow mode di VPS.
+Contoh konfigurasi harus tetap aman dan tidak membutuhkan broker credentials untuk mengirim order.
+
+Jika project sudah mempunyai live feed entrypoint, gunakan dan perluas yang sudah ada.
+Jangan membuat sistem feed kedua.
+
+OBSERVABILITY:
+Pastikan output/log dapat menunjukkan:
+- kapan candle diterima
+- apakah candle CLOSED
+- apakah signal muncul
+- alasan NO TRADE
+- risk decision
+- shadow decision
+- feed stale/reconnect
+- error
+
+Jangan spam log setiap tick jika candle belum berubah.
+Prioritaskan satu evaluasi per closed candle.
+
+VALIDASI:
+1. Jalankan test khusus Live Shadow.
+2. Jalankan regression test yang relevan.
+3. Jalankan full test suite jika waktunya masih wajar.
+4. Pastikan tidak ada real order.
+5. Pastikan tidak ada strategy change.
+6. Pastikan working tree dan git diff diperiksa.
+
+JANGAN:
+- mengklaim shadow trading membuktikan profit
+- mengoptimasi parameter
+- mengubah strategy agar lebih sering trading
+- membuat synthetic live market
+- menggunakan future data
+- melakukan real trading
+- lanjut ke Production Hardening pada prompt ini
+
+SETELAH SELESAI:
+Tampilkan:
+1. file yang dibuat/diubah
+2. command untuk menjalankan Live Shadow
+3. sumber live market data yang digunakan
+4. jumlah test PASS/FAIL
+5. bukti bahwa real execution tidak dipanggil
+6. contoh output shadow decision
+7. status git
+
+Jika semua PASS dan working tree bersih:
+- commit perubahan
+- push ke origin/main
+- verifikasi SHA lokal = origin/main
+
+BERHENTI setelah Live Shadow Mode selesai.
 ```
 # 
 ```
