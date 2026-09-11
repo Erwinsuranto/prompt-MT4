@@ -16,7 +16,334 @@
 ```
 # 
 ```
+TASK: WINDOWS MT5 READ-ONLY VERIFICATION — STEP 1
 
+REPOSITORY:
+https://github.com/zenolambee/mt-info.git
+
+CURRENT MAIN:
+1a51216
+
+TUJUAN:
+Mulai verifikasi nyata menggunakan Windows laptop + MetaTrader 5 DEMO.
+
+INI HANYA READ-ONLY.
+JANGAN MELAKUKAN TRADING.
+
+ATURAN KERAS:
+- Jangan order_send().
+- Jangan membuka posisi.
+- Jangan menutup posisi.
+- Jangan mengubah SL/TP.
+- Jangan menjalankan bridge production.
+- Jangan menjalankan live executor.
+- Jangan menggunakan akun REAL.
+- Jangan membuat order untuk testing.
+- Jangan commit/push perubahan source code.
+- Jangan mengubah repository.
+- Jangan menggunakan Gorouter.app.
+
+==================================================
+1. ENVIRONMENT CHECK
+==================================================
+
+Periksa:
+
+- Windows version
+- Python version
+- Git version
+- MetaTrader 5 terinstall
+- MetaTrader 5 sedang berjalan
+- Python package MetaTrader5 tersedia
+
+Jika package belum tersedia, install hanya dependency yang diperlukan.
+
+Jangan mengubah source project untuk mengatasi masalah environment.
+
+==================================================
+2. CONNECT TO MT5
+==================================================
+
+Gunakan MetaTrader5 Python API.
+
+Hubungkan ke terminal MT5 yang sedang berjalan.
+
+Gunakan initialize() tanpa menyimpan password/account credential di source atau command history.
+
+Jika initialize gagal:
+- tampilkan error code/message
+- STOP.
+- jangan mencoba order atau workaround berbahaya.
+
+Setelah berhasil:
+- terminal_info()
+- version()
+- account_info()
+
+Tampilkan hanya informasi yang aman:
+- terminal connected/status
+- MT5 version
+- account login boleh dimasking
+- server
+- trade_allowed
+- balance/equity boleh ditampilkan jika akun DEMO
+- jangan tampilkan password/token/secret.
+
+==================================================
+3. SYMBOL DISCOVERY
+==================================================
+
+Jangan menebak nama symbol.
+
+Cari symbol yang berhubungan dengan XAUUSD menggunakan daftar symbol MT5.
+
+Tampilkan kandidat exact/normalized secara terpisah.
+
+Contoh:
+- XAUUSD
+- XAUUSDm
+- XAUUSD.a
+- suffix broker lainnya
+
+JANGAN memilih symbol secara otomatis jika:
+- lebih dari satu kandidat
+- hanya fuzzy match
+- nama tidak dapat dipastikan.
+
+Jika ada beberapa kandidat:
+STOP setelah melaporkan kandidat.
+
+Jika hanya ada satu kandidat yang jelas:
+lanjutkan pemeriksaan read-only.
+
+==================================================
+4. SYMBOL INFO
+==================================================
+
+Untuk symbol yang telah dipastikan:
+
+Gunakan:
+symbol_info()
+
+Tampilkan:
+
+- name
+- visible
+- point
+- digits
+- trade_mode
+- trade_tick_size
+- trade_tick_value
+- trade_contract_size
+- volume_min
+- volume_max
+- volume_step
+- trade_stops_level
+- trade_freeze_level
+- filling mode / filling flags
+- currency_base
+- currency_profit
+- currency_margin
+
+Jangan mengubah setting symbol.
+
+==================================================
+5. CURRENT TICK
+==================================================
+
+Gunakan:
+
+symbol_info_tick()
+
+Tampilkan:
+
+- bid
+- ask
+- last
+- time
+- time_msc
+- flags
+
+Validasi:
+
+- bid finite
+- ask finite
+- bid > 0
+- ask > 0
+- ask >= bid
+- timestamp valid
+- tick tidak stale
+- timestamp tidak berada jauh di masa depan.
+
+Jangan membuat order.
+
+==================================================
+6. M5 / M15 DATA
+==================================================
+
+Ambil data READ-ONLY:
+
+- XAUUSD broker symbol M5
+- XAUUSD broker symbol M15
+
+Ambil secukupnya untuk verifikasi.
+
+Tampilkan:
+
+- jumlah bar
+- timestamp bar terbaru
+- OHLC terbaru
+- timestamp dalam UTC jika tersedia/appropriate.
+
+PENTING:
+
+Verifikasi apakah bar terbaru adalah forming/current candle atau closed candle.
+
+Jangan memasukkan data tersebut ke live strategy.
+
+Jangan membuat signal trading.
+
+==================================================
+7. SERVER TIME / OFFSET OBSERVATION
+==================================================
+
+Ambil current tick time dan beberapa pembacaan berurutan.
+
+Catat:
+
+- local UTC time
+- MT5 tick server timestamp
+- observed difference
+- apakah offset konsisten.
+
+Ini hanya observasi.
+
+Jangan mengubah offset project.
+
+Jika market sedang closed/weekend dan tidak ada fresh tick:
+- laporkan dengan jelas.
+- jangan membuat data.
+
+==================================================
+8. POSITION / ORDER SAFETY CHECK
+==================================================
+
+READ ONLY.
+
+Gunakan:
+
+positions_total()
+positions_get()
+orders_total()
+
+Tujuan hanya memastikan akun DEMO tidak memiliki posisi/order yang tidak disengaja.
+
+Jika ada posisi/order yang tidak diharapkan:
+STOP dan laporkan.
+
+JANGAN CLOSE atau MODIFY apa pun.
+
+==================================================
+9. PROHIBITED API CHECK
+==================================================
+
+Pastikan script verification ini TIDAK memanggil:
+
+mt5.order_send()
+mt5.position_close()
+modification/trade operation apa pun.
+
+Boleh membaca:
+- account_info
+- terminal_info
+- symbol_info
+- symbol_info_tick
+- copy_rates/copy_rates_from_pos
+- positions_get
+- orders_get/orders_total
+- symbols_get
+
+Setelah selesai:
+mt5.shutdown()
+
+==================================================
+10. OUTPUT
+==================================================
+
+Buat laporan:
+
+WINDOWS MT5 READ-ONLY STEP 1
+
+Environment:
+- Windows:
+- Python:
+- MT5:
+- Python MT5 package:
+
+Terminal:
+- initialize:
+- terminal_info:
+- account_info:
+
+XAUUSD discovery:
+- candidates:
+- selected:
+- reason:
+
+Symbol specification:
+- volume:
+- tick:
+- stops:
+- freeze:
+- filling:
+- contract:
+- currencies:
+- trade mode:
+
+Tick:
+- bid:
+- ask:
+- timestamp:
+- age:
+- sanity:
+
+M5:
+- bars:
+- latest timestamp:
+- forming/closed:
+
+M15:
+- bars:
+- latest timestamp:
+- forming/closed:
+
+Observed server offset:
+- UTC:
+- MT5 tick:
+- difference:
+- consistency:
+
+Positions:
+- count:
+
+Orders:
+- count:
+
+ORDER_SEND:
+- MUST BE 0
+
+VERDICT:
+
+Pilih salah satu:
+- PASS — environment/read-only data path verified
+- BLOCKED — environment problem
+- CONDITIONAL — market/tick/symbol condition prevents complete verification
+
+JANGAN menyebut broker execution ready.
+
+JANGAN menyebut production ready.
+
+STOP setelah laporan.
 ```
 # 
 ```
