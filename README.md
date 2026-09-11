@@ -12,7 +12,181 @@
 ```
 # 
 ```
+TASK: WINDOWS MT5 REAL READ-ONLY VERIFICATION — STEP 1
 
+IMPORTANT:
+- Jalankan SEMUA perintah di Windows laptop ini.
+- Jangan menggunakan SSH/VPS Linux.
+- Jangan mengubah repository mt-info.
+- Jangan commit.
+- Jangan push.
+- Jangan order_send.
+- Jangan membuka/menutup/memodifikasi posisi.
+- Gunakan akun DEMO saja.
+- MT5 terminal harus sudah terbuka dan login.
+
+ENVIRONMENT:
+Python dan package MetaTrader5 sudah tersedia.
+Jangan reinstall jika import sudah berhasil.
+
+BUAT file sementara:
+mt5_readonly_step1.py
+
+File ini hanya untuk verification dan boleh berada di luar repository.
+
+Lakukan pemeriksaan berikut secara READ-ONLY:
+
+1. Import MetaTrader5.
+2. initialize() ke terminal MT5 yang sedang berjalan.
+3. Jika initialize gagal:
+   tampilkan retcode/error dan STOP.
+4. terminal_info()
+5. version()
+6. account_info()
+
+Tampilkan informasi aman saja.
+Jangan tampilkan password, token, atau credential.
+
+7. Cari semua symbol yang mengandung "XAUUSD".
+   Tampilkan:
+   - nama symbol
+   - apakah visible
+   - trade_mode
+
+JANGAN memilih symbol fuzzy secara otomatis.
+
+Jika:
+- 0 kandidat -> STOP dan laporkan.
+- >1 kandidat -> tampilkan semua kandidat dan STOP.
+- tepat 1 kandidat -> lanjut.
+
+8. Untuk symbol terpilih, baca symbol_info() dan tampilkan:
+
+- name
+- visible
+- point
+- digits
+- trade_mode
+- trade_tick_size
+- trade_tick_value
+- trade_contract_size
+- volume_min
+- volume_max
+- volume_step
+- trade_stops_level
+- trade_freeze_level
+- filling mode
+- currency_base
+- currency_profit
+- currency_margin
+
+9. Baca symbol_info_tick().
+
+Validasi:
+- bid finite
+- ask finite
+- bid > 0
+- ask > 0
+- ask >= bid
+- timestamp tersedia
+- tick age
+- timestamp tidak future secara tidak masuk akal.
+
+10. Baca data:
+- M5
+- M15
+
+Ambil secukupnya untuk pemeriksaan.
+
+Tampilkan:
+- jumlah bar
+- timestamp terbaru
+- OHLC terbaru
+- apakah bar terbaru masih forming/current atau sudah closed.
+
+JANGAN mengirim data ke strategy.
+
+11. Baca positions_get() / positions_total().
+12. Baca orders_get() / orders_total().
+
+READ-ONLY:
+Jangan close/modify apa pun.
+
+13. Ambil beberapa tick/time observations untuk melihat server timestamp dan observed UTC difference.
+
+Jika market closed dan tick tidak fresh:
+- laporkan apa adanya.
+- jangan membuat/sintesis data.
+
+14. Pastikan script ini TIDAK memanggil:
+- order_send
+- order_check
+- position modification
+- order modification
+- close operation
+
+Untuk tahap ini kita hanya memverifikasi koneksi/data.
+
+15. Panggil mt5.shutdown() dalam finally.
+
+OUTPUT:
+
+=== WINDOWS MT5 READ-ONLY STEP 1 ===
+
+Environment:
+Windows:
+Python:
+MetaTrader5 package:
+
+Terminal:
+initialize:
+version:
+terminal_info:
+account_info:
+
+XAUUSD candidates:
+...
+
+Selected symbol:
+...
+
+Symbol specification:
+...
+
+Tick:
+...
+
+M5:
+...
+
+M15:
+...
+
+Server time observation:
+...
+
+Open positions:
+...
+
+Pending orders:
+...
+
+Forbidden trade calls:
+order_send = 0
+order_check = 0
+
+VERDICT:
+PASS / BLOCKED / CONDITIONAL
+
+Jelaskan alasan verdict.
+
+IMPORTANT:
+- Ini bukan test trading.
+- Jangan mengklaim broker readiness.
+- Jangan mengklaim production readiness.
+- Jangan mengklaim strategy profitability.
+- Jangan mengubah source code project.
+- STOP setelah laporan.
 ```
 # 
 ```
