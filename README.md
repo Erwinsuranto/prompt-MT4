@@ -52,7 +52,163 @@
 ```
 # 
 ```
+TASK: WINDOWS BRIDGE TASK SCHEDULER REAL VERIFICATION
 
+Tujuan:
+Verifikasi deployment Windows bridge yang sudah dibuat oleh mt-info pada Windows laptop secara nyata.
+
+ATURAN:
+- Jangan melakukan trading.
+- Jangan panggil order_send().
+- Jangan panggil order_check().
+- Jangan close/modify/delete posisi MT5.
+- Jangan mengubah kode source.
+- Jangan commit.
+- Jangan push.
+- Jangan mengubah akun MT5.
+- Gunakan task name dan installer yang memang ada di repo.
+- Jika installer belum dijalankan, jalankan installer sesuai dokumentasi/repo.
+- STOP setelah seluruh verifikasi selesai.
+
+1. VERIFY INSTALLER
+Periksa file deployment Windows yang digunakan oleh project.
+Pastikan installer/wrapper bridge yang dipakai berasal dari repo mt-info.
+
+2. TASK SCHEDULER QUERY
+
+Setelah task dibuat/terpasang, jalankan:
+
+schtasks /Query /TN "<TASK_NAME>" /V /FO LIST
+
+Tampilkan:
+- TaskName
+- Run As User
+- Logon Mode
+- Run Level
+- Task To Run
+- Working Directory jika tersedia
+- Start Time
+- Schedule
+- Start When Available
+- Restart on Failure / recovery settings jika tersedia
+- Last Run Time
+- Last Run Result
+- Status
+
+3. XML VERIFICATION
+
+Jalankan:
+
+schtasks /Query /TN "<TASK_NAME>" /XML
+
+Periksa secara eksplisit:
+
+- Principal = NT AUTHORITY\LocalService
+- LogonType = ServiceAccount
+- RunLevel = LeastPrivilege
+- BootTrigger ada
+- Delay = PT5M
+- StartWhenAvailable = true
+- RestartOnFailure ada
+- Restart interval sekitar PT1M
+- batas restart = 3
+- Action menggunakan absolute path
+- WorkingDirectory absolute dan benar
+- tidak menggunakan interactive user session
+
+Jika nilai berbeda dari desain H3, laporkan persis nilai aktualnya.
+Jangan memperbaikinya.
+
+4. MANUAL START — NO TRADING
+
+Start task secara manual hanya untuk memastikan process bridge dapat berjalan:
+
+schtasks /Run /TN "<TASK_NAME>"
+
+Tunggu secukupnya.
+
+Periksa:
+- task status
+- process bridge
+- exit code
+- log jika ada
+
+Jangan menjalankan komponen yang mengirim order.
+Bridge harus tetap berada pada mode yang aman/read-only.
+
+5. STOP TASK
+
+Hentikan task dengan mekanisme stop yang didukung deployment.
+
+Pastikan:
+- process berhenti
+- task tetap terdaftar
+- tidak ada perubahan pada MT5 position/order
+
+6. DISABLE DRILL
+
+Disable task.
+
+Query kembali:
+
+schtasks /Query /TN "<TASK_NAME>" /V /FO LIST
+
+Pastikan status disabled.
+
+Jangan reboot jika ada risiko menjalankan komponen yang tidak jelas.
+Jika reboot aman dan deployment memang siap, boleh lakukan reboot untuk memverifikasi BootTrigger.
+
+7. RE-ENABLE
+
+Jika sebelumnya disabled, enable kembali.
+
+Query ulang dan tampilkan status final.
+
+8. SECURITY CHECK
+
+Pastikan task tidak:
+- Run as Administrator
+- Run as current interactive user
+- menggunakan privilege tinggi
+- menggunakan relative executable path
+- menggunakan relative working directory
+
+9. FINAL VERDICT
+
+Pilih:
+
+A = PASS
+Task definition dan lifecycle sesuai desain H3.
+
+B = CONDITIONAL
+Task berjalan tetapi ada perbedaan/caveat yang tidak langsung membahayakan.
+
+C = BLOCKED
+Task tidak dapat dibuat/dijalankan/diverifikasi.
+
+Berikan tabel:
+
+TASK CREATED
+PRINCIPAL
+LOGON TYPE
+RUN LEVEL
+BOOT TRIGGER
+DELAY
+RESTART POLICY
+WORKING DIRECTORY
+MANUAL START
+STOP
+DISABLE
+FINAL STATUS
+
+PENTING:
+Tidak ada trading.
+Tidak ada order_send.
+Tidak ada order_check.
+Tidak ada perubahan source.
+Tidak commit.
+Tidak push.
+STOP setelah laporan.
 ```
 # 
 ```
