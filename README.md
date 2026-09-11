@@ -8,7 +8,164 @@
 ```
 # 
 ```
+TASK: MT5 TIMESTAMP DIAGNOSTIC — READ ONLY
 
+INI BUKAN TEST TRADING.
+
+JANGAN:
+- order_send
+- order_check
+- membuka/menutup/modifikasi posisi
+- mengubah source mt-info
+- commit
+- push
+- menggunakan akun REAL
+
+Tujuan:
+Menentukan apakah "tick age ~9910 seconds / future_unreasonable=True" dari Step 1 merupakan bug pada script verification atau masalah timestamp MT5 yang nyata.
+
+Jalankan di WINDOWS LAPTOP yang sama dengan MT5 DEMO.
+
+Gunakan MetaTrader5 Python API.
+
+1. Connect:
+   mt5.initialize()
+
+2. Ambil:
+   tick = mt5.symbol_info_tick("<SYMBOL_XAUUSD_YANG_TADI_TERPILIH>")
+
+3. Cetak RAW values:
+   tick.time
+   tick.time_msc
+
+4. Cetak semua reference clock:
+
+   time.time()
+   datetime.now()
+   datetime.now(timezone.utc)
+
+5. Convert tick.time menjadi:
+   datetime.fromtimestamp(tick.time, timezone.utc)
+
+6. Convert tick.time_msc menjadi UTC datetime dengan benar.
+
+7. Ambil timezone Windows:
+   tzlocal jika tersedia, atau metode standard Windows/Python.
+   Tampilkan:
+   - local timezone
+   - UTC offset
+   - local current time
+   - UTC current time
+
+8. Ambil terminal_info() dan version().
+
+9. Untuk symbol yang sama, ambil:
+   M5 = mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_M5, 0, 3)
+   M15 = mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_M15, 0, 3)
+
+10. Untuk setiap bar:
+   tampilkan RAW epoch `time`
+   dan UTC datetime hasil conversion.
+
+11. Secara khusus tampilkan:
+
+   UTC_NOW
+   TICK_UTC
+   TICK_AGE_SECONDS
+
+   M5_BAR_0_UTC
+   M5_BAR_1_UTC
+   M5_BAR_2_UTC
+
+   M15_BAR_0_UTC
+   M15_BAR_1_UTC
+   M15_BAR_2_UTC
+
+12. Jangan menggunakan local timezone untuk menilai apakah epoch MT5 adalah UTC.
+
+13. Jangan menambahkan offset manual seperti +2, +3, +7, dll.
+
+14. Ambil dua tick dengan jarak sekitar 2-3 detik:
+   tick1
+   sleep 2-3 sec
+   tick2
+
+   Bandingkan:
+   tick1.time
+   tick2.time
+   tick1.time_msc
+   tick2.time_msc
+
+15. Jika market sedang aktif:
+   pastikan tick.time_msc bergerak maju secara masuk akal.
+
+16. Jika market closed:
+   jangan menyimpulkan timestamp rusak hanya karena tick tidak bergerak.
+
+17. Jangan memanggil symbol_select() kecuali symbol memang belum visible dan pemanggilan itu benar-benar diperlukan untuk READ-ONLY observation. Jika sudah visible, jangan ubah apa pun.
+
+18. Setelah selesai:
+   mt5.shutdown()
+
+OUTPUT:
+
+=== MT5 TIMESTAMP DIAGNOSTIC ===
+
+Windows:
+local timezone:
+UTC now:
+local now:
+
+MT5:
+terminal version:
+server:
+symbol:
+
+RAW TICK:
+tick.time:
+tick.time_msc:
+
+CONVERTED:
+tick UTC:
+tick age seconds:
+
+M5:
+bar0 raw:
+bar0 UTC:
+bar1 raw:
+bar1 UTC:
+bar2 raw:
+bar2 UTC:
+
+M15:
+bar0 raw:
+bar0 UTC:
+bar1 raw:
+bar1 UTC:
+bar2 raw:
+bar2 UTC:
+
+SECOND TICK:
+tick1:
+tick2:
+elapsed:
+timestamp progression:
+
+DIAGNOSIS:
+Pilih:
+A. Timestamp normal — bug ada pada verification calculation.
+B. Timestamp abnormal — perlu investigasi terminal/server.
+C. Market closed — tidak cukup evidence untuk menilai freshness.
+D. Inconclusive.
+
+Jelaskan angka sebenarnya.
+
+PENTING:
+Jangan memperbaiki code mt-info.
+Jangan membuat commit.
+Jangan push.
+Jangan trading.
+STOP setelah laporan.
 ```
 # 
 ```
