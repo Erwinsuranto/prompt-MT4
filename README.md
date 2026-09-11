@@ -48,7 +48,134 @@
 ```
 # 
 ```
+TASK: FIX H3 WINDOWS TASK SCHEDULER SERVICEACCOUNT REJECTION
 
+Repo:
+mt-info
+
+Kondisi aktual:
+- Real Windows verification pada laptop gagal.
+- Verdict: C = BLOCKED.
+- Repo installer Windows gagal membuat/verify Scheduled Task.
+- Penyebab spesifik: Windows Task Scheduler menolak LogonType=ServiceAccount.
+- Desain yang diinginkan tetap:
+  Principal = NT AUTHORITY\LocalService
+  LogonType = ServiceAccount
+  RunLevel = LeastPrivilege
+- Tidak ada trading/order_send/order_check pada test ini.
+- Working tree saat ini harus dipertahankan selain perubahan yang memang diperlukan untuk H3.
+
+TUJUAN:
+Perbaiki deployment H3 agar Scheduled Task benar-benar dapat dibuat di Windows dengan privilege minimum, tanpa menyimpan password/credential dan tanpa menjalankan bridge sebagai Administrator.
+
+ATURAN KEAMANAN:
+- Jangan pernah meminta atau menyimpan password Windows.
+- Jangan menggunakan plaintext password.
+- Jangan menggunakan Administrator sebagai runtime principal.
+- Jangan menurunkan privilege menjadi HighestAvailable.
+- Jangan menggunakan interactive user sebagai runtime principal.
+- Jangan mengubah MT5 execution/trading code.
+- Jangan mengubah H1/H2/H4.
+- Jangan melakukan trading.
+- Jangan memanggil order_send().
+- Jangan memanggil order_check().
+- Jangan menyentuh posisi/order MT5.
+
+LANGKAH:
+
+1. INSPEKSI H3
+Periksa:
+- python/xausr/win_deploy.py
+- windows/Install-XausrBridge.ps1
+- test Windows deployment yang terkait.
+
+Temukan tepatnya bagaimana task dibuat dan bagaimana XML/LogonType ServiceAccount ditentukan.
+
+2. REPRODUKSI ERROR
+Pada Windows, jalankan mekanisme installer saat ini dalam mode aman dan tangkap:
+- command yang dipakai
+- exit code
+- stderr/stdout
+- pesan Task Scheduler sebenarnya
+
+Jangan sekadar menebak penyebab.
+
+3. CARI CARA WINDOWS-NATIVE YANG VALID
+Tentukan metode yang benar-benar didukung Windows untuk membuat Scheduled Task dengan:
+
+NT AUTHORITY\LocalService
+ServiceAccount
+LeastPrivilege
+
+Jika schtasks.exe tidak dapat membuat kombinasi tersebut dengan cara yang sekarang, gunakan mekanisme Windows-native yang sesuai, misalnya Task Scheduler COM/API atau XML registration yang benar.
+
+Jangan mengganti security principal hanya supaya test menjadi PASS.
+
+4. PERBAIKI IMPLEMENTASI
+Buat perubahan minimal hanya pada deployment H3.
+
+Pertahankan:
+- LocalService
+- ServiceAccount
+- LeastPrivilege
+- BootTrigger
+- Delay PT5M
+- StartWhenAvailable
+- absolute executable path
+- absolute working directory
+- restart-on-failure PT1M x3
+- no interactive session
+- no stored password
+
+Installer harus:
+- fail loudly jika task registration gagal
+- tidak meninggalkan task setengah jadi
+- tidak menghapus/mengubah task lain
+- aman bila dijalankan ulang
+
+5. TEST OTOMATIS
+Update/add regression tests khusus H3 untuk memastikan:
+- principal benar
+- logon type benar
+- run level benar
+- boot trigger benar
+- delay benar
+- restart policy benar
+- absolute paths benar
+- tidak ada password plaintext
+- installer gagal dengan jelas jika registration gagal
+
+Jalankan test H3 terlebih dahulu.
+
+6. TEST FULL SUITE
+Setelah H3 test PASS, jalankan full test suite project.
+
+Pastikan:
+- H1 tidak berubah
+- H2 tidak berubah
+- H4 tidak berubah
+- tidak ada regression.
+
+7. JANGAN LANGSUNG PUSH
+Setelah test selesai, tampilkan:
+- root cause sebenarnya
+- file yang berubah
+- ringkasan perubahan
+- H3 test result
+- full suite result
+- git diff --stat
+- git status
+- commit SHA saat ini
+
+JANGAN commit.
+JANGAN push.
+
+STOP setelah laporan.
+
+PENTING:
+Ini bukan permintaan audit seluruh repo.
+Ini targeted H3 remediation berdasarkan kegagalan nyata pada Windows.
+Jangan melakukan perubahan di luar scope Windows Task Scheduler deployment.
 ```
 # 
 ```
