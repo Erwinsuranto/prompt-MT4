@@ -60,6 +60,151 @@
 ```
 # 
 ```
+TASK: MT5 READ-ONLY SYMBOL + BAR DATA VERIFICATION
+
+Tujuan:
+Lanjutkan validasi Windows MT5 DEMO setelah timestamp diagnostic menyimpulkan Diagnosis A (timestamp normal). Ini READ-ONLY.
+
+ATURAN WAJIB:
+- Jangan melakukan trading apa pun.
+- Jangan panggil order_send().
+- Jangan panggil order_check().
+- Jangan modify/close/delete position atau order.
+- Jangan symbol_select() jika tidak benar-benar diperlukan; prioritaskan query read-only.
+- Jangan mengubah source code mt-info.
+- Jangan commit.
+- Jangan push.
+- Jangan mengubah konfigurasi broker/account.
+- STOP setelah laporan.
+
+Gunakan terminal MT5 DEMO yang sama.
+
+VERIFIKASI:
+
+1. CONNECT
+- initialize()
+- terminal_info()
+- account_info()
+- tampilkan:
+  - terminal connected
+  - trade_allowed
+  - account trade_mode
+  - server
+  - login (boleh disamarkan sebagian)
+  - terminal version
+
+2. EXACT XAUUSD SYMBOL
+Cari symbol XAUUSD secara exact/preferred.
+Jangan fuzzy-match.
+
+Tampilkan:
+- symbol name
+- visible
+- selected
+- point
+- digits
+- trade_mode
+- trade_calc_mode
+- contract_size
+- volume_min
+- volume_max
+- volume_step
+- tick_size
+- tick_value
+- trade_stops_level
+- trade_freeze_level
+- filling_mode
+- currency_base
+- currency_profit
+- currency_margin
+
+Jika XAUUSD exact tidak ada:
+- cari kandidat symbol yang mengandung XAUUSD hanya untuk DIAGNOSTIC
+- tampilkan semua kandidat
+- jangan memilih/mengaktifkan apa pun secara otomatis.
+
+3. TICK READ-ONLY
+Gunakan symbol_info_tick().
+
+Tampilkan raw:
+- bid
+- ask
+- last
+- volume
+- time
+- time_msc
+
+Konversi epoch menggunakan UTC dengan benar.
+Tampilkan:
+- tick_time_utc
+- tick_time_msc_utc
+- observed_utc
+- age_seconds
+
+Jangan membuat timezone/server offset manual.
+
+4. M5 BARS
+Gunakan copy_rates_from_pos(symbol, TIMEFRAME_M5, 0, 5).
+
+Tampilkan untuk setiap bar:
+- index
+- raw time
+- UTC time
+- open
+- high
+- low
+- close
+- tick_volume
+
+Pastikan index 0 ditandai sebagai FORMING/CURRENT BAR.
+Jangan gunakan index 0 sebagai closed candle.
+
+5. M15 BARS
+Lakukan hal yang sama untuk TIMEFRAME_M15 sebanyak 5 bar.
+
+6. CONSISTENCY CHECK
+Validasi:
+- M5 spacing antar closed bars = 300 detik jika data tersedia normal.
+- M15 spacing antar closed bars = 900 detik jika data tersedia normal.
+- high >= max(open, close)
+- low <= min(open, close)
+- semua OHLC finite
+- harga > 0
+- closed bar terakhir tidak berada di masa depan relatif terhadap UTC.
+- tidak ada look-ahead.
+
+7. POSITION/ORDER READ-ONLY
+Tampilkan:
+- positions_total()
+- orders_total()
+- untuk positions_get(), hanya tampilkan ringkasan read-only.
+JANGAN close/modify apa pun.
+
+Jika ada posisi DEMO yang sudah ada:
+- tandai sebagai PRE-EXISTING
+- jangan disentuh.
+
+8. VERDICT
+
+Berikan salah satu:
+
+A = PASS
+Semua data symbol/bar/tick konsisten dan usable untuk tahap read-only berikutnya.
+
+B = CONDITIONAL
+Ada data valid tetapi ada satu atau lebih caveat yang perlu dicatat.
+
+C = BLOCKED
+MT5/symbol/bar data tidak dapat diverifikasi.
+
+Jelaskan penyebab secara spesifik.
+
+IMPORTANT:
+- Jangan menganggap trade_allowed=False sebagai kerusakan jika tujuan hanya read-only.
+- Jangan menganggap market closed sebagai kerusakan.
+- Jangan membuat klaim freshness kalau market sedang tutup.
+- Jangan mengubah kode berdasarkan hasil ini.
+- STOP setelah laporan.
 
 ```
 
