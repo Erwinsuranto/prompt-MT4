@@ -56,7 +56,164 @@
 ```
 # 
 ```
+TASK: MT5 XAUUSD.M READ-ONLY READINESS + ORDER_CHECK
 
+Tujuan:
+Validasi kandidat broker XAUUSD.m pada Windows MT5 DEMO sebagai symbol yang benar-benar dapat dipakai oleh execution layer.
+
+HASIL SEBELUMNYA:
+- Exact XAUUSD tidak tersedia.
+- Hanya ada satu kandidat diagnostic: XAUUSD.m.
+- M5/M15 structure dan OHLC valid.
+- Tidak ada look-ahead.
+- positions_total=1 dan ada posisi DEMO PRE-EXISTING.
+- Jangan sentuh posisi tersebut.
+- Timestamp sudah didiagnosis sebagai Diagnosis A.
+
+ATURAN WAJIB:
+- DEMO ACCOUNT SAJA.
+- READ-ONLY.
+- order_send() DILARANG.
+- Jangan close/modify/delete posisi/order.
+- Jangan membuat transaksi.
+- Jangan symbol_select() kecuali implementation memang membutuhkan dan laporkan.
+- Jangan mengubah source code mt-info.
+- Jangan commit.
+- Jangan push.
+- STOP setelah laporan.
+
+1. SYMBOL RESOLUTION
+
+Gunakan XAUUSD.m sebagai kandidat yang sudah ditemukan.
+
+Verifikasi:
+- symbol_info("XAUUSD.m")
+- symbol_info_tick("XAUUSD.m")
+
+Pastikan symbol benar-benar tersedia.
+
+Tampilkan:
+- name
+- visible
+- selected
+- digits
+- point
+- trade_mode
+- trade_calc_mode
+- contract_size
+- volume_min
+- volume_max
+- volume_step
+- tick_size
+- tick_value
+- trade_stops_level
+- trade_freeze_level
+- filling_mode
+- currency_base
+- currency_profit
+- currency_margin
+
+2. TICK SANITY
+
+Tampilkan:
+- bid
+- ask
+- last
+- time
+- time_msc
+- converted UTC
+- age terhadap observed UTC
+
+Validasi:
+- bid > 0
+- ask > 0
+- ask >= bid
+- semua nilai finite
+- timestamp tidak future secara unreasonable
+
+Jika market closed/static:
+- jangan anggap sebagai error.
+- cukup tandai freshness UNKNOWN/CONDITIONAL.
+
+3. TERMINAL + ACCOUNT READINESS
+
+Tampilkan:
+- terminal connected
+- terminal trade_allowed
+- account trade_mode
+- account trade_allowed
+- balance
+- equity
+- margin
+- margin_free
+- server
+- terminal version
+
+Jangan menganggap trade_allowed=False sebagai error untuk read-only.
+
+4. BUILD ORDER_CHECK REQUEST — DRY RUN ONLY
+
+Buat request yang bentuknya IDENTIK dengan request yang nantinya akan digunakan execution layer, tetapi:
+
+- JANGAN kirim dengan order_send().
+- HANYA gunakan order_check().
+
+Gunakan volume MINIMAL yang valid menurut volume_min/volume_step.
+Gunakan harga/tick yang benar-benar berasal dari XAUUSD.m.
+Gunakan SL/TP yang valid terhadap stops_level jika request memerlukan SL/TP.
+Jika kondisi market closed membuat order_check tidak bisa bermakna, tetap jalankan hanya jika aman dan dokumentasikan hasilnya.
+
+Sebelum order_check(), print request lengkap TANPA secret.
+
+Kemudian:
+- panggil order_check(request)
+- tampilkan retcode
+- comment
+- balance
+- equity
+- margin
+- margin_free
+- seluruh field result yang tersedia
+
+WAJIB:
+- pastikan order_send() invocation count = 0.
+- pastikan tidak ada trade transaction.
+- pastikan posisi PRE-EXISTING tetap tidak berubah.
+
+5. READINESS VERDICT
+
+Pilih:
+
+A = PASS
+Jika XAUUSD.m valid, symbol spec lengkap, tick sane, terminal/account readable, dan order_check dapat dievaluasi tanpa transaksi.
+
+B = CONDITIONAL
+Jika symbol/spec valid tetapi market closed/static atau order_check tidak dapat memberikan hasil penuh karena kondisi pasar.
+
+C = BLOCKED
+Jika symbol/spec/readiness gagal atau request tidak dapat dibangun dengan aman.
+
+6. FINAL REPORT
+
+Berikan tabel ringkas:
+
+SYMBOL
+TERMINAL
+ACCOUNT
+TICK
+M5/M15
+ORDER_CHECK
+ORDER_SEND
+PRE-EXISTING POSITION
+VERDICT
+
+Jelaskan apakah XAUUSD.m sudah layak menjadi symbol broker untuk tahap read-only berikutnya.
+
+Jangan memperbaiki kode.
+Jangan commit.
+Jangan push.
+Jangan trading.
+STOP.
 ```
 # 
 ```
