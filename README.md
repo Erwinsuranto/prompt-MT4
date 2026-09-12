@@ -12,7 +12,150 @@
 ```
 # 
 ```
+TASK: FINAL H3 DIFF CHECK AND PUSH
 
+Repo:
+E:\mt5\mt-info
+
+H3 Windows verification sekarang:
+- Task Scheduler berhasil dibuat.
+- LocalService + ServiceAccount + LeastPrivilege terbukti.
+- BootTrigger PT5M terbukti di XML.
+- StartWhenAvailable terbukti.
+- RestartOnFailure PT1M x3 terbukti di XML.
+- Python machine-wide tersedia.
+- Bridge berhasil berjalan sebagai LocalService.
+- User-session MT5 worker dapat mengakses MT5.
+- User-session MT5 -> handoff -> LocalService bridge terbukti bekerja.
+- XAUUSD.m valid.
+- M5/M15 valid.
+- Signal decision NO_TRADE.
+- order_send = 0.
+- order_check = 0.
+- Posisi pre-existing tidak berubah.
+- Reboot tidak dilakukan.
+- Crash restart drill inconclusive karena metode Stop-Process tidak diklasifikasikan sebagai failure; JANGAN mengubah H3 hanya untuk itu.
+- H3 source changes saat ini hanya di:
+  python/xausr/win_deploy.py
+  python/tests/test_win_deploy.py
+  windows/Install-XausrBridge.ps1
+
+TUJUAN:
+Amankan perubahan H3 yang sudah terverifikasi ke GitHub.
+
+ATURAN:
+- Jangan mengubah source.
+- Jangan membuat fitur baru.
+- Jangan melakukan audit repo.
+- Jangan trading.
+- Jangan order_send().
+- Jangan order_check().
+- Jangan menyentuh MT5.
+- Jangan mengubah H1/H2/H4.
+- Jangan memasukkan file/temp/log/generated artifacts.
+- Jika diff mengandung perubahan di luar H3, STOP dan laporkan.
+- Jika diff H3 bersih, commit dan push ke origin/main.
+
+1. GIT STATUS
+
+Jalankan:
+
+git status --short
+git branch --show-current
+git rev-parse HEAD
+git rev-parse origin/main
+
+2. DIFF SCOPE
+
+Jalankan:
+
+git diff --stat
+git diff -- python/xausr/win_deploy.py
+git diff -- python/tests/test_win_deploy.py
+git diff -- windows/Install-XausrBridge.ps1
+
+Pastikan hanya perubahan H3.
+
+Jika ada file lain berubah:
+- STOP.
+- Jangan commit.
+
+3. TEST H3
+
+Jalankan test khusus:
+
+python -m pytest python/tests/test_win_deploy.py -q
+
+Pastikan PASS.
+
+4. FULL SUITE
+
+Karena source H3 sudah berubah, jalankan full suite sekali lagi.
+
+Catat:
+- passed
+- skipped
+- failed
+- errors
+- hangs jika ada
+
+Bandingkan failure dengan failure environmental/pre-existing yang sudah diketahui.
+
+5. FINAL DIFF CHECK
+
+Setelah test:
+
+git status --short
+git diff --stat
+
+Pastikan tidak ada generated artifact.
+
+6. COMMIT
+
+Jika:
+- hanya 3 file H3 berubah
+- H3 tests PASS
+- full suite tidak menunjukkan regression baru
+
+Commit:
+
+fix: harden windows task deployment
+
+7. PUSH
+
+Push langsung:
+
+git push origin main
+
+8. VERIFY REMOTE
+
+Setelah push:
+
+git rev-parse HEAD
+git rev-parse origin/main
+git status --short
+
+Pastikan:
+HEAD == origin/main
+working tree clean
+
+9. FINAL REPORT
+
+Tampilkan:
+
+H3 TEST
+FULL SUITE
+FILES COMMITTED
+COMMIT SHA
+REMOTE SHA
+WORKTREE
+H1/H2/H4 REGRESSION
+TRADING = 0
+
+STOP setelah push berhasil.
+
+Jika ada masalah pada diff atau test:
+JANGAN commit/push; laporkan masalahnya.
 ```
 # 
 ```
