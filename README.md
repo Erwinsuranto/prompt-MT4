@@ -8,7 +8,256 @@
 ```
 # 
 ```
+TASK: START REAL MT5 LIVE SHADOW MODE — NO TRADING
 
+Repo:
+E:\mt5\mt-info
+
+TUJUAN:
+Lanjutkan project ke tahap Live Shadow Mode menggunakan data MT5 DEMO nyata.
+
+Shadow Mode berarti:
+MT5 DEMO real market data
+-> feed
+-> M15 structure
+-> M5 confirmation
+-> reversal strategy
+-> signal decision
+-> shadow/audit output
+
+DILARANG:
+signal -> order execution
+
+STATUS:
+- H1/H2/H3/H4 sudah selesai.
+- H3 Windows deployment sudah diverifikasi nyata.
+- XAUSR-Bridge LocalService sudah PASS.
+- User-session MT5 worker -> handoff -> LocalService bridge sudah terbukti.
+- Broker symbol = XAUUSD.m.
+- M5/M15 data valid.
+- order_send = 0.
+- order_check = 0 pada verification sebelumnya.
+- Tidak boleh ada perubahan posisi DEMO.
+- Reboot laptop tidak dilakukan.
+
+ATURAN KERAS:
+- Jangan order_send().
+- Jangan order_check().
+- Jangan open position.
+- Jangan close/modify/delete position/order.
+- Jangan mengubah MT5 account.
+- Jangan mengubah H1/H2/H3/H4.
+- Jangan membuat synthetic market data.
+- Jangan membuat signal palsu untuk membuat test PASS.
+- Jangan mengubah parameter strategi hanya untuk meningkatkan jumlah signal/win rate.
+- Jangan look-ahead.
+- Jangan gunakan forming candle.
+- Jangan commit.
+- Jangan push.
+- STOP setelah laporan.
+
+1. GIT BASELINE
+
+Verifikasi:
+
+git status --short
+git rev-parse HEAD
+git rev-parse origin/main
+
+Jika HEAD != origin/main:
+jangan coding; laporkan sync problem.
+
+Jika working tree tidak clean:
+STOP dan laporkan.
+
+2. START SHADOW PATH
+
+Gunakan komponen Shadow Mode yang SUDAH ADA di repo.
+
+Jangan membuat implementation baru jika sudah tersedia.
+
+Pastikan jalurnya:
+
+REAL MT5 DATA
+-> feed validation
+-> closed candle handling
+-> M15 structure
+-> M5 confirmation
+-> strategy
+-> shadow decision/output
+
+Tidak boleh masuk execution.
+
+3. MT5
+
+Gunakan user-session yang memang dapat mengakses MT5.
+
+Verifikasi:
+- terminal connected
+- DEMO account
+- server
+- exact symbol XAUUSD.m
+- tick
+- M5
+- M15
+
+4. CANDLE SAFETY
+
+WAJIB:
+
+- index 0 = forming/current
+- index 0 TIDAK boleh digunakan sebagai closed candle
+- hanya closed candles untuk signal
+- M5/M15 timestamp valid
+- tidak ada candle future
+- tidak ada look-ahead
+
+Jika feed tidak fresh karena market closed:
+status = FRESHNESS UNKNOWN/CONDITIONAL.
+Jangan memalsukan freshness.
+
+5. STRATEGY DECISION
+
+Jalankan strategy sampai keputusan:
+
+TRADE / NO_TRADE
+
+Tetapi shadow mode WAJIB:
+
+- tidak melakukan execution
+- tidak memanggil order_send
+- tidak memanggil order_check
+- tidak membuka/menutup posisi
+
+Untuk setiap decision, catat jika tersedia:
+- timestamp
+- symbol
+- M15 structure
+- M5 confirmation
+- support/resistance context
+- reversal direction
+- signal
+- reason
+- data freshness
+
+Jika tidak ada setup valid:
+NO_TRADE adalah hasil yang benar.
+
+Jangan memaksa signal.
+
+6. SHADOW OUTPUT
+
+Pastikan output/journal shadow mencatat decision tanpa menjadi order instruction.
+
+Periksa:
+- output durable
+- partial/unwritable handling
+- duplicate handling
+- timestamp
+- provenance
+- no execution side effect
+
+7. POSITION SAFETY
+
+Sebelum dan sesudah shadow run:
+
+positions_total()
+orders_total()
+positions_get()
+
+Pastikan posisi pre-existing tidak berubah.
+
+WAJIB:
+- order_send = 0
+- order_check = 0
+- trade transaction = 0
+- position change = 0
+
+8. MARKET CLOSED HANDLING
+
+Jika sekarang XAUUSD closed/static:
+
+JANGAN:
+- membuat tick sintetis
+- mengubah timestamp
+- menganggap static tick sebagai live
+- menghasilkan signal hanya agar pipeline terlihat aktif
+
+Tetap verifikasi pipeline menggunakan data terakhir yang benar-benar diterima dan tandai:
+
+LIVE FRESHNESS = UNKNOWN/CONDITIONAL
+
+9. NO CODE CHANGE BY DEFAULT
+
+Jika seluruh pipeline berjalan:
+JANGAN mengubah source.
+
+Jika ditemukan bug nyata:
+- jangan langsung memperbaiki.
+- tampilkan:
+  file
+  root cause
+  impact
+  minimal fix
+  test yang diperlukan
+
+STOP sebelum perubahan source.
+
+10. FINAL REPORT
+
+Tampilkan:
+
+GIT HEAD
+ORIGIN/MAIN
+WORKTREE
+
+MT5 CONNECTION
+ACCOUNT
+SERVER
+SYMBOL
+
+TICK FRESHNESS
+M5
+M15
+
+FORMING CANDLE EXCLUDED
+LOOK-AHEAD
+M15 STRUCTURE
+M5 CONFIRMATION
+
+SHADOW ENGINE
+SIGNAL RESULT
+SIGNAL REASON
+SHADOW OUTPUT
+
+ORDER_SEND
+ORDER_CHECK
+TRADE TRANSACTION
+PRE-EXISTING POSITION
+POSITION CHANGE
+
+CODE CHANGED
+COMMIT
+PUSH
+REBOOT
+
+VERDICT:
+
+A = SHADOW READY
+Jika real MT5 data dapat masuk ke shadow pipeline dan seluruh safety gate PASS.
+
+B = CONDITIONAL
+Jika pipeline valid tetapi market closed/static sehingga live freshness belum dapat dibuktikan.
+
+C = BLOCKED
+Jika real MT5 -> shadow pipeline tidak dapat berjalan.
+
+REBOOT = NOT PERFORMED.
+
+Jangan commit.
+Jangan push.
+Jangan trading.
+STOP setelah laporan.
 ```
 # 
 ```
