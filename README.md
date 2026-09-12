@@ -1,10 +1,313 @@
 # prompt-MT4
 
-
-
 # 
 ```
 
+```
+# 
+```
+
+```
+# 
+```
+TASK: REAL XAUUSD M5 SHADOW MONITORING — NO TRADING
+
+Repo:
+E:\mt5\mt-info
+
+TUJUAN:
+Jalankan Shadow Mode pada data broker MT5 DEMO nyata dan kumpulkan decision strategi secara live ketika market XAUUSD.m aktif.
+
+ALUR:
+MT5 DEMO
+-> user-session MT5 worker
+-> real broker data
+-> M15 structure
+-> M5 closed-candle confirmation
+-> XAUUSD reversal strategy
+-> NO_TRADE / SIGNAL
+-> shadow journal
+
+TIDAK BOLEH:
+-> order execution
+
+STATUS:
+- H1/H2/H3/H4 selesai.
+- Windows bridge LocalService sudah diverifikasi.
+- User-session MT5 -> handoff -> LocalService bridge sudah terbukti.
+- XAUUSD.m valid.
+- M5/M15 data broker nyata valid.
+- Shadow pipeline sudah berjalan.
+- Sebelumnya signal = NO_TRADE.
+- order_send = 0.
+- order_check = 0.
+- posisi pre-existing tidak berubah.
+- Tidak perlu reboot laptop.
+
+ATURAN KERAS:
+- Jangan order_send().
+- Jangan order_check().
+- Jangan open position.
+- Jangan close/modify/delete position/order.
+- Jangan menyentuh posisi pre-existing.
+- Jangan membuat synthetic tick/bar.
+- Jangan mengubah timestamp.
+- Jangan menggunakan data masa depan.
+- Jangan menggunakan forming candle.
+- Jangan mengubah parameter strategi.
+- Jangan mengoptimalkan strategi berdasarkan hasil monitoring.
+- Jangan memaksa signal.
+- Jangan mengubah H1/H2/H3/H4.
+- Jangan commit.
+- Jangan push.
+
+1. GIT BASELINE
+
+Verifikasi:
+
+git status --short
+git rev-parse HEAD
+git rev-parse origin/main
+
+Jika working tree tidak clean atau HEAD != origin/main:
+STOP dan laporkan.
+
+2. START SHADOW ENGINE
+
+Gunakan shadow engine yang sudah ada.
+
+Gunakan:
+- real MT5 broker data
+- symbol XAUUSD.m
+- closed candles only
+
+Jalankan mode shadow/read-only yang memang tersedia di repo.
+
+Pastikan executor tetap NoExecution/disabled.
+
+3. MARKET FRESHNESS
+
+Pada setiap polling:
+
+- baca tick broker
+- catat tick.time
+- catat tick.time_msc
+- hitung age secara benar
+- jangan menggunakan manual timezone offset
+- jangan menganggap market closed sebagai error
+
+Jika tick tidak bergerak:
+FRESHNESS = UNKNOWN/CONDITIONAL.
+
+Jika tick bergerak:
+FRESHNESS = LIVE dan catat waktu observasi.
+
+4. CLOSED CANDLE DISCIPLINE
+
+Untuk M5:
+- index 0 = FORMING
+- jangan gunakan index 0
+- hanya candle closed
+
+Untuk M15:
+- index 0 = FORMING
+- jangan gunakan index 0
+- hanya candle closed
+
+Pada setiap candle baru:
+- pastikan timestamp monotonic
+- pastikan tidak future
+- pastikan M5 spacing normal
+- pastikan M15 spacing normal
+
+5. STRATEGY DECISION
+
+Untuk setiap closed M5 candle yang baru:
+
+Gunakan data yang tersedia sampai candle tersebut saja.
+
+Evaluasi:
+- M15 structure
+- Support/Resistance
+- M5 reversal confirmation
+- engulfing rules
+- seluruh filter strategi yang sudah ada
+
+Decision harus salah satu:
+- NO_TRADE
+- SIGNAL
+
+Jika SIGNAL:
+catat alasan lengkap:
+- BUY/SELL
+- reference candle
+- M15 structure
+- S/R level/context
+- confirmation
+- entry reference
+- SL/TP reference jika strategy memang menghasilkan
+- timestamp
+- data freshness
+
+Jangan mengeksekusi signal.
+
+6. NO FORCED SIGNAL
+
+Jika kondisi market trending dan strategy memang tidak berlaku:
+NO_TRADE.
+
+Jika S/R tidak valid:
+NO_TRADE.
+
+Jika engulfing tidak valid:
+NO_TRADE.
+
+Jika confirmation belum closed:
+NO_TRADE.
+
+Jika feed freshness tidak valid:
+NO_TRADE atau HOLD sesuai behavior existing.
+
+Jangan mengubah strategy agar menghasilkan lebih banyak signal.
+
+7. SHADOW JOURNAL
+
+Pastikan setiap closed-candle decision masuk journal/output yang sudah tersedia.
+
+Untuk setiap record minimal:
+- timestamp
+- symbol
+- timeframe
+- candle timestamp
+- decision
+- reason
+- data provenance
+- freshness state
+
+Pastikan:
+- no partial records
+- duplicate handling tetap aktif
+- durable write tetap aktif
+- tidak ada order instruction yang diteruskan ke executor
+
+8. RUN DURATION
+
+Jika market CLOSED:
+- lakukan warmup/readiness validation.
+- jangan membuat data sintetis.
+- jangan menganggap monitoring live sudah tervalidasi.
+- boleh berhenti setelah readiness + closed-market behavior terbukti.
+
+Jika market OPEN:
+jalankan monitoring sampai minimal beberapa closed M5 candles baru terobservasi.
+
+Target:
+- minimal 6 closed M5 candle baru
+- jika memungkinkan 12–24 closed M5 candle baru lebih baik.
+
+Jangan menunggu tanpa batas.
+Jika environment tidak memungkinkan durasi tersebut, laporkan jumlah candle aktual.
+
+9. STATISTICS
+
+Setelah monitoring, hitung hanya statistik observasi:
+
+- total closed M5 decisions
+- NO_TRADE count
+- SIGNAL count
+- BUY count
+- SELL count
+- freshness states
+- skipped/invalid count
+- duplicate count
+- partial/unwritable count
+
+JANGAN menghitung win rate/profit sebagai bukti edge dari data yang belum memiliki outcome lengkap.
+
+JANGAN mengubah strategy berdasarkan statistik ini.
+
+10. SAFETY AUDIT
+
+Pastikan selama monitoring:
+
+order_send = 0
+order_check = 0
+trade transactions = 0
+position changes = 0
+order changes = 0
+
+Bandingkan positions_total/orders_total sebelum dan sesudah.
+
+Pre-existing position harus tetap tidak berubah.
+
+11. STOP
+
+Setelah target observasi tercapai:
+- hentikan shadow engine dengan cara normal.
+- jangan meninggalkan proses yang tidak diperlukan.
+- jangan reboot.
+
+12. FINAL REPORT
+
+Tampilkan:
+
+GIT HEAD
+ORIGIN/MAIN
+WORKTREE
+
+MT5
+SERVER
+SYMBOL
+
+MARKET STATUS
+FRESHNESS
+
+M5 CLOSED CANDLES OBSERVED
+M15 DATA
+FORMING CANDLE EXCLUDED
+LOOK-AHEAD
+
+TOTAL DECISIONS
+NO_TRADE
+SIGNAL
+BUY
+SELL
+
+SIGNAL REASONS
+
+SHADOW JOURNAL
+PARTIAL
+DUPLICATE
+
+ORDER_SEND
+ORDER_CHECK
+TRADE TRANSACTION
+POSITION CHANGE
+ORDER CHANGE
+
+REBOOT = NOT PERFORMED
+
+CODE CHANGED = NO
+COMMIT = NO
+PUSH = NO
+
+VERDICT:
+
+A = LIVE SHADOW OBSERVATION PASS
+Jika market open dan minimal 6 closed M5 candles baru berhasil diproses tanpa safety violation.
+
+B = CONDITIONAL
+Jika market closed/static atau jumlah candle live belum mencukupi, tetapi pipeline tetap sehat.
+
+C = BLOCKED
+Jika real broker data/shadow pipeline gagal.
+
+PENTING:
+Hasil monitoring adalah OBSERVATION, bukan bukti profitability/edge.
+Jangan mengubah strategy hanya karena hasil observasi.
+Jangan membuat signal sintetis.
+Jangan trading.
+STOP setelah laporan.
 ```
 # 
 ```
