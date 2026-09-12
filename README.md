@@ -44,7 +44,195 @@
 ```
 # 
 ```
+TASK: REAL WINDOWS H3 INSTALL + TASK XML VERIFICATION
 
+Kondisi:
+- H3 remediation sudah selesai.
+- H3 test: 54 passed, 1 skipped.
+- Full suite: 2705 passed, 2 skipped, 5 failed + 1 hang; failures/hang sudah terbukti pre-existing/environmental.
+- Installer sekarang tidak lagi menghasilkan value-error.
+- Registrasi task berhenti pada Windows `Access is denied`.
+- Root cause untuk langkah registrasi: shell Windows belum elevated.
+- Runtime design TIDAK boleh berubah:
+  LocalService + ServiceAccount + LeastPrivilege.
+
+TUJUAN:
+Lakukan verifikasi H3 secara nyata di Windows dengan PowerShell yang dijalankan sebagai Administrator.
+
+ATURAN:
+- Jangan ubah source code.
+- Jangan commit.
+- Jangan push.
+- Jangan trading.
+- Jangan order_send().
+- Jangan order_check().
+- Jangan menyentuh posisi/order MT5.
+- Jangan menggunakan password.
+- Jangan mengganti runtime principal menjadi Administrator/current user.
+- Jangan mengubah konfigurasi MT5.
+- STOP setelah laporan.
+
+1. BUKA ELEVATED SHELL
+
+Pastikan PowerShell yang digunakan benar-benar Administrator.
+
+Verifikasi dengan command Windows yang aman, misalnya cek membership/elevation token.
+
+Laporkan:
+- elevated = True/False
+- current user
+- hostname
+
+Jika bukan elevated:
+STOP dan laporkan BLOCKED.
+Jangan mengubah source.
+
+2. JALANKAN INSTALLER H3
+
+Dari repo mt-info, jalankan installer Windows yang sudah diperbaiki:
+
+windows/Install-XausrBridge.ps1
+
+Gunakan mode yang memang direkomendasikan oleh installer/repo.
+
+Jika installer membutuhkan parameter, gunakan nilai aman/default dari dokumentasi/repo.
+
+Jangan membuat task manual dengan konfigurasi berbeda hanya untuk mendapatkan PASS.
+
+3. TASK QUERY
+
+Setelah installer selesai, cari task `XAUSR-Bridge` yang dibuat.
+
+Jalankan:
+
+schtasks /Query /TN "XAUSR-Bridge" /V /FO LIST
+
+Kemudian:
+
+schtasks /Query /TN "XAUSR-Bridge" /XML
+
+Simpan/tampilkan hasil XML yang relevan.
+
+4. VERIFY PRINCIPAL
+
+Dari XML aktual, pastikan:
+
+- UserId = NT AUTHORITY\LocalService
+- LogonType = ServiceAccount
+- RunLevel = LeastPrivilege
+
+Jika berbeda:
+STOP sebagai CONDITIONAL/BLOCKED.
+Jangan memperbaiki lagi.
+
+5. VERIFY TRIGGER
+
+Pastikan XML aktual mempunyai:
+
+- BootTrigger
+- Delay = PT5M
+- StartWhenAvailable = true
+
+6. VERIFY RESTART POLICY
+
+Pastikan XML aktual mempunyai restart-on-failure:
+
+- interval sekitar PT1M
+- maximum restart count = 3
+
+Jika XML menggunakan bentuk Windows Task Scheduler yang ekuivalen, tampilkan nilai XML aktualnya dan jelaskan.
+
+7. VERIFY ACTION/PATH
+
+Pastikan:
+
+- executable/script path absolute
+- working directory absolute
+- tidak menggunakan relative path
+- tidak menjalankan shell interactive
+- tidak meminta password
+
+8. MANUAL START — SAFE ONLY
+
+Start task hanya untuk memastikan lifecycle task bekerja.
+
+JANGAN menjalankan komponen trading.
+
+Jika bridge startup path secara desain melakukan readiness/read-only initialization, itu boleh.
+
+Setelah start:
+- query task status
+- query process
+- capture last run result
+- capture exit code/log yang tersedia
+
+Jangan melakukan order_check/order_send.
+
+9. STOP
+
+Stop task.
+
+Pastikan:
+- process berhenti
+- task tetap terdaftar
+- principal tidak berubah
+- tidak ada perubahan posisi/order MT5
+
+10. DISABLE TEST
+
+Disable task.
+
+Query ulang:
+
+schtasks /Query /TN "XAUSR-Bridge" /V /FO LIST
+
+Pastikan disabled.
+
+11. RE-ENABLE
+
+Enable kembali task.
+
+Query ulang.
+
+12. FINAL VERDICT
+
+Gunakan:
+
+A = PASS
+Jika task berhasil dibuat dan XML/lifecycle sesuai desain H3.
+
+B = CONDITIONAL
+Jika task berhasil dibuat tetapi ada caveat eksternal yang tidak merusak security model.
+
+C = BLOCKED
+Jika registrasi/query/lifecycle masih gagal.
+
+Tampilkan tabel:
+
+ELEVATED SHELL
+TASK CREATED
+PRINCIPAL
+LOGON TYPE
+RUN LEVEL
+BOOT TRIGGER
+DELAY
+START WHEN AVAILABLE
+RESTART POLICY
+ABSOLUTE ACTION
+WORKING DIRECTORY
+MANUAL START
+STOP
+DISABLE
+RE-ENABLE
+TRADING CALLS
+VERDICT
+
+PENTING:
+Jangan mengubah source.
+Jangan commit.
+Jangan push.
+Jangan trading.
+STOP setelah laporan.
 ```
 # 
 ```
