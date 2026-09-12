@@ -66,7 +66,272 @@
 ```
 # 
 ```
+TASK: LIVE SHADOW OBSERVATION — REAL BROKER DATA, NO TRADING
 
+Repo:
+E:\mt5\mt-info
+
+BASELINE:
+- HEAD = 383fdec
+- origin/main = 383fdec
+- working tree clean
+- H1/H2/H3/H4 sudah selesai
+- Windows MT5 user-session -> handoff -> LocalService sudah terverifikasi
+- Shadow pipeline sudah terverifikasi
+- XAUUSD.m valid
+- M5/M15 valid
+
+TUJUAN:
+Mulai observasi Shadow Mode menggunakan DATA BROKER MT5 DEMO NYATA.
+
+ALUR WAJIB:
+MT5 DEMO
+-> real tick/bar
+-> closed M15 structure
+-> closed M5 confirmation
+-> strategy
+-> NO_TRADE / SIGNAL
+-> shadow journal
+
+TIDAK ADA EXECUTION.
+
+ATURAN KERAS:
+- order_send() = DILARANG
+- order_check() = DILARANG
+- open/close/modify/delete posisi = DILARANG
+- jangan menyentuh posisi pre-existing
+- jangan synthetic tick/bar
+- jangan mengubah timestamp
+- jangan manual timezone offset
+- jangan forming candle
+- jangan look-ahead
+- jangan mengubah parameter strategy
+- jangan optimasi strategy
+- jangan membuat signal untuk mengejar jumlah signal
+- jangan mengubah H1/H2/H3/H4
+- jangan commit
+- jangan push
+- jangan reboot laptop
+
+1. VERIFY GIT
+
+Jalankan:
+
+git status --short
+git rev-parse HEAD
+git rev-parse origin/main
+
+Pastikan:
+HEAD == origin/main == 383fdec...
+working tree clean.
+
+Jika tidak:
+STOP.
+
+2. START EXISTING SHADOW ENGINE
+
+Gunakan implementation Shadow Mode yang sudah ada.
+
+Jangan membuat engine baru.
+
+Pastikan executor = NoExecution/disabled.
+
+Gunakan:
+symbol = XAUUSD.m
+
+3. REAL MT5 DATA
+
+Dari USER SESSION yang memang dapat mengakses MT5:
+
+- initialize MT5
+- verify DEMO account
+- verify server
+- resolve exact XAUUSD.m
+- read tick
+- read M5
+- read M15
+
+Catat:
+tick.time
+tick.time_msc
+bid
+ask
+observed UTC
+freshness/age
+
+Jangan melakukan manual timezone correction.
+
+4. CLOSED-CANDLE ONLY
+
+Untuk M5 dan M15:
+
+- index 0 = forming
+- index 0 harus dikeluarkan
+- hanya closed candles yang boleh masuk strategy
+
+Validasi:
+- timestamp tidak future
+- spacing M5 = 300 sec
+- spacing M15 = 900 sec
+- no look-ahead
+
+5. MARKET STATE
+
+Jika market CLOSED/static:
+- jangan memaksa live observation
+- gunakan data broker terakhir yang valid
+- status freshness = UNKNOWN/CONDITIONAL
+- jangan membuat synthetic data
+- jangan menunggu tanpa batas
+
+Jika market OPEN:
+- observasi closed M5 candle baru
+- target minimal 6 closed M5 candles baru
+- jika memungkinkan lanjut sampai 12
+
+6. STRATEGY
+
+Pada setiap closed M5 candle baru:
+
+Evaluasi strategy existing tanpa perubahan:
+
+M15:
+- structure
+- support/resistance context
+
+M5:
+- confirmation
+- genuine engulfing
+- reversal conditions
+- seluruh filter existing
+
+Decision:
+NO_TRADE atau SIGNAL.
+
+NO_TRADE adalah hasil valid.
+
+Jika market trending dan setup reversal tidak valid:
+NO_TRADE.
+
+Jangan mengubah strategy agar menghasilkan signal.
+
+7. SHADOW JOURNAL
+
+Pastikan decision dicatat oleh mechanism existing.
+
+Catat jika tersedia:
+- candle timestamp
+- symbol
+- M15 structure
+- M5 confirmation
+- decision
+- reason
+- freshness
+- provenance
+
+Pastikan:
+- no partial record
+- no duplicate
+- durable write
+- tidak ada execution instruction
+
+8. SAFETY COUNTERS
+
+Sebelum dan sesudah:
+
+positions_total()
+orders_total()
+positions_get()
+
+WAJIB:
+
+order_send = 0
+order_check = 0
+trade transaction = 0
+position change = 0
+order change = 0
+
+Pre-existing position harus tetap identik.
+
+9. DO NOT CODE
+
+Jika pipeline bekerja:
+CODE CHANGED = NO.
+
+Jika ditemukan bug nyata:
+JANGAN memperbaiki.
+Laporkan:
+- file
+- root cause
+- impact
+- minimal fix
+- required test
+
+Kemudian STOP.
+
+10. FINAL REPORT
+
+Tampilkan:
+
+GIT HEAD
+ORIGIN/MAIN
+WORKTREE
+
+MT5 CONNECTION
+ACCOUNT
+SERVER
+SYMBOL
+
+MARKET STATUS
+TICK
+FRESHNESS
+
+M5 CLOSED OBSERVED
+M15 DATA
+FORMING EXCLUDED
+LOOK-AHEAD
+
+TOTAL DECISIONS
+NO_TRADE
+SIGNAL
+BUY
+SELL
+
+SIGNAL REASONS
+
+SHADOW JOURNAL
+PARTIAL
+DUPLICATE
+
+ORDER_SEND
+ORDER_CHECK
+TRADE TRANSACTION
+POSITION CHANGE
+ORDER CHANGE
+
+CODE CHANGED
+COMMIT
+PUSH
+REBOOT
+
+VERDICT:
+
+A = LIVE SHADOW PASS
+Jika market open dan >=6 closed M5 candles baru berhasil diamati tanpa safety violation.
+
+B = CONDITIONAL
+Jika market closed/static atau candle live belum cukup, tetapi pipeline sehat.
+
+C = BLOCKED
+Jika real MT5 -> shadow pipeline gagal.
+
+PENTING:
+Ini hanya observasi.
+Jangan menyimpulkan profitability/win-rate/edge dari observasi ini.
+Jangan trading.
+
+REBOOT = NOT PERFORMED.
+STOP setelah laporan.
 ```
 
 # 
