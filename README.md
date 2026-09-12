@@ -24,7 +24,189 @@
 ```
 # 
 ```
+TASK: DIAGNOSE WINDOWS TASK SCHEDULER RESTART FAILURE
 
+Kondisi:
+- XAUSR-Bridge task berhasil dibuat.
+- Principal = NT AUTHORITY\LocalService.
+- LogonType = ServiceAccount.
+- RunLevel = LeastPrivilege.
+- RestartOnFailure = PT1M x3.
+- Bridge sebelumnya berhasil start sebagai LocalService.
+- Crash drill sebelumnya menghasilkan:
+  initial PID = 15196
+  initial owner = LocalService
+  restart PID = none
+  restart count = 0/3
+  Last Run Result = -1
+- Reboot TIDAK BOLEH dilakukan.
+- Jangan mengubah source code.
+- Jangan commit.
+- Jangan push.
+- Jangan trading.
+- Jangan order_send().
+- Jangan order_check().
+- Jangan menyentuh posisi/order MT5.
+
+TUJUAN:
+Tentukan apakah restart failure berasal dari:
+1. Task Scheduler policy/configuration,
+2. cara process dihentikan,
+3. bridge exit behavior,
+4. kondisi scheduler/environment.
+
+Jangan menebak.
+
+1. QUERY TASK SAAT INI
+
+Jalankan:
+
+schtasks /Query /TN "XAUSR-Bridge" /V /FO LIST
+
+Catat:
+- Status
+- Last Run Time
+- Last Run Result
+- Next Run Time
+- Run As User
+- Logon Mode
+- Task To Run
+
+Kemudian:
+
+schtasks /Query /TN "XAUSR-Bridge" /XML
+
+Ambil bagian:
+
+<Settings>
+<RestartOnFailure>
+<Interval>
+<Count>
+
+2. TASK SCHEDULER EVENT LOG
+
+Baca event log Windows Task Scheduler untuk task XAUSR-Bridge pada periode crash drill.
+
+Gunakan Windows-native event log/query.
+
+Cari event yang berkaitan dengan:
+- task started
+- task completed
+- action started
+- action completed
+- action failed
+- restart
+- termination
+- Last Run Result
+
+Tampilkan:
+- timestamp
+- event ID
+- message ringkas
+- result/error code
+
+Jangan mengubah event log.
+
+3. IDENTIFIKASI ACTION
+
+Dari XML aktual, tentukan command/action yang dijalankan.
+
+Pastikan action benar-benar menjalankan:
+
+python.exe -m xausr.bridge
+
+atau command ekuivalen yang ditentukan installer.
+
+Tampilkan executable + arguments + working directory.
+
+4. CHECK PROCESS LIFECYCLE
+
+Start task:
+
+schtasks /Run /TN "XAUSR-Bridge"
+
+Pastikan process muncul sebagai:
+- XAUSR-Bridge runtime
+- owner = LocalService
+- PID diketahui.
+
+JANGAN membunuh MT5 atau proses lain.
+
+5. CONTROLLED FAILURE
+
+Jangan langsung kill process lagi.
+
+Pertama tentukan dari implementation bridge bagaimana process dapat menghasilkan controlled non-zero exit yang aman TANPA trading.
+
+Jika ada mekanisme test-only/safe failure yang sudah tersedia:
+- gunakan mekanisme tersebut.
+
+Jika tidak ada:
+- jangan mengubah source hanya untuk memaksa test.
+- gunakan hasil event log dari crash drill sebelumnya dan laporkan bahwa controlled failure belum dapat dibuktikan.
+
+6. IMPORTANT DISTINCTION
+
+Jangan menyimpulkan:
+
+"RestartOnFailure rusak"
+
+hanya karena Stop-Process tidak menyebabkan restart.
+
+Windows Task Scheduler dapat membedakan kondisi termination/exit tertentu dari failure yang memicu restart policy.
+
+Tentukan berdasarkan event log dan LastTaskResult.
+
+7. MT5 SAFETY
+
+Pastikan:
+- order_send = 0
+- order_check = 0
+- no trade transaction
+- pre-existing MT5 position unchanged
+
+8. STOP
+
+Setelah diagnosis:
+- stop XAUSR-Bridge secara normal jika masih running.
+- jangan reboot.
+
+9. FINAL VERDICT
+
+Pilih:
+
+A = RESTART POLICY VERIFIED
+Jika bukti Windows menunjukkan restart memang terjadi/berfungsi.
+
+B = POLICY PRESENT, TEST METHOD INCONCLUSIVE
+Jika XML policy benar tetapi crash drill tidak membuktikan behavior karena termination method/environment.
+
+C = POLICY BROKEN
+Hanya jika event log/Windows evidence membuktikan policy memang tidak diterapkan atau konfigurasi aktual salah.
+
+Tampilkan:
+
+TASK STATUS
+LAST RUN RESULT
+RESTART XML
+TASK SCHEDULER EVENTS
+ACTION
+PROCESS OWNER
+CRASH METHOD
+RESTART OBSERVED
+ORDER_SEND
+ORDER_CHECK
+MT5 POSITION CHANGE
+REBOOT = NOT PERFORMED
+VERDICT
+
+JANGAN:
+- ubah source
+- commit
+- push
+- trading
+
+STOP setelah laporan.
 ```
 # 
 ```
