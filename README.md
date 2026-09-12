@@ -36,7 +36,303 @@
 ```
 # 
 ```
+TASK: COMPLETE REAL WINDOWS H3 VERIFICATION END-TO-END
 
+Repo:
+E:\mt5\mt-info
+
+Tujuan:
+Selesaikan seluruh verifikasi H3 Windows Task Scheduler sampai mendapatkan verdict final. Kerjakan otomatis sebanyak mungkin. Jangan berhenti hanya karena shell saat ini belum elevated. Jika Windows membutuhkan UAC elevation, lakukan mekanisme elevation resmi Windows dan minta operator hanya melakukan approval UAC bila memang muncul. DILARANG bypass UAC.
+
+KONDISI:
+- H3 remediation sudah dibuat.
+- H3 tests: 54 passed, 1 skipped.
+- Full suite: 2705 passed, 2 skipped, 5 failed + 1 hang; failures/hang sudah terbukti environmental/pre-existing.
+- Sebelumnya registrasi task gagal karena shell tidak elevated.
+- Runtime yang WAJIB dipertahankan:
+  NT AUTHORITY\LocalService
+  LogonType = ServiceAccount
+  RunLevel = LeastPrivilege
+
+ATURAN KERAS:
+- Jangan bypass UAC.
+- Jangan meminta password Windows.
+- Jangan menyimpan credential.
+- Jangan mengganti LocalService menjadi Administrator/current interactive user.
+- Jangan menggunakan HighestAvailable.
+- Jangan mengubah H1/H2/H4.
+- Jangan melakukan trading.
+- DILARANG order_send().
+- DILARANG order_check().
+- Jangan close/modify/delete posisi/order MT5.
+- Jangan mengubah akun MT5.
+- Jangan mengubah source code kecuali benar-benar diperlukan untuk memperbaiki H3 registration dan terbukti ada bug.
+- Jangan commit/push kecuali setelah seluruh verifikasi nyata PASS dan saya secara eksplisit meminta push.
+- STOP jika ada kondisi yang membutuhkan keputusan operator selain UAC approval.
+
+PHASE 1 — ENVIRONMENT
+
+1. Pastikan repo:
+   E:\mt5\mt-info
+
+2. Deteksi:
+   - current user
+   - hostname
+   - Windows version
+   - PowerShell version
+   - Python executable yang tersedia
+   - git status
+   - current HEAD
+
+3. Deteksi elevation.
+
+Jika shell BELUM elevated:
+- Jangan menyatakan H3 gagal.
+- Gunakan mekanisme resmi Windows untuk membuka proses PowerShell elevated yang menjalankan proses verifikasi.
+- Jika UAC prompt muncul, tampilkan instruksi singkat kepada operator untuk klik YES.
+- Setelah proses elevated tersedia, lanjutkan otomatis dari PHASE 2.
+- Jangan bypass UAC.
+- Jangan meminta password.
+
+PHASE 2 — INSTALL H3
+
+Gunakan installer repo:
+
+windows\Install-XausrBridge.ps1
+
+Gunakan root:
+E:\mt5\mt-info\python
+
+Gunakan entrypoint:
+bridge
+
+Gunakan Python executable yang benar-benar terdeteksi pada mesin.
+
+Jalankan installer dari elevated shell.
+
+Jika task lama XAUSR-Bridge ada:
+- jangan menghapus task lain.
+- hanya kelola task XAUSR-Bridge sesuai lifecycle installer.
+- gunakan installer resmi repo.
+
+Tangkap:
+- stdout
+- stderr
+- exit code
+
+Jika registration gagal:
+- tampilkan error Windows sebenarnya.
+- jangan mengubah security principal untuk memaksa PASS.
+- jika jelas merupakan bug installer, perbaiki hanya H3, tambahkan regression test, ulangi installer.
+- jangan commit/push.
+
+PHASE 3 — VERIFY ACTUAL TASK
+
+Setelah berhasil:
+
+schtasks /Query /TN "XAUSR-Bridge" /V /FO LIST
+
+dan:
+
+schtasks /Query /TN "XAUSR-Bridge" /XML
+
+Parse XML aktual.
+
+WAJIB cocok:
+
+UserId:
+NT AUTHORITY\LocalService
+
+LogonType:
+ServiceAccount
+
+RunLevel:
+LeastPrivilege
+
+BootTrigger:
+ada
+
+Delay:
+PT5M
+
+StartWhenAvailable:
+true
+
+RestartOnFailure:
+ada
+
+Restart interval:
+PT1M atau ekuivalen yang ditetapkan implementasi
+
+Maximum restart count:
+3
+
+Action:
+absolute path
+
+WorkingDirectory:
+absolute path
+
+Tidak boleh:
+- Administrator
+- current interactive user
+- password
+- relative executable path
+- relative working directory
+- interactive logon
+
+PHASE 4 — LIFECYCLE
+
+Lakukan lifecycle test nyata:
+
+A. Manual start
+
+schtasks /Run /TN "XAUSR-Bridge"
+
+Tunggu sampai task/process memiliki kesempatan startup.
+
+Periksa:
+- task status
+- last run result
+- process
+- logs
+
+Bridge harus tetap aman/read-only.
+
+JANGAN menjalankan:
+- order_send
+- order_check
+- trade transaction
+
+B. Stop
+
+Hentikan task dengan mekanisme yang didukung.
+
+Pastikan process berhenti.
+
+C. Disable
+
+Disable task.
+
+Query task.
+
+Pastikan disabled.
+
+D. Enable
+
+Enable kembali.
+
+Query task.
+
+Pastikan enabled.
+
+Jangan reboot dulu kecuali seluruh langkah di atas PASS dan reboot memang diperlukan untuk verifikasi BootTrigger.
+
+PHASE 5 — BOOT TRIGGER
+
+Jika aman dilakukan:
+- reboot Windows.
+- jangan menyentuh MT5 position/order.
+- setelah Windows kembali, tunggu lebih dari Delay PT5M.
+- query task.
+- verifikasi task dapat start melalui BootTrigger tanpa interactive login.
+
+Jika reboot tidak aman/tidak dapat dilakukan dari environment:
+- jangan memaksakan.
+- tandai BootTrigger sebagai EXTERNAL VERIFICATION REQUIRED.
+- lanjutkan laporan.
+
+PHASE 6 — CRASH RECOVERY
+
+Jika aman dan bridge memang tidak melakukan trading:
+
+- jalankan task.
+- identifikasi process bridge milik XAUSR-Bridge.
+- hentikan process secara paksa sekali.
+- jangan membunuh proses MT5 terminal.
+- jangan menyentuh posisi/order.
+- tunggu restart policy.
+- amati apakah bridge restart sesuai:
+  PT1M, maksimum 3 restart.
+
+Jika mekanisme crash test berisiko menjalankan trading:
+STOP crash drill dan tandai NOT EXECUTED.
+
+PHASE 7 — MT5 SAFETY
+
+Pastikan selama seluruh verification:
+
+order_send invocation = 0
+order_check invocation = 0
+trade transactions = 0
+
+Pastikan posisi pre-existing tetap tidak berubah.
+
+Jangan close/modify position.
+
+PHASE 8 — TEST SUITE
+
+Jika tidak ada source change:
+- jangan perlu menjalankan full suite lagi hanya karena lifecycle test.
+
+Jika source H3 berubah:
+- jalankan H3 tests.
+- jalankan full suite.
+- pastikan H1/H2/H4 tidak berubah.
+
+PHASE 9 — FINAL REPORT
+
+Berikan hasil nyata, bukan asumsi:
+
+ELEVATED
+TASK CREATED
+TASK XML
+PRINCIPAL
+LOGON TYPE
+RUN LEVEL
+BOOT TRIGGER
+DELAY
+START WHEN AVAILABLE
+RESTART POLICY
+ACTION
+WORKING DIRECTORY
+MANUAL START
+STOP
+DISABLE
+ENABLE
+REBOOT/BOOT TEST
+CRASH RECOVERY
+ORDER_SEND
+ORDER_CHECK
+MT5 POSITION CHANGE
+H3 TEST
+FULL SUITE
+GIT STATUS
+VERDICT
+
+Verdict:
+
+A = PASS
+Jika seluruh bagian yang dapat diverifikasi pada host ini benar-benar PASS.
+
+B = CONDITIONAL
+Jika sebagian external verification belum dapat dilakukan tetapi task/security model sudah benar.
+
+C = BLOCKED
+Jika task tetap tidak dapat dibuat atau security model tidak dapat diverifikasi.
+
+PENTING:
+- Kerjakan semuanya otomatis.
+- Jangan berhenti hanya karena shell awal tidak elevated.
+- Untuk UAC, hanya operator yang boleh menyetujui prompt Windows.
+- Jangan bypass UAC.
+- Jangan mengubah security model.
+- Jangan trading.
+- Jangan order_send.
+- Jangan order_check.
+- Jangan commit.
+- Jangan push.
+- Setelah final report, STOP.
 ```
 # 
 ```
