@@ -16,6 +16,224 @@
 ```
 # 
 ```
+TASK: VERIFY INTENDED USER-SESSION MT5 WORKER -> LOCAL SERVICE BRIDGE
+
+Hasil E2E sebelumnya:
+- XAUSR-Bridge berjalan sebagai NT AUTHORITY\LocalService.
+- Python machine-wide valid.
+- LocalService -> MT5 direct IPC menghasilkan error -10003.
+- Ini konsisten dengan Windows session isolation.
+- Arsitektur project memang memisahkan:
+  1. komponen user-session yang menyentuh MT5
+  2. XAUSR-Bridge LocalService yang menerima/membaca hasil melalui file-tail.
+- MT5 DEMO sebelumnya sudah berhasil diakses dari user-session.
+- XAUUSD.m valid.
+- M5/M15 valid.
+- Signal result sebelumnya NO_TRADE.
+- order_send = 0.
+- order_check = 0.
+- Posisi pre-existing tidak berubah.
+
+TUJUAN:
+Verifikasi arsitektur yang BENAR, tanpa memaksa LocalService mengakses MT5 secara langsung.
+
+ALUR YANG HARUS DIUJI:
+
+USER SESSION MT5 WORKER
+        |
+        | read-only MT5 data
+        v
+signal/feed/output file
+        |
+        | file-tail / durable handoff
+        v
+XAUSR-Bridge (LocalService)
+        |
+        v
+bridge processing
+
+ATURAN KERAS:
+- Jangan trading.
+- Jangan order_send().
+- Jangan order_check().
+- Jangan close/modify/delete posisi/order.
+- Jangan menyentuh posisi MT5.
+- Jangan mengubah H3 security model.
+- Jangan mengganti LocalService menjadi Administrator/user.
+- Jangan mencoba bypass Windows session isolation.
+- Jangan mengubah source code kecuali ditemukan bug nyata pada handoff yang memang diperlukan.
+- Jangan commit.
+- Jangan push.
+- Jangan reboot laptop.
+- STOP setelah laporan.
+
+1. INSPEKSI ARSITEKTUR
+
+Baca implementation yang sudah ada dan tentukan secara tepat:
+
+- proses mana yang memang dirancang menyentuh MT5
+- proses mana yang berjalan sebagai LocalService
+- file/path apa yang menjadi handoff
+- format data handoff
+- bagaimana bridge mendeteksi data baru
+- bagaimana bridge memvalidasi data
+- bagaimana bridge menangani partial/unwritable file
+- bagaimana durability/fail-closed bekerja
+
+Jangan membuat arsitektur baru.
+
+2. START USER-SESSION MT5 WORKER
+
+Dari sesi Windows user yang sama dengan MT5 DEMO, jalankan komponen MT5 worker/feed yang memang sudah ada di repo.
+
+Pastikan:
+- MT5 initialize berhasil
+- terminal/account terbaca
+- XAUUSD.m resolve exact
+- M5/M15 terbaca
+- forming candle tidak dipakai sebagai closed candle
+- tidak ada trading API
+
+Catat PID dan owner proses.
+
+3. GENERATE READ-ONLY HANDOFF
+
+Biarkan worker menghasilkan output/handoff sesuai mekanisme project yang SUDAH ADA.
+
+Jangan membuat format baru.
+
+Data minimal yang perlu dapat diverifikasi:
+- symbol = XAUUSD.m
+- timestamp
+- M5/M15 closed-bar information atau signal/feed payload yang memang digunakan project
+- provenance/metadata jika memang tersedia
+
+Tidak boleh ada:
+- order instruction
+- trade execution
+- position modification
+
+4. LOCAL SERVICE CONSUMPTION
+
+Pastikan XAUSR-Bridge yang berjalan sebagai:
+
+NT AUTHORITY\LocalService
+
+dapat membaca handoff tersebut.
+
+Verifikasi:
+- file ditemukan
+- file terbaca
+- parser menerima payload
+- payload tidak dianggap partial
+- payload lolos validation
+- bridge memproses payload
+- tidak ada error permission yang tidak semestinya
+
+5. FAIL-CLOSED TEST
+
+Jika mekanisme test yang SUDAH ADA memungkinkan:
+
+- buat kondisi file handoff incomplete/unwritable melalui mekanisme test yang sudah tersedia.
+- pastikan bridge tidak mengonsumsi payload partial.
+- pastikan tidak ada state setengah terbaca.
+
+Jangan membuat perubahan source hanya untuk test ini.
+
+6. DATA CONSISTENCY
+
+Bandingkan data dari user-session worker dengan data yang diterima LocalService.
+
+Pastikan:
+- symbol sama
+- timestamp sama/terkait secara valid
+- candle data sama
+- tidak ada transformasi harga yang tidak terdokumentasi
+- tidak ada future candle
+- tidak ada look-ahead
+
+7. SIGNAL PATH
+
+Jika arsitektur memang memungkinkan signal decision secara read-only:
+
+USER SESSION DATA
+ -> validation
+ -> strategy
+ -> NO_TRADE / signal decision
+ -> handoff
+ -> LocalService bridge
+
+Jalankan hanya sampai decision/handoff.
+
+Jika tidak ada setup reversal yang valid:
+hasil harus NO_TRADE.
+
+Jangan memaksa signal.
+
+8. MT5 SAFETY
+
+Selama test:
+- order_send = 0
+- order_check = 0
+- trade transactions = 0
+- close/modify/delete = 0
+- pre-existing position tetap sama
+
+9. PROCESS OWNERSHIP
+
+Tampilkan:
+
+MT5 WORKER PID
+MT5 WORKER OWNER
+BRIDGE PID
+BRIDGE OWNER
+
+Expected:
+- MT5 worker = Windows user session
+- XAUSR-Bridge = LocalService
+
+Jangan mencoba membuat kedua proses menggunakan session yang sama jika arsitektur tidak demikian.
+
+10. FINAL VERDICT
+
+A = PASS
+Jika user-session MT5 worker dapat menghasilkan handoff read-only dan XAUSR-Bridge LocalService dapat menerima/memvalidasinya sesuai desain.
+
+B = CONDITIONAL
+Jika handoff bekerja tetapi market closed/static membatasi freshness atau sebagian E2E tidak dapat diamati.
+
+C = BLOCKED
+Jika handoff architecture yang memang ada di repo tidak dapat bekerja.
+
+PENTING:
+Error LocalService -> MT5 `-10003` JANGAN dianggap bug dengan sendirinya.
+Jangan memperbaiki session isolation dengan menurunkan security model.
+Yang harus diverifikasi adalah arsitektur handoff yang memang dirancang project.
+
+LAPORAN:
+
+MT5 WORKER
+WORKER OWNER
+MT5 CONNECTION
+SYMBOL
+M5/M15
+HANDOFF FILE
+HANDOFF VALIDATION
+LOCAL SERVICE BRIDGE
+BRIDGE OWNER
+DATA CONSISTENCY
+SIGNAL RESULT
+ORDER_SEND
+ORDER_CHECK
+POSITION CHANGE
+REBOOT
+VERDICT
+
+REBOOT = NOT PERFORMED.
+
+Jangan commit.
+Jangan push.
+STOP setelah laporan.
 
 ```
 # 
