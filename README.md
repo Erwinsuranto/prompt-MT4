@@ -62,7 +62,282 @@
 ```
 # 
 ```
+TASK: FINAL PRE-MONDAY READINESS — FIX ONLY REAL BLOCKERS
 
+Repo:
+E:\mt5\mt-info
+
+TUJUAN:
+Pastikan project benar-benar siap sehingga hari Senin kita bisa langsung menjalankan REAL XAUUSD M5 LIVE SHADOW TEST tanpa pekerjaan teknis tambahan.
+
+INI BUKAN FULL AUDIT.
+Fokus hanya pada blocker yang dapat mencegah test Senin.
+
+CURRENT BASELINE:
+- Git main sudah di commit H3: 383fdec
+- HEAD = origin/main = 383fdec
+- working tree clean
+- H1/H2/H3/H4 sudah selesai
+- Windows Task/LocalService sudah diverifikasi
+- User-session MT5 worker -> handoff -> LocalService sudah terbukti
+- XAUUSD.m exact + valid
+- M5/M15 broker data valid
+- Shadow pipeline sudah berjalan
+- Market sebelumnya closed
+- Shadow result sebelumnya NO_TRADE
+- order_send = 0
+- order_check = 0
+- position tidak berubah
+- tidak perlu reboot untuk readiness ini
+
+TARGET SENIN:
+User hanya perlu membuka/menjalankan environment yang diperlukan lalu menjalankan shadow test.
+Tidak boleh baru menemukan dependency/path/config/handoff blocker pada hari Senin.
+
+ATURAN KERAS:
+- Jangan melakukan trading.
+- Jangan order_send().
+- Jangan order_check().
+- Jangan open/close/modify/delete position/order.
+- Jangan menyentuh posisi MT5.
+- Jangan membuat synthetic market data.
+- Jangan mengubah strategy rules.
+- Jangan mengubah parameter strategy untuk memperbanyak signal.
+- Jangan mengubah H1/H2/H3/H4 kecuali ditemukan blocker nyata.
+- Jangan melakukan full-repo audit.
+- Jangan melakukan speculative refactor.
+- Jangan menambah fitur yang tidak diperlukan untuk test Senin.
+- Jangan reboot laptop.
+- Jika tidak ada blocker, jangan ubah source.
+- Jika ada blocker nyata, boleh fix minimal sekarang.
+
+1. GIT BASELINE
+
+Jalankan:
+
+git status --short
+git rev-parse HEAD
+git rev-parse origin/main
+
+Expected:
+HEAD == origin/main == 383fdec...
+working tree clean.
+
+Jika tidak:
+STOP dan laporkan.
+
+2. TEST EXACT MONDAY ENTRY PATH
+
+Identifikasi perintah/path yang benar-benar akan digunakan Senin untuk menjalankan:
+
+USER SESSION
+-> MT5
+-> shadow engine
+-> handoff
+-> LocalService bridge
+
+Gunakan implementation existing.
+
+Jangan membuat command baru jika command existing sudah benar.
+
+Verifikasi:
+- Python interpreter
+- required packages
+- MT5 package
+- repo path
+- required environment/config
+- required directories
+- shadow output/journal path
+- handoff path
+- LocalService bridge availability
+- executor = NoExecution
+
+3. DEPENDENCY CHECK
+
+Pastikan dependency yang dibutuhkan Senin memang tersedia di Windows.
+
+Khusus:
+- Python interpreter yang digunakan worker
+- MetaTrader5 Python package
+- numpy/dependencies existing
+- module import xausr
+- shadow module
+- MT5 connection dependency
+
+Jangan install ulang package jika sudah tersedia.
+
+Jika dependency missing:
+boleh install dependency yang memang diperlukan.
+Jangan mengubah source hanya untuk menghindari dependency.
+
+4. MT5 READINESS
+
+Tanpa trading:
+
+- connect MT5 DEMO
+- verify account
+- verify server
+- resolve exact XAUUSD.m
+- read tick
+- read M5
+- read M15
+- verify closed-bar path
+
+Jangan menggunakan forming candle.
+
+Jika market closed:
+jangan anggap error.
+
+5. SHADOW ENTRY TEST
+
+Jalankan jalur shadow existing sampai sejauh mungkin dengan data broker yang tersedia.
+
+Expected:
+- executor NoExecution
+- signal file/journal path valid
+- output write/read valid
+- no order execution
+
+Jika market closed:
+boleh memakai existing broker historical/closed data hanya untuk structural readiness.
+Jangan menyebutnya live freshness.
+
+6. HANDOFF
+
+Verifikasi handoff path:
+
+MT5 USER SESSION
+    ->
+handoff
+    ->
+XAUSR-Bridge LocalService
+
+Pastikan:
+- permissions benar
+- LocalService dapat membaca
+- parser valid
+- partial-file protection aktif
+- duplicate protection aktif
+- durable output aktif
+
+Jangan mengubah LocalService security model.
+
+7. MONDAY OPERATOR STEPS
+
+Tentukan secara singkat langkah manual MINIMAL yang harus dilakukan user pada hari Senin.
+
+Contoh bentuk:
+
+1. buka MT5 Demo
+2. buka PowerShell/repo
+3. jalankan command X
+4. tunggu closed M5 candles
+5. lihat report
+
+Gunakan command existing yang benar-benar ditemukan di repo.
+
+Jangan mengarang command.
+
+Jika ada langkah manual yang sebenarnya tidak perlu, jangan tambahkan.
+
+8. SAFETY PROOF
+
+Pastikan jalur Monday test tidak dapat melakukan execution.
+
+Verifikasi:
+- order_send = 0 selama readiness
+- order_check = 0 selama readiness
+- executor = NoExecution
+- no position change
+- no order change
+
+Jangan memanggil order_check hanya untuk membuktikan ini.
+
+9. ONLY IF REAL BLOCKER EXISTS
+
+Jika ditemukan blocker yang benar-benar akan membuat Monday test gagal:
+
+- jelaskan root cause
+- lakukan minimal fix
+- tambahkan regression test jika sesuai
+- jalankan targeted test
+- jalankan full suite hanya jika perubahan cukup luas untuk memerlukannya
+- pastikan tidak ada regression H1/H2/H3/H4
+- git diff hanya berisi fix tersebut
+
+Kemudian:
+git add <file yang relevan>
+git commit -m "<appropriate fix message>"
+git push origin main
+
+Setelah push:
+git rev-parse HEAD
+git rev-parse origin/main
+git status --short
+
+Jika tidak ada blocker:
+JANGAN commit.
+JANGAN push.
+
+10. FINAL VERDICT
+
+A = READY FOR MONDAY
+Jika exact Monday path dapat dijalankan dan tidak ada blocker.
+
+B = CONDITIONAL
+Jika hanya ada keterbatasan market closed/freshness yang memang harus menunggu Senin.
+
+C = BLOCKED
+Jika ada blocker nyata yang belum dapat diselesaikan.
+
+FINAL REPORT HARUS BERISI:
+
+GIT HEAD
+ORIGIN/MAIN
+WORKTREE
+
+PYTHON
+MT5 PACKAGE
+REQUIRED DEPENDENCIES
+
+MT5 DEMO
+SERVER
+XAUUSD SYMBOL
+
+M5
+M15
+FORMING CANDLE
+
+SHADOW ENGINE
+HANDOFF
+LOCAL SERVICE
+EXECUTOR
+
+ORDER_SEND
+ORDER_CHECK
+POSITION CHANGE
+ORDER CHANGE
+
+MONDAY COMMAND
+MONDAY MANUAL STEPS
+
+CODE CHANGED
+COMMIT
+PUSH
+REBOOT
+
+BLOCKERS
+FIXES
+
+VERDICT
+
+PENTING:
+Tujuan utama adalah Senin tinggal TEST.
+Jangan mencari masalah yang tidak relevan.
+Jangan memperbaiki sesuatu hanya karena "bisa dibuat lebih bagus".
+Jangan mengubah strategy.
+Jangan trading.
+STOP setelah laporan.
 ```
 # 
 ```
