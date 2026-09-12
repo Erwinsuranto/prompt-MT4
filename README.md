@@ -32,7 +32,174 @@
 ```
 # 
 ```
+TASK: VERIFY AND FIX LOCAL SERVICE PYTHON RUNTIME
 
+Kondisi saat ini:
+
+- XAUSR-Bridge Scheduled Task sudah berhasil dibuat.
+- Principal = NT AUTHORITY\LocalService.
+- LogonType = ServiceAccount.
+- RunLevel = LeastPrivilege.
+- BootTrigger = PT5M.
+- StartWhenAvailable = true.
+- Restart policy = PT1M x3.
+- Start/Stop/Disable/Enable sudah berhasil.
+- H3 test = 57 passed, 1 skipped.
+- Tidak ada trading.
+- order_send = 0.
+- order_check = 0.
+- Posisi MT5 tidak berubah.
+- Verdict masih B karena runtime Python untuk LocalService belum terbukti.
+- Sebelumnya ditemukan Python yang dipakai berasal dari user-local installation:
+  C:\Users\ACER\AppData\Local\Python\...
+  LocalService mungkin tidak dapat mengakses runtime tersebut.
+
+TUJUAN:
+Pastikan XAUSR-Bridge benar-benar dapat menjalankan Python sebagai LocalService tanpa interactive user session.
+
+ATURAN:
+- Jangan trading.
+- Jangan order_send().
+- Jangan order_check().
+- Jangan menyentuh posisi/order MT5.
+- Jangan meminta atau menyimpan password.
+- Jangan mengganti LocalService menjadi Administrator.
+- Jangan mengganti RunLevel menjadi HighestAvailable.
+- Jangan mengubah H1/H2/H4.
+- Jangan mengubah source code kecuali terbukti ada bug deployment H3.
+- Jangan commit.
+- Jangan push.
+
+1. INSPEKSI TASK AKTUAL
+
+Ambil XML aktual:
+
+schtasks /Query /TN "XAUSR-Bridge" /XML
+
+Tentukan secara pasti:
+- executable/action yang dijalankan
+- arguments
+- working directory
+- Python executable yang digunakan
+
+2. CEK PYTHON RUNTIME
+
+Periksa apakah Python executable tersebut:
+- benar-benar ada
+- dapat dieksekusi oleh LocalService
+- bukan hanya dapat dieksekusi oleh user ACER
+- semua directory parent dapat diakses LocalService
+- Python environment memiliki dependency yang diperlukan bridge
+
+Jangan hanya mengetes sebagai user ACER.
+
+3. TEST DENGAN LOCAL SERVICE
+
+Gunakan metode Windows-native yang aman untuk membuktikan apakah LocalService dapat menjalankan Python executable dan:
+
+python --version
+
+Kemudian jalankan health/readiness startup bridge yang NON-TRADING.
+
+Jangan menjalankan:
+- order_send
+- order_check
+- trade operation
+
+Jika Windows-native test membutuhkan elevated shell, gunakan UAC resmi Windows.
+Jangan bypass UAC.
+
+4. JIKA PYTHON USER-LOCAL TIDAK DAPAT DIAKSES LOCALSERVICE
+
+Jangan mengubah principal.
+
+Cari apakah sudah ada Python machine-wide yang tersedia di host.
+
+Jika ada:
+- gunakan Python machine-wide tersebut.
+- update/reinstall XAUSR-Bridge melalui installer resmi.
+- jangan mengubah source code.
+
+Jika TIDAK ada Python machine-wide:
+- jangan diam-diam menggunakan Administrator.
+- jangan menyimpan credential.
+- laporkan bahwa external prerequisite Python machine-wide belum tersedia.
+- jika environment mengizinkan instalasi package/software secara resmi tanpa credential tambahan, boleh gunakan installer resmi Python/Windows package manager.
+- jika membutuhkan tindakan UAC/operator, minta operator approve UAC saja.
+
+5. AFTER RUNTIME VALID
+
+Setelah LocalService terbukti dapat menjalankan Python:
+
+- reinstall/update XAUSR-Bridge menggunakan installer resmi repo
+- query XML kembali
+- pastikan security model tetap:
+  LocalService
+  ServiceAccount
+  LeastPrivilege
+- pastikan BootTrigger PT5M tetap
+- pastikan RestartOnFailure PT1M x3 tetap
+- pastikan absolute action/workdir tetap
+
+6. SAFE START TEST
+
+Start task:
+
+schtasks /Run /TN "XAUSR-Bridge"
+
+Verifikasi:
+- task status
+- process owner
+- process command line
+- last run result
+- bridge startup/readiness log
+
+Pastikan process owner adalah LocalService atau SID LocalService yang ekuivalen.
+
+Jangan melakukan trading.
+
+7. STOP TEST
+
+Stop task.
+
+Pastikan process berhenti.
+
+8. FINAL REPORT
+
+Berikan:
+
+PYTHON PATH
+PYTHON MACHINE-WIDE
+LOCALSERVICE CAN EXECUTE PYTHON
+BRIDGE STARTED AS LOCALSERVICE
+TASK XML
+PRINCIPAL
+LOGON TYPE
+RUN LEVEL
+BOOT TRIGGER
+DELAY
+START WHEN AVAILABLE
+RESTART POLICY
+START
+STOP
+ORDER_SEND
+ORDER_CHECK
+MT5 POSITION CHANGE
+VERDICT
+
+Verdict:
+A = PASS jika LocalService benar-benar dapat menjalankan bridge dan seluruh task security model tetap benar.
+B = CONDITIONAL jika Python machine-wide/runtime masih memerlukan tindakan eksternal.
+C = BLOCKED jika deployment tidak dapat dijalankan dengan LocalService.
+
+Jika source code tidak berubah:
+- jangan commit/push.
+
+Jika source code memang harus berubah:
+- tampilkan diff dan test result.
+- jangan commit/push.
+
+STOP setelah laporan.
 ```
 # 
 ```
