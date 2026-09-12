@@ -6,7 +6,55 @@
 ```
 # 
 ```
+TASK: PUSH H3 KE ORIGIN/MAIN — JANGAN UBAH APA PUN
 
+Repo:
+E:\mt5\mt-info
+
+Kondisi:
+- HEAD lokal = 383fdec
+- Commit H3 sudah dibuat.
+- Working tree = clean.
+- origin/main masih = 1a51216.
+- Tidak perlu coding.
+- Tidak perlu test ulang.
+- Tidak perlu audit.
+- Tidak perlu reboot.
+
+Jalankan hanya:
+
+git push origin main
+
+Jika push berhasil, langsung verifikasi:
+
+git rev-parse HEAD
+git rev-parse origin/main
+git status --short
+
+Target:
+- HEAD == origin/main
+- SHA = 383fdec...
+- working tree clean
+
+ATURAN:
+- Jangan edit file.
+- Jangan commit lagi.
+- Jangan reset.
+- Jangan force push.
+- Jangan trading.
+- Jangan order_send().
+- Jangan order_check().
+- Jangan menyentuh MT5.
+- Jangan reboot laptop.
+
+Jika git push ditolak atau gagal:
+JANGAN melakukan workaround/destructive action.
+Laporkan error persisnya dan STOP.
+
+Jika berhasil:
+tampilkan hasil push + SHA HEAD + SHA origin/main + git status.
+
+STOP.
 ```
 # 
 ```
