@@ -40,7 +40,82 @@
 ```
 # 
 ```
+Jalankan ulang verifikasi H3, tetapi KALI INI WAJIB dari PowerShell yang benar-benar ELEVATED (Run as Administrator).
 
+Jangan ubah source code.
+Jangan commit.
+Jangan push.
+Jangan trading.
+Jangan order_send().
+Jangan order_check().
+Jangan menyentuh posisi/order MT5.
+
+1. Buka PowerShell baru dengan:
+   Run as Administrator
+
+2. Verifikasi elevation terlebih dahulu.
+   Jika elevated=False:
+   STOP.
+
+3. Masuk ke repo:
+   cd E:\mt5\mt-info
+
+4. Jalankan installer H3 dengan runtime yang sudah ditentukan project:
+
+   powershell -ExecutionPolicy Bypass -File .\windows\Install-XausrBridge.ps1 `
+     -Root "E:\mt5\mt-info\python" `
+     -Entrypoint bridge `
+     -Python "C:\Users\ACER\AppData\Local\Python\pythoncore-3.14-64\python.exe"
+
+   Jika path Python berbeda di mesin ini, gunakan path Python yang benar-benar terdeteksi oleh Windows, jangan mengarang path.
+
+5. Setelah installer selesai, langsung verifikasi:
+
+   schtasks /Query /TN "XAUSR-Bridge" /V /FO LIST
+
+   lalu:
+
+   schtasks /Query /TN "XAUSR-Bridge" /XML
+
+6. Laporkan nilai aktual:
+   - UserId
+   - LogonType
+   - RunLevel
+   - BootTrigger
+   - Delay
+   - StartWhenAvailable
+   - RestartOnFailure
+   - Restart interval
+   - Restart count
+   - executable/action
+   - working directory
+
+7. Jika task berhasil dibuat dan XML sesuai desain H3:
+   lanjutkan lifecycle test:
+   - manual start
+   - query status
+   - stop
+   - disable
+   - query
+   - enable
+   - query final
+
+   Jangan reboot dulu.
+
+8. Pastikan:
+   - order_send = 0
+   - order_check = 0
+   - tidak ada transaksi
+   - posisi MT5 tidak berubah
+
+9. FINAL:
+   A = PASS jika task benar-benar dibuat dan XML + lifecycle sesuai desain H3.
+   B = CONDITIONAL jika task dibuat tetapi ada caveat.
+   C = BLOCKED jika tetap gagal.
+
+STOP setelah laporan.
+
+Jangan commit/push.
 ```
 # 
 ```
