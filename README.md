@@ -20,6 +20,262 @@
 ```
 # 
 ```
+TASK: REAL WINDOWS E2E BRIDGE -> MT5 READINESS VERIFICATION
+
+Repo:
+E:\mt5\mt-info
+
+Tujuan:
+Verifikasi jalur nyata Windows:
+XAUSR-Bridge -> Python runtime -> MT5 terminal -> XAUUSD.m -> readiness/feed layer
+
+Ini hanya READ-ONLY. Belum ada eksekusi order.
+
+KONDISI YANG SUDAH TERVERIFIKASI:
+- XAUSR-Bridge berhasil dibuat sebagai NT AUTHORITY\LocalService.
+- LogonType = ServiceAccount.
+- RunLevel = LeastPrivilege.
+- BootTrigger = PT5M.
+- StartWhenAvailable = true.
+- RestartOnFailure = PT1M x3.
+- Python machine-wide tersedia.
+- Bridge berhasil start sebagai LocalService.
+- Start/Stop/Disable/Enable berhasil.
+- Windows crash drill inconclusive karena Stop-Process tidak diklasifikasikan sebagai failure oleh scheduler; jangan ubah H3 karena itu.
+- MT5 DEMO terhubung.
+- Broker = JustMarkets-Demo2.
+- Symbol broker = XAUUSD.m.
+- M5/M15 bars valid.
+- order_check sebelumnya retcode 0 / Done.
+- order_send = 0.
+- Posisi DEMO pre-existing tidak boleh disentuh.
+
+ATURAN KERAS:
+- Jangan reboot laptop.
+- Jangan trading.
+- DILARANG order_send().
+- DILARANG order_check() pada tahap ini.
+- Jangan close/modify/delete posisi/order.
+- Jangan symbol_select() kecuali code path memang membutuhkan dan laporkan.
+- Jangan mengubah source code.
+- Jangan commit.
+- Jangan push.
+- Jangan mengubah akun MT5.
+- Jangan mengubah task security model.
+- Jangan membuat posisi/order baru.
+- STOP setelah laporan.
+
+1. IDENTIFIKASI TASK DAN PROCESS
+
+Query:
+
+schtasks /Query /TN "XAUSR-Bridge" /V /FO LIST
+
+Pastikan task enabled.
+
+Start task jika belum running.
+
+Identifikasi PID XAUSR-Bridge.
+
+Pastikan:
+- executable = machine-wide Python
+- command line = bridge module
+- owner = NT AUTHORITY\LocalService
+
+Jangan memilih process Python lain.
+
+2. BRIDGE HEALTH/STARTUP
+
+Periksa log/status bridge yang tersedia.
+
+Pastikan bridge:
+- berhasil startup
+- tidak crash
+- tidak masuk error loop
+- tidak membutuhkan interactive user
+- tidak meminta credential
+
+Jika bridge memiliki health/readiness function yang memang sudah ada, panggil/read endpoint tersebut.
+
+Jangan membuat endpoint baru.
+
+3. MT5 CONNECTION DARI BRIDGE RUNTIME
+
+Verifikasi bahwa runtime bridge dapat mengakses MT5 Python API dalam konteks yang sama dengan task.
+
+Gunakan implementation yang sudah ada.
+
+Validasi:
+- mt5.initialize()
+- terminal_info()
+- account_info()
+
+Tampilkan:
+- terminal connected
+- server
+- account trade mode
+- terminal version
+- terminal trade_allowed
+- account trade_allowed
+
+Untuk tujuan ini trade_allowed=False bukan failure.
+
+4. SYMBOL RESOLUTION
+
+Gunakan resolver yang sudah ada di project.
+
+Pastikan broker symbol:
+XAUUSD.m
+
+Validasi:
+- exact resolution
+- tidak fuzzy-match
+- tidak memilih kandidat lain
+- symbol spec tersedia
+
+Tampilkan:
+- symbol
+- digits
+- point
+- trade mode
+- contract size
+- volume min/max/step
+- tick size/value
+- stops level
+- freeze level
+- filling mode
+- currencies
+
+5. READINESS CHECK
+
+Jalankan readiness check yang sudah tersedia di:
+
+python/xausr/mt5_ready.py
+
+Gunakan symbol XAUUSD.m.
+
+Verifikasi seluruh stage yang tersedia:
+- terminal
+- account
+- symbol
+- tick
+- readiness
+
+Jangan menjalankan order_check.
+
+Jangan menjalankan order_send.
+
+6. LIVE FEED READ-ONLY
+
+Jika bridge/feed layer memang sudah terhubung ke MT5:
+
+- baca tick
+- baca M5
+- baca M15
+
+Pastikan:
+- OHLC finite
+- harga > 0
+- ask >= bid
+- closed candles tidak menggunakan index 0
+- forming candle tetap dikecualikan
+- M5 closed-bar spacing konsisten
+- M15 closed-bar spacing konsisten
+- tidak ada look-ahead
+- tidak ada future closed candle
+
+Jika market sedang tutup/static:
+- tandai freshness UNKNOWN/CONDITIONAL
+- jangan menganggap sebagai error.
+
+7. STRATEGY PIPELINE READ-ONLY
+
+Jika live signal engine dapat dijalankan tanpa order:
+
+jalankan hanya sampai tahap:
+DATA -> VALIDATION -> SIGNAL DECISION
+
+Jangan sampai:
+SIGNAL -> EXECUTION
+
+Yang ingin dibuktikan:
+- engine menerima data broker XAUUSD.m
+- closed candle digunakan
+- M15 structure tersedia
+- M5 confirmation tersedia
+- jika tidak ada setup valid, hasil harus NO TRADE
+- tidak boleh memaksa signal
+
+Jangan membuka posisi.
+
+8. POSITION SAFETY
+
+Query:
+- positions_total()
+- orders_total()
+- positions_get()
+
+Catat posisi pre-existing.
+
+Pastikan:
+- jumlah posisi sama sebelum/sesudah
+- ticket pre-existing tidak berubah
+- tidak ada order baru
+
+9. CALL SAFETY AUDIT
+
+Hitung/konfirmasi selama E2E:
+
+order_send = 0
+order_check = 0
+trade transactions = 0
+close/modify/delete = 0
+
+Jika instrumentation project tersedia, gunakan instrumentation tersebut.
+Jangan menambahkan instrumentation hanya untuk test ini.
+
+10. FINAL VERDICT
+
+A = PASS
+Jika bridge nyata dapat mengakses MT5 DEMO, resolve XAUUSD.m, readiness/feed valid, dan pipeline dapat berjalan sampai signal decision tanpa trading.
+
+B = CONDITIONAL
+Jika koneksi/readiness valid tetapi live freshness/strategy decision belum dapat dinilai karena market closed/static atau kondisi eksternal.
+
+C = BLOCKED
+Jika bridge LocalService tidak dapat mengakses MT5, symbol tidak dapat di-resolve, atau readiness gagal.
+
+Tampilkan tabel:
+
+BRIDGE PROCESS
+PROCESS OWNER
+PYTHON
+MT5 CONNECTION
+SERVER
+SYMBOL
+SYMBOL SPEC
+READINESS
+TICK
+M5
+M15
+SIGNAL PIPELINE
+SIGNAL RESULT
+ORDER_SEND
+ORDER_CHECK
+TRADE TRANSACTION
+PRE-EXISTING POSITION
+POSITION CHANGE
+REBOOT
+VERDICT
+
+Catatan wajib:
+REBOOT = NOT PERFORMED.
+
+Jangan ubah source.
+Jangan commit.
+Jangan push.
+Jangan trading.
+STOP setelah laporan.
 
 ```
 # 
