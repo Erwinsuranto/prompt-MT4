@@ -28,7 +28,174 @@
 ```
 # 
 ```
+TASK: REAL WINDOWS XAUSR-BRIDGE CRASH RECOVERY VERIFICATION
 
+Lanjutkan dari hasil H3 sebelumnya.
+
+STATUS YANG SUDAH PASS:
+- XAUSR-Bridge berhasil dibuat.
+- Principal = NT AUTHORITY\LocalService.
+- LogonType = ServiceAccount.
+- RunLevel = LeastPrivilege.
+- BootTrigger = PT5M.
+- StartWhenAvailable = true.
+- RestartOnFailure = PT1M x3.
+- Python machine-wide tersedia.
+- Bridge terbukti berjalan sebagai LocalService.
+- Start = OK.
+- Stop = OK.
+- Disable = OK.
+- Enable = OK.
+- order_send = 0.
+- order_check = 0.
+- posisi MT5 tidak berubah.
+- H3 test = 57 passed, 1 skipped.
+
+CATATAN:
+- JANGAN reboot laptop.
+- BootTrigger verification ditandai EXTERNAL/PENDING dan jangan diuji sekarang.
+
+TUJUAN:
+Verifikasi nyata RestartOnFailure dengan mematikan PROCESS XAUSR-Bridge secara paksa, lalu memastikan Task Scheduler menjalankannya kembali sesuai policy.
+
+ATURAN KERAS:
+- Jangan reboot Windows.
+- Jangan menyentuh proses terminal MetaTrader 5.
+- Jangan close/modify/delete posisi atau order.
+- Jangan trading.
+- Jangan order_send().
+- Jangan order_check().
+- Jangan mengubah source code.
+- Jangan commit.
+- Jangan push.
+- Jangan mengubah principal/security model.
+- Hanya proses XAUSR-Bridge yang boleh dihentikan untuk crash drill.
+
+LANGKAH:
+
+1. QUERY TASK
+
+Ambil:
+
+schtasks /Query /TN "XAUSR-Bridge" /V /FO LIST
+
+Pastikan task enabled dan konfigurasi sebelumnya masih benar.
+
+2. START TASK
+
+Start:
+
+schtasks /Run /TN "XAUSR-Bridge"
+
+Tunggu sampai process XAUSR-Bridge benar-benar running.
+
+Identifikasi process dengan aman:
+- PID
+- executable
+- command line
+- owner/account
+
+WAJIB pastikan process owner adalah:
+NT AUTHORITY\LOCAL SERVICE
+
+Jangan memilih proses berdasarkan nama Python saja jika ada beberapa Python process.
+Pastikan PID benar-benar milik XAUSR-Bridge berdasarkan command line/path/task.
+
+3. CRASH DRILL
+
+Terminate HANYA PID XAUSR-Bridge tersebut.
+
+Gunakan mekanisme Windows yang sesuai, misalnya:
+
+Stop-Process -Id <PID> -Force
+
+Jangan terminate:
+- terminal MetaTrader 5
+- Python process lain
+- PowerShell
+- editor/AI tool
+- system process
+
+Catat:
+- waktu termination
+- PID sebelum terminate
+- exit/termination result
+
+4. OBSERVE RESTART
+
+Tunggu sampai policy restart bekerja.
+
+Periksa setiap sekitar 15–20 detik sampai maksimal sekitar 5 menit.
+
+Setiap pemeriksaan:
+- task status
+- Last Run Time
+- Last Run Result
+- process PID
+- process owner
+- command line
+
+Target:
+- process baru muncul
+- process owner = LocalService
+- command line/path sesuai task
+- restart terjadi sekitar PT1M
+
+5. COUNT
+
+Hitung restart yang benar-benar terjadi.
+
+Jangan memicu crash lebih dari yang diperlukan.
+
+Jika restart pertama berhasil:
+- cukup PASS untuk restart behavior.
+- jangan melakukan 3 crash hanya untuk menghabiskan quota.
+
+6. SAFETY CHECK
+
+Pastikan selama drill:
+- order_send invocation = 0
+- order_check invocation = 0
+- trade transactions = 0
+- positions/order tidak berubah
+
+7. STOP BRIDGE
+
+Setelah restart berhasil diverifikasi:
+- lakukan normal stop terhadap XAUSR-Bridge.
+- jangan biarkan crash drill meninggalkan process berjalan jika tidak diperlukan.
+
+8. FINAL VERDICT
+
+A = PASS
+Jika process XAUSR-Bridge restart otomatis sesuai RestartOnFailure dan kembali berjalan sebagai LocalService.
+
+B = CONDITIONAL
+Jika task restart bekerja tetapi timing/LastRunResult tidak dapat diverifikasi secara penuh.
+
+C = BLOCKED
+Jika restart tidak terjadi atau process yang diuji tidak dapat dipastikan sebagai XAUSR-Bridge.
+
+Tampilkan:
+
+TASK
+INITIAL PID
+INITIAL OWNER
+CRASH TIME
+RESTART PID
+RESTART OWNER
+RESTART DELAY
+LAST RUN RESULT
+RESTART COUNT
+ORDER_SEND
+ORDER_CHECK
+MT5 POSITION CHANGE
+REBOOT
+VERDICT
+
+REBOOT = NOT PERFORMED.
+
+STOP setelah laporan.
 ```
 # 
 ```
