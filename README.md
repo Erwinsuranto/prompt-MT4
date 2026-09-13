@@ -58,6 +58,155 @@
 ```
 # 
 ```
+AUDIT NO. 2 SAJA — TRADING LOGIC mt-info
+
+Lakukan audit mendalam dan independen terhadap TRADING LOGIC project mt-info.
+
+FOKUS AUDIT HANYA PADA STRATEGY/TRADING LOGIC.
+Jangan melakukan audit Windows, deployment, MT5 execution, security, ops, atau area lain kecuali ada dependency yang secara langsung membuat trading logic salah.
+
+Tujuan utama:
+Memastikan implementasi strategi benar-benar sesuai aturan yang telah ditetapkan dan tidak menghasilkan signal palsu karena look-ahead, repaint, candle forming, atau aturan yang dilonggarkan.
+
+ATURAN WAJIB:
+
+1. TIMEFRAME
+- M15 digunakan untuk market structure dan Support/Resistance.
+- M5 digunakan untuk confirmation dan entry.
+- Pastikan data M15/M5 yang digunakan benar-benar berasal dari candle yang sudah CLOSED.
+
+2. CLOSED CANDLE ONLY
+- Candle index/current forming candle tidak boleh digunakan sebagai dasar signal.
+- Signal hanya boleh dibuat setelah candle konfirmasi M5 selesai.
+- Periksa seluruh jalur data sampai signal generation, bukan hanya satu fungsi.
+- Cari kemungkinan forming candle masuk secara tidak langsung.
+
+3. NO LOOK-AHEAD
+Telusuri seluruh perhitungan:
+- Support/Resistance
+- structure
+- engulfing
+- confirmation
+- entry
+- exit bila relevan
+
+Pastikan tidak ada penggunaan data candle masa depan.
+Pastikan historical calculation pada candle N hanya menggunakan informasi yang tersedia sampai candle N tersebut.
+Periksa juga rolling/window calculations, swing/high-low detection, indexing, sorting, dan alignment M15↔M5.
+
+4. SUPPORT / RESISTANCE
+Pastikan S/R yang digunakan benar-benar tersedia sebelum entry.
+Jangan menggunakan level yang baru diketahui setelah candle entry terjadi.
+Pastikan implementasi tidak secara diam-diam melihat candle masa depan untuk menentukan level historis.
+
+5. ENGULFING
+Verifikasi bahwa "engulfing" benar-benar mengikuti definisi strategy yang digunakan project.
+Jangan menerima candle hanya karena body lebih besar atau candle berlawanan arah.
+Periksa:
+- arah candle sebelumnya
+- arah candle engulfing
+- open/close relationship
+- body containment/engulfment sesuai definisi kode
+- indexing candle
+
+6. REVERSAL LOGIC
+Signal hanya boleh muncul bila:
+- kondisi S/R valid
+- kondisi reversal valid
+- engulfing/confirmation valid
+- seluruh syarat strategy terpenuhi
+
+Jika salah satu syarat tidak terpenuhi:
+=> NO TRADE.
+
+DILARANG:
+- membuat fallback signal
+- melonggarkan rule
+- menambahkan trend-following strategy
+- memaksa signal ketika market trending
+- mengubah threshold hanya agar jumlah trade/profit/win-rate meningkat
+- melakukan parameter optimization untuk mempercantik backtest
+
+7. TRENDING MARKET
+Strategy ini selective reversal strategy.
+Jika kondisi pasar tidak sesuai dengan setup reversal yang ditentukan, hasil yang benar adalah NO TRADE.
+Jangan menciptakan setup alternatif hanya agar strategy tetap aktif ketika market trending.
+
+8. CAUSALITY TEST
+Cari bukti konkret apakah strategy bersifat causal.
+Untuk setiap komponen penting, jelaskan:
+- data apa yang tersedia saat keputusan dibuat
+- candle/index mana yang digunakan
+- apakah ada data masa depan
+- apakah signal bisa berubah setelah candle berikutnya muncul
+
+9. AUDIT PERUBAHAN MUSE 7 HARI TERAKHIR
+Periksa git history/diff 7 hari terakhir dan identifikasi perubahan yang menyentuh trading logic.
+Untuk setiap perubahan:
+- apa yang berubah
+- apakah behavior strategy berubah
+- apakah perubahan valid
+- apakah berpotensi menimbulkan look-ahead/repaint/false signal
+
+10. TEST
+Jika menemukan kelemahan:
+- buat regression test yang membuktikan masalah tersebut
+- perbaiki hanya masalah yang terbukti
+- jangan melakukan refactor besar yang tidak diperlukan
+
+Jika tidak menemukan bug:
+- JANGAN mengubah kode
+- JANGAN membuat commit
+
+Jika menemukan bug dan memperbaikinya:
+- jalankan test relevan
+- pastikan tidak merusak rule strategy
+- tampilkan file yang berubah dan alasan setiap perubahan
+- commit hanya perubahan yang diperlukan
+- push ke origin/main hanya jika fix benar-benar diperlukan
+
+OUTPUT WAJIB:
+
+A. VERDICT:
+PASS / FIX REQUIRED / BLOCKED
+
+B. TRADING LOGIC AUDIT
+- M15 structure: PASS/FAIL
+- M5 confirmation: PASS/FAIL
+- closed candle: PASS/FAIL
+- no look-ahead: PASS/FAIL
+- no repaint: PASS/FAIL
+- Support/Resistance causality: PASS/FAIL
+- engulfing definition: PASS/FAIL
+- reversal conditions: PASS/FAIL
+- NO TRADE enforcement: PASS/FAIL
+- trending-market behavior: PASS/FAIL
+
+C. TEMUAN
+Untuk setiap temuan sertakan:
+- severity
+- file
+- function/line
+- masalah
+- bukti
+- dampak terhadap signal
+
+D. MUSE 7-DAY DIFF
+Ringkas hanya perubahan yang berhubungan dengan trading logic.
+
+E. TEST RESULT
+Tampilkan test yang dijalankan dan hasilnya.
+
+F. GIT
+- code changed: yes/no
+- commit: SHA atau none
+- push: yes/no
+
+PENTING:
+Jangan menganggap strategy bagus hanya karena backtest profit.
+Jangan memperbaiki hasil statistik.
+Yang diaudit adalah KEBENARAN IMPLEMENTASI dan CAUSALITY strategy.
+Jangan melakukan audit area lain.
 
 ```
 # 
