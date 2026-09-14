@@ -54,7 +54,114 @@
 ```
 # 
 ```
+LIVE MARKET TEST — XAUUSD M5 REVERSAL (READ-ONLY / NO EXECUTION)
 
+Sekarang market sudah buka. Lakukan TEST LANGSUNG menggunakan MT5 Demo dan data XAUUSD aktual.
+
+PENTING:
+- Jangan mengubah kode.
+- Jangan mengubah parameter strategy.
+- Jangan melakukan optimasi.
+- Jangan membuat signal secara manual.
+- Jangan menjalankan order_send.
+- Jangan membuka, mengubah, atau menutup posisi.
+- Mode WAJIB Shadow / NoExecution.
+- order_send HARUS = 0.
+- Jika strategy tidak menemukan setup valid, hasil yang benar adalah NO TRADE.
+
+TARGET:
+Menguji apakah pipeline strategy benar-benar bekerja pada market XAUUSD yang sedang berjalan.
+
+LANGKAH:
+
+1. Pastikan MT5 terhubung ke akun Demo.
+2. Resolve symbol XAUUSD secara aman:
+   - gunakan exact symbol jika tersedia.
+   - jangan fuzzy-match.
+   - jika ambiguous, fail-closed.
+3. Baca tick XAUUSD aktual.
+4. Baca M5 dan M15 aktual.
+5. Pastikan candle forming/index 0 TIDAK digunakan.
+6. Pastikan minimal closed candles valid dan spacing M5/M15 benar.
+7. Jalankan shadow strategy menggunakan implementation yang SEKARANG ADA.
+8. Jangan bypass strategy dan jangan membuat setup tambahan.
+9. Biarkan strategy menentukan sendiri:
+   - BUY
+   - SELL
+   - NO TRADE
+10. Jika ada signal, tampilkan alasan lengkap:
+   - timestamp candle
+   - M15 structure
+   - Support/Resistance yang digunakan
+   - candle M5 confirmation
+   - engulfing validation
+   - arah signal
+   - entry reference
+   - SL/TP jika strategy menghasilkan
+   - alasan seluruh kondisi terpenuhi
+11. Jika NO TRADE, tampilkan alasan tepat kenapa setup belum valid.
+12. Jalankan cukup lama untuk menangkap perubahan candle M5 berikutnya bila memungkinkan, tetapi jangan memaksa menunggu tanpa batas.
+13. Pastikan setiap keputusan hanya memakai data yang sudah tersedia pada saat candle close.
+
+VALIDASI WAJIB:
+
+- XAUUSD actual data: PASS/FAIL
+- MT5 connection: PASS/FAIL
+- M15 closed candle: PASS/FAIL
+- M5 closed candle: PASS/FAIL
+- forming candle excluded: PASS/FAIL
+- look-ahead protection: PASS/FAIL
+- Support/Resistance: PASS/FAIL
+- engulfing: PASS/FAIL
+- reversal confirmation: PASS/FAIL
+- NO TRADE enforcement: PASS/FAIL
+- shadow/no-execution: PASS/FAIL
+- order_send calls: HARUS 0
+- position changes: HARUS 0
+
+JANGAN:
+- memperbaiki kode selama test
+- mengubah strategy
+- mengoptimalkan parameter
+- memaksa signal
+- membuka order
+- menggunakan data sintetis
+
+OUTPUT AKHIR:
+
+=== LIVE XAUUSD TEST ===
+
+Market:
+Symbol:
+Bid:
+Ask:
+Tick time:
+Market status:
+
+Data:
+M5 latest CLOSED:
+M15 latest CLOSED:
+M5 spacing:
+M15 spacing:
+
+Strategy:
+Decision: BUY / SELL / NO TRADE
+Signal timestamp:
+Reason:
+
+Safety:
+order_send:
+order_check:
+position change:
+order change:
+execution mode:
+
+Verdict:
+PASS / CONDITIONAL / FAIL
+
+Jika ada error teknis, jangan memperbaiki dulu. Berhenti dan laporkan error beserta file/function terkait.
+
+Jika test PASS, jangan commit dan jangan push karena test ini read-only.
 ```
 # 
 ```
