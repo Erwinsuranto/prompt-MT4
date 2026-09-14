@@ -38,7 +38,217 @@
 ```
 # 
 ```
+AUDIT NO. 6 SAJA — PAPER / SHADOW E2E mt-info
 
+Lakukan audit dan verifikasi end-to-end project mt-info menggunakan MARKET XAUUSD AKTUAL dari MT5 DEMO.
+
+FOKUS:
+MT5
+→ Live Feed
+→ Closed M5/M15
+→ Strategy Decision
+→ Risk Gate
+→ Shadow/NoExecution
+→ Journal
+
+No. 2 Trading Logic = PASS
+No. 3 Live Pipeline = PASS
+No. 4 Risk & Execution = PASS
+No. 5 Windows Bridge/Handoff = PASS
+
+Jangan mengulang audit tersebut kecuali menemukan integration failure yang nyata.
+
+TUJUAN:
+Membuktikan seluruh komponen dapat bekerja bersama pada market aktual tanpa membuka atau mengubah posisi.
+
+WAJIB:
+
+1. REAL MARKET
+- gunakan XAUUSD aktual dari MT5 Demo
+- exact symbol resolution
+- jangan synthetic data
+- jangan mengubah parameter strategy
+- jangan mengoptimalkan strategy
+
+2. END-TO-END PIPELINE
+Verifikasi jalur:
+
+MT5 tick/bars
+→ M5/M15 closed candles
+→ feed
+→ strategy
+→ decision
+→ risk/shadow gate
+→ journal
+
+Pastikan tidak ada komponen yang diam-diam bypass komponen sebelumnya.
+
+3. CANDLE
+- forming candle/index 0 wajib excluded
+- M5 decision hanya setelah M5 close
+- M15 structure hanya menggunakan M15 yang sudah closed
+- tidak ada look-ahead
+
+4. DECISION
+Biarkan strategy menentukan sendiri:
+BUY / SELL / NO TRADE
+
+Jika tidak ada setup:
+=> NO TRADE adalah hasil valid.
+
+Jangan memaksa signal.
+
+5. RISK
+Jika decision dibuat:
+- pastikan risk gate dijalankan
+- jangan melakukan real execution
+- tampilkan apakah decision approved/rejected dan alasannya
+
+6. SHADOW EXECUTOR
+WAJIB:
+- NoExecution/shadow mode
+- `order_send = 0`
+- tidak membuka/menutup/memodifikasi posisi
+- tidak mengubah account state
+
+7. JOURNAL
+Verifikasi:
+- setiap decision yang benar-benar dibuat tercatat
+- NO TRADE behavior sesuai implementasi
+- tidak ada duplicate decision
+- tidak ada partial/corrupt journal entry
+- timestamp decision valid
+- symbol dan timeframe benar
+- journal tidak mengklaim execution yang tidak terjadi
+
+8. LIVE OBSERVATION
+Biarkan pipeline berjalan melewati minimal SATU closed M5 candle baru jika kondisi market memungkinkan.
+
+Jangan menggunakan historical replay sebagai pengganti live observation.
+
+Jika belum ada closed M5 baru:
+- jangan memalsukan hasil
+- laporkan bahwa live observation belum menangkap candle baru.
+
+9. COUNTERS
+Catat:
+- total decisions
+- BUY
+- SELL
+- NO TRADE
+- duplicate
+- rejected
+- journal rows
+- partial rows
+- execution attempts
+- order_send
+- position changes
+- order changes
+
+10. PRE-EXISTING POSITION
+Jika ada posisi demo yang sudah ada:
+- catat ticket/count
+- pastikan tetap tidak berubah
+- jangan close/modify posisi tersebut
+
+11. ERROR HANDLING
+Jika MT5 disconnect, stale tick, invalid bar, atau feed error:
+- pipeline harus fail-closed
+- jangan menghasilkan signal dari data invalid
+- jangan menganggap error sebagai NO TRADE biasa tanpa membedakannya.
+
+12. TESTS
+Jalankan regression/integration test yang relevan.
+
+Jika ada bug integration yang terbukti:
+- identifikasi root cause
+- buat regression test
+- fix minimal
+- test ulang
+
+Jika tidak ada bug:
+- jangan ubah kode
+- jangan commit
+- jangan push
+
+DILARANG:
+- order_send
+- real trading
+- modify/close/open position
+- mengubah strategy
+- mengubah parameter
+- optimasi hasil
+- synthetic data sebagai bukti live E2E
+
+OUTPUT WAJIB:
+
+=== NO. 6 PAPER / SHADOW E2E ===
+
+Market:
+Symbol:
+MT5:
+Market status:
+
+LIVE DATA:
+Latest M5 CLOSED:
+Latest M15 CLOSED:
+Tick:
+Freshness:
+Offset:
+
+PIPELINE:
+MT5 → Feed: PASS/FAIL
+Feed → Strategy: PASS/FAIL
+Strategy → Decision: PASS/FAIL
+Decision → Risk Gate: PASS/FAIL
+Risk → Shadow: PASS/FAIL
+Shadow → Journal: PASS/FAIL
+
+DECISIONS:
+Total:
+BUY:
+SELL:
+NO TRADE:
+Rejected:
+Duplicates:
+Journal rows:
+Partial rows:
+
+SAFETY:
+Execution mode:
+Execution attempts:
+order_check:
+order_send:
+Position changes:
+Order changes:
+
+PRE-EXISTING POSITION:
+Count:
+Unchanged: YES/NO
+
+REGRESSION:
+Tests:
+Passed:
+Failed:
+Skipped:
+
+TEMUAN:
+- severity
+- component
+- root cause
+- bukti
+- dampak
+
+VERDICT:
+PASS / CONDITIONAL / FIX REQUIRED / BLOCKED
+
+PENTING:
+PASS pada E2E berarti pipeline aman dan terhubung.
+Itu BUKAN bukti bahwa strategy profitable.
+Jangan menyimpulkan profitability dari satu/few signal.
+Jika market tidak menghasilkan setup, NO TRADE tetap hasil yang benar.
+Jika tidak ada closed M5 baru selama observasi, nyatakan CONDITIONAL dan jangan mengarang hasil.
+Jika semua aman, jangan commit/push.
 ```
 # 
 ```
