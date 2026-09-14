@@ -6,7 +6,499 @@
 ```
 # 
 ```
+AUDIT + FIX — S/R-DIRECT PATH (PATH A)
+PROJECT: mt-info
 
+Lakukan audit mendalam terhadap perubahan lokal commit:
+dbb6839
+feat(strategy): S/R-direct signal path (PATH A, engulfing optional)
+
+TUJUAN:
+Saya memang menginginkan S/R sebagai dasar utama signal.
+
+Rule yang benar:
+
+PATH A:
+S/R valid + seluruh rule reversal S/R terpenuhi
+→ SIGNAL
+→ tidak wajib engulfing.
+
+PATH B:
+S/R valid + reversal context valid + valid engulfing
+→ SIGNAL.
+
+ENGULFING TANPA S/R VALID
+→ NO_TRADE.
+
+Tetapi hasil implementasi Path A menunjukkan populasi yang buruk
+(sekitar -0.06R dan max DD sangat besar).
+
+JANGAN menerima hasil buruk itu begitu saja.
+Audit apakah masalahnya ada pada IMPLEMENTASI atau DEFINISI RULE.
+
+==================================================
+ATURAN KERAS
+==================================================
+
+1. Jangan membuat signal lebih banyak hanya demi frequency.
+
+2. Jangan optimasi parameter untuk mempercantik win rate.
+
+3. Jangan curve-fit.
+
+4. Jangan menggunakan hindsight.
+
+5. Jangan menggunakan future candle.
+
+6. Jangan menggunakan future S/R.
+
+7. Jangan menggunakan outcome trade untuk menentukan signal.
+
+8. Semua signal harus causal pada saat candle CLOSED.
+
+9. S/R harus tetap menjadi prerequisite.
+
+10. Engulfing tetap OPTIONAL, bukan mandatory.
+
+11. Jangan menghapus Path A hanya karena hasil awal buruk.
+
+12. Jangan mempertahankan Path A hanya karena user menginginkannya.
+Jika rule-nya ternyata tidak cukup kuat, jelaskan dan perbaiki desainnya.
+
+13. Jangan menyentuh execution/MT5/Windows bridge kecuali audit menemukan dependency yang benar-benar bermasalah.
+
+14. order_send harus tetap 0 selama pengujian.
+
+==================================================
+STEP 1 — INSPEKSI COMMIT dbb6839
+==================================================
+
+Periksa diff:
+
+git show --stat dbb6839
+git show dbb6839
+
+Identifikasi:
+- file yang berubah
+- fungsi yang berubah
+- logic Path A
+- bagaimana S/R-direct ditentukan
+- bagaimana engulfing dibuat optional
+- apakah ada perubahan terhadap existing Path B
+- apakah ada perubahan terhadap test saja atau production strategy juga
+
+Jangan langsung coding.
+
+==================================================
+STEP 2 — TRACE SIGNAL PATH
+==================================================
+
+Trace lengkap:
+
+M15 data
+→ S/R detection
+→ S/R validation
+→ reaction/reversal
+→ M5 confirmation
+→ Path A
+→ Path B
+→ final decision
+
+Cari apakah Path A terlalu mudah menghasilkan signal.
+
+Secara khusus periksa kemungkinan:
+
+- S/R terlalu banyak
+- S/R terlalu lemah
+- S/R hanya berdasarkan proximity
+- reaction dianggap valid terlalu cepat
+- reversal belum benar-benar terjadi
+- breakout dianggap reversal
+- trend continuation dianggap reversal
+- level yang sudah broken masih digunakan sebagai reversal level
+- retest salah diklasifikasikan
+- M15/M5 alignment salah
+- candle close timing salah
+- duplicate/overlapping zones
+- stale S/R
+- S/R yang baru diketahui setelah signal
+- risk/reward bukan masalah strategy tetapi hanya downstream
+- entry terlalu dini
+
+==================================================
+STEP 3 — ANALISIS POPULASI PATH A
+==================================================
+
+Jangan hanya melihat total P/L.
+
+Pisahkan hasil Path A berdasarkan:
+
+- BUY / SELL
+- support / resistance
+- rejection type
+- breakout vs reversal
+- trend regime
+- distance from S/R
+- confirmation type
+- holding outcome
+- win/loss
+- R multiple
+- maximum drawdown
+- jumlah signal
+
+Cari pola kegagalan yang konsisten.
+
+Tujuannya menemukan ROOT CAUSE,
+bukan mencari parameter terbaik.
+
+==================================================
+STEP 4 — VALIDASI S/R QUALITY
+==================================================
+
+Audit apakah S/R yang digunakan Path A benar-benar bermakna.
+
+Pertanyaan:
+
+Apakah level:
+- sudah terbentuk sebelum signal?
+- mempunyai reaction historis yang cukup?
+- masih valid pada waktu signal?
+- tidak terlalu jauh?
+- tidak berasal dari future information?
+- tidak sekadar swing kecil/noise?
+
+Jika S/R terlalu longgar, perbaiki DEFINISI S/R,
+bukan sekadar memperketat angka sampai backtest bagus.
+
+==================================================
+STEP 5 — REVERSAL HARUS DIBEDAKAN DARI CONTINUATION
+==================================================
+
+Ini sangat penting.
+
+Path A tidak boleh:
+
+"harga dekat resistance + candle bearish = SELL"
+
+atau:
+
+"harga dekat support + candle bullish = BUY"
+
+Harus ada bukti bahwa harga benar-benar bereaksi/reversal.
+
+Bedakan:
+
+A. Reversal
+B. Rejection
+C. Failed breakout
+D. Retest
+E. Breakout continuation
+F. Breakdown continuation
+
+Jika market sedang continuation kuat,
+S/R reversal harus tetap NO_TRADE sampai ada bukti reversal yang causal.
+
+==================================================
+STEP 6 — CONFIRMATION TANPA ENGULFING
+==================================================
+
+Karena Path A tidak membutuhkan engulfing,
+tentukan confirmation alternatif yang benar-benar objektif.
+
+Contoh yang BOLEH dipertimbangkan hanya jika deterministic:
+
+- rejection + close kembali dari zone
+- failed breakout
+- structure shift
+- lower-high / higher-low yang sudah confirmed
+- close melewati trigger level
+- momentum reversal tertentu
+
+Jangan memasukkan banyak indikator/pola hanya untuk menambah signal.
+
+Pilih minimum rule yang cukup kuat.
+
+==================================================
+STEP 7 — KASUS LIVE 2026-09-14
+==================================================
+
+Audit ulang kasus:
+
+BUY 08:50
+XAUUSD.m
+entry 4334.58
+SL 4321.93857
+TP 4359.86286
+
+Tentukan apakah Path A atau Path B yang menghasilkan signal tersebut.
+
+Jawab:
+- apakah S/R valid?
+- apakah reaction valid?
+- apakah confirmation cukup?
+- apakah signal terlalu dini?
+- apakah engulfing sebenarnya memberi false confidence?
+- apakah signal seharusnya NO_TRADE menurut rule yang lebih benar?
+
+Jangan menggunakan candle setelah 08:50 untuk mengubah keputusan 08:50.
+
+==================================================
+STEP 8 — KASUS SELL YANG DIHARAPKAN
+==================================================
+
+Audit kembali area SELL yang saya tunjuk di chart.
+
+Jangan memaksakan SELL.
+
+Tentukan apakah:
+- valid S/R
+- valid reaction
+- valid reversal
+- valid confirmation
+- atau sebenarnya continuation setelah breakdown.
+
+Jika tidak causal,
+NO_TRADE tetap benar.
+
+==================================================
+STEP 9 — PERBAIKI JIKA ROOT CAUSE DITEMUKAN
+==================================================
+
+Jika ditemukan bug implementation:
+
+FIX MINIMAL.
+
+Jika ditemukan desain Path A terlalu longgar:
+
+Perbaiki rule secara deterministic.
+
+Jika hasil buruk ternyata bukan bug tetapi memang edge belum terbukti:
+
+Jangan melakukan curve fitting.
+
+Dalam kondisi itu, boleh membatasi/menahan Path A dari live use,
+tetapi jangan mengklaim strategy sudah profitable.
+
+Prioritas:
+
+CORRECTNESS
+>
+CAUSALITY
+>
+SELECTIVITY
+>
+ROBUSTNESS
+>
+PERFORMANCE
+
+==================================================
+STEP 10 — TEST REGRESSION
+==================================================
+
+Pastikan test mencakup:
+
+1. Valid S/R reversal tanpa engulfing
+→ SIGNAL
+
+2. Valid S/R reversal + valid engulfing
+→ SIGNAL
+
+3. Engulfing tanpa S/R
+→ NO_TRADE
+
+4. Weak S/R + engulfing
+→ NO_TRADE
+
+5. S/R touch tanpa reversal
+→ NO_TRADE
+
+6. Strong trend continuation di S/R
+→ NO_TRADE
+
+7. Failed breakout + valid reversal
+→ SIGNAL jika rule terpenuhi
+
+8. Valid breakout continuation
+→ NO_TRADE reversal
+
+9. Forming candle
+→ NO_TRADE
+
+10. Future S/R
+→ tidak boleh digunakan
+
+11. M15/M5 causal alignment
+→ PASS
+
+12. No-look-ahead
+→ PASS
+
+Tambahkan regression test untuk BUG yang ditemukan.
+
+==================================================
+STEP 11 — REAL DATA VALIDATION
+==================================================
+
+Gunakan REAL XAUUSD historical data.
+
+Jangan synthetic.
+
+Bandingkan:
+
+BEFORE
+vs
+AFTER
+
+Tetapi jangan memilih versi berdasarkan P/L semata.
+
+Laporkan:
+- signal count
+- win/loss
+- R distribution
+- drawdown
+- Path A
+- Path B
+- BUY
+- SELL
+- alasan NO_TRADE
+
+Jika hasil tetap belum membuktikan edge:
+nyatakan NOT PROVEN.
+
+==================================================
+STEP 12 — LIVE SAFETY
+==================================================
+
+Tetap:
+
+Shadow/NoExecution.
+
+order_send = 0.
+
+Tidak boleh membuka posisi.
+
+Pre-existing position harus tetap tidak disentuh.
+
+==================================================
+STEP 13 — FULL TEST
+==================================================
+
+Setelah fix:
+
+- targeted tests
+- strategy tests
+- real-data tests
+- full relevant suite
+
+Laporkan semua failure.
+
+Jangan menyembunyikan test failure.
+
+Jika failure hanya environment:
+jelaskan secara terpisah.
+
+==================================================
+STEP 14 — GIT
+==================================================
+
+Jika TIDAK ditemukan bug/perubahan yang benar-benar diperlukan:
+jangan membuat commit baru.
+
+Jika ditemukan dan diperbaiki:
+
+1. commit perubahan
+2. push origin main
+
+Pastikan:
+
+git status
+git log -1
+git rev-parse HEAD
+git rev-parse origin/main
+
+Harus jelas apakah push berhasil.
+
+Jika push gagal karena authentication,
+jangan mengklaim push berhasil.
+
+==================================================
+FINAL REPORT
+==================================================
+
+Tampilkan:
+
+=== PATH A AUDIT ===
+
+Current Path A:
+...
+
+Root cause:
+...
+
+S/R quality:
+...
+
+Reversal quality:
+...
+
+Confirmation:
+...
+
+Live BUY 08:50:
+...
+
+Missed SELL case:
+...
+
+Fix:
+...
+
+Files changed:
+...
+
+Tests:
+...
+
+Real-data result:
+...
+
+order_send:
+...
+
+Position changes:
+...
+
+Git commit:
+...
+
+Git push:
+...
+
+FINAL VERDICT:
+PASS
+atau
+FIXED
+atau
+BLOCKED
+atau
+NOT PROVEN
+
+PENTING:
+
+Saya ingin strategy yang AKURAT dan SELECTIVE,
+bukan strategy yang sekadar sering memberi signal.
+
+Jangan mengejar jumlah signal.
+
+Jangan mengubah angka hanya agar hasil backtest terlihat bagus.
+
+Jangan menggunakan hindsight.
+
+Jika bukti menunjukkan Path A belum mempunyai edge,
+katakan dengan jujur.
+
+Tetapi jika ada bug logic yang menyebabkan Path A buruk,
+perbaiki bug tersebut dan buktikan dengan regression test.
 ```
 # 
 ```
