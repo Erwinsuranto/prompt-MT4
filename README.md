@@ -22,7 +22,110 @@
 ```
 # 
 ```
+LIVE SIGNAL MONITOR — JALAN TERUS SAMPAI SIGNAL VALID
 
+Jangan coding.
+Jangan mengubah kode.
+Jangan mengubah parameter strategy.
+Jangan optimasi.
+Jangan membuat atau memaksa signal.
+
+Jalankan mt-info menggunakan XAUUSD REAL dari MT5 DEMO dalam mode Shadow/NoExecution.
+
+TUJUAN UTAMA:
+MONITOR TERUS SAMPAI STRATEGY ASLI MENGHASILKAN SIGNAL BUY ATAU SELL YANG VALID.
+
+ATURAN MONITOR:
+1. Jangan gunakan batas 5 candle.
+2. Jangan berhenti setelah 5, 10, 20, atau jumlah candle tertentu.
+3. Setiap closed M5 candle baru harus diproses.
+4. Teruskan monitoring selama market aktif.
+5. NO_TRADE BUKAN alasan untuk berhenti.
+6. Hanya berhenti jika:
+   A. Signal BUY valid muncul, atau
+   B. Signal SELL valid muncul, atau
+   C. Terjadi error teknis yang membuat monitoring tidak aman.
+7. Jika market sementara tidak aktif/quote stale, jangan membuat signal; lanjutkan monitoring ketika data kembali valid.
+
+SIGNAL HARUS BERASAL DARI STRATEGY ASLI:
+- M15 structure
+- Support/Resistance
+- M5 confirmation
+- genuine engulfing
+- reversal condition
+- closed candle
+- no look-ahead
+- semua rule wajib terpenuhi
+
+JANGAN:
+- menurunkan threshold
+- melonggarkan engulfing
+- mengubah S/R
+- membuat fallback signal
+- membuat trend-following signal
+- memaksa BUY/SELL karena terlalu lama menunggu
+
+SETIAP CLOSED M5:
+Tampilkan hanya:
+TIME | DECISION | REASON
+
+Contoh:
+05:15 | NO_TRADE | no_reversal
+05:20 | NO_TRADE | partial_engulfing
+
+Jangan berhenti pada NO_TRADE.
+
+KETIKA SIGNAL VALID MUNCUL:
+
+=== VALID LIVE SIGNAL FOUND ===
+
+Symbol:
+Direction: BUY / SELL
+Signal candle:
+M5 confirmation:
+M15 structure:
+Support/Resistance:
+Engulfing:
+Reversal confirmation:
+Entry reference:
+SL:
+TP:
+Risk status:
+Decision ID:
+
+CAUSALITY:
+M5 closed: PASS
+M15 closed: PASS
+Forming excluded: PASS
+Look-ahead: PASS
+
+SAFETY:
+Execution mode: Shadow/NoExecution
+Execution attempts: 0
+order_check: 0
+order_send: 0
+Position changes: 0
+Order changes: 0
+
+SETELAH SIGNAL VALID MUNCUL:
+- STOP MONITOR
+- JANGAN EKSEKUSI
+- JANGAN MENUNGGU OUTCOME
+- JANGAN MENGUBAH SIGNAL
+- JANGAN CODING
+- JANGAN COMMIT
+- JANGAN PUSH
+
+Jika belum ada signal:
+TERUS MONITORING.
+
+Jika terjadi error teknis:
+STOP dan laporkan error secara lengkap.
+
+PENTING:
+Kita sedang menguji apakah strategy menghasilkan SIGNAL VALID secara nyata.
+Bukan menguji seberapa cepat signal muncul.
+Signal yang lama ditunggu tetapi benar-benar memenuhi rule lebih bernilai daripada signal cepat tetapi tidak akurat.
 ```
 # 
 ```
