@@ -50,6 +50,177 @@
 ```
 # 
 ```
+AUDIT NO. 3 SAJA — LIVE PIPELINE mt-info
+
+Lakukan audit terarah terhadap LIVE PIPELINE project mt-info.
+
+FOKUS HANYA:
+MT5 DATA → BAR FEED → CLOSED CANDLE → SIGNAL PIPELINE → SHADOW DECISION
+
+Jangan audit trading strategy logic secara umum karena itu sudah diaudit pada tahap sebelumnya.
+Jangan audit Windows deployment, security, risk management, atau order execution kecuali ada dependency langsung yang membuat live pipeline salah.
+
+TUJUAN:
+Memastikan pipeline live menggunakan data market aktual secara causal, tidak menggunakan candle forming, tidak menghasilkan duplicate/stale/future data, dan fail-closed ketika data tidak valid.
+
+WAJIB PERIKSA:
+
+1. MT5 DATA INGESTION
+- koneksi MT5
+- symbol resolution
+- tick retrieval
+- M5/M15 retrieval
+- handling MT5 error
+- handling terminal disconnect/reconnect
+- tidak menggunakan synthetic/fallback market data
+
+2. CLOSED CANDLE
+Pastikan:
+- index 0/current forming candle tidak masuk signal pipeline
+- hanya candle CLOSED yang diteruskan
+- keputusan baru dibuat setelah candle benar-benar close
+- tidak ada jalur alternatif yang memasukkan forming candle
+
+3. BAR FEED
+Audit:
+- timestamp
+- ordering
+- duplicate bar
+- missing bar
+- timeframe spacing
+- stale bar
+- future bar
+- restart behavior
+- polling behavior
+
+Pastikan pipeline tidak menganggap data lama sebagai data baru.
+
+4. SERVER/TIME OFFSET
+Audit implementasi offset:
+- bagaimana offset diperoleh
+- kapan offset diperbarui
+- behavior ketika tick tidak tersedia
+- behavior saat weekend/market halt
+- behavior ketika offset berubah
+- behavior ketika clock skew
+- pastikan tidak ada koreksi waktu manual yang dapat menyebabkan candle masa depan diterima
+
+Jika data/tick tidak cukup untuk memverifikasi offset:
+=> FAIL-CLOSED, jangan menebak.
+
+5. M5 ↔ M15 ALIGNMENT
+Pastikan:
+- M15 structure yang dipakai memang sudah CLOSED pada saat M5 decision dibuat
+- tidak terjadi penggunaan M15 candle yang belum close
+- timestamp alignment benar
+- tidak ada future M15 data yang bocor ke M5 decision
+
+6. NEW-BAR DETECTION
+Periksa:
+- apakah setiap closed bar diproses tepat satu kali
+- duplicate polling tidak menghasilkan duplicate decision
+- restart tidak menyebabkan bar diproses secara salah
+- bar lama tidak dianggap sebagai bar baru
+
+7. STALE / DISCONNECTED MARKET
+Pastikan pipeline fail-closed ketika:
+- MT5 disconnected
+- tick stale
+- bar stale
+- timestamp invalid
+- timestamp future
+- spacing invalid
+- data kosong
+- symbol tidak valid
+- offset belum terverifikasi
+
+Jangan membuat signal dari data stale.
+
+8. SHADOW PIPELINE
+Audit jalur:
+MT5
+→ feed
+→ closed bars
+→ signal
+→ shadow decision
+→ journal
+
+Pastikan:
+- signal hanya berasal dari data valid
+- forming candle tidak masuk
+- duplicate decision tidak terjadi
+- journal merekam keputusan yang benar
+- NoExecution tetap tidak dapat mengirim order
+
+9. REAL-MARKET VERIFICATION
+Gunakan MT5 Demo dan XAUUSD aktual untuk smoke test READ-ONLY jika diperlukan.
+
+DILARANG:
+- order_send
+- membuka order
+- mengubah posisi
+- menutup posisi
+- mengubah strategy
+- mengubah parameter
+- synthetic data sebagai bukti live behavior
+
+`order_send` HARUS = 0.
+
+10. TEST REGRESSION
+Jika menemukan bug:
+- identifikasi root cause
+- buat regression test
+- lakukan fix minimal
+- jalankan test terkait
+
+Jika tidak ada bug:
+- jangan ubah kode
+- jangan commit
+- jangan push
+
+Jika ada fix:
+- tampilkan file/function yang berubah
+- test result
+- commit SHA
+- push status
+
+OUTPUT:
+
+=== NO. 3 LIVE PIPELINE AUDIT ===
+
+MT5 ingestion: PASS/FAIL
+Closed candle enforcement: PASS/FAIL
+Bar ordering: PASS/FAIL
+Duplicate protection: PASS/FAIL
+Missing-bar handling: PASS/FAIL
+Stale-data handling: PASS/FAIL
+Future-bar protection: PASS/FAIL
+Clock/offset handling: PASS/FAIL
+M5/M15 alignment: PASS/FAIL
+New-bar detection: PASS/FAIL
+Disconnect handling: PASS/FAIL
+Shadow pipeline: PASS/FAIL
+NoExecution safety: PASS/FAIL
+
+REAL MT5 TEST:
+Symbol:
+M5 latest CLOSED:
+M15 latest CLOSED:
+Tick status:
+Freshness:
+Offset status:
+Decisions:
+Duplicates:
+order_send:
+Position changes:
+
+VERDICT:
+PASS / FIX REQUIRED / BLOCKED
+
+PENTING:
+Jangan memperbaiki sesuatu hanya berdasarkan asumsi.
+Jika menemukan masalah, tunjukkan bukti konkret dari kode/test.
+Jika semuanya benar, berhenti setelah laporan dan jangan membuat commit.
 
 ```
 # 
