@@ -26,7 +26,104 @@
 ```
 # 
 ```
+LIVE SIGNAL WATCH — TUNGGU SIGNAL XAUUSD M5
 
+Jangan coding.
+Jangan mengubah file.
+Jangan mengubah parameter.
+Jangan melakukan optimasi.
+Jangan membuat signal manual.
+
+Sekarang jalankan mt-info dalam mode SHADOW / NoExecution menggunakan XAUUSD REAL dari MT5 DEMO dan TUNGGU sampai strategy menghasilkan signal BUY atau SELL yang benar-benar valid.
+
+TUJUAN:
+Menguji SIGNAL ENGINE pada kondisi market nyata ketika setup reversal benar-benar terjadi.
+
+MODE:
+- Shadow / NoExecution
+- order_send = 0
+- tidak membuka posisi
+- tidak menutup posisi
+- tidak modify posisi
+- jangan menyentuh posisi demo existing
+
+ATURAN:
+1. Jalankan monitor live secara continuous.
+2. Setiap ada CLOSED M5 baru, proses sesuai strategy yang sekarang.
+3. M15 harus CLOSED dan causal terhadap keputusan M5.
+4. Jangan menggunakan candle forming.
+5. Jangan menggunakan future data.
+6. Jangan memaksa signal.
+7. NO_TRADE tetap valid selama setup belum memenuhi seluruh syarat.
+8. Jangan berhenti hanya karena beberapa candle menghasilkan NO_TRADE.
+9. Tunggu sampai:
+   BUY valid
+   atau
+   SELL valid.
+10. Setelah BUY/SELL valid ditemukan, LANGSUNG berhenti dan tampilkan detail signal tersebut.
+11. Jangan menunggu outcome trade dengan mengubah keputusan setelah fakta berikutnya muncul.
+
+SETIAP CLOSED M5:
+Tampilkan ringkas:
+timestamp
+decision
+reason
+
+Jangan memenuhi output dengan data yang tidak diperlukan.
+
+KETIKA SIGNAL BUY/SELL VALID MUNCUL:
+Tampilkan:
+
+=== VALID LIVE SIGNAL ===
+
+Symbol:
+Signal:
+Signal candle time:
+Confirmation candle:
+M15 structure:
+Support/Resistance:
+Engulfing:
+Reversal confirmation:
+Entry reference:
+SL:
+TP:
+Risk status:
+Decision ID:
+
+CAUSALITY:
+M5 candle CLOSED: PASS
+M15 candle CLOSED: PASS
+forming candle excluded: PASS
+look-ahead: PASS
+
+SAFETY:
+Execution mode: Shadow/NoExecution
+order_send: 0
+position changes: 0
+order changes: 0
+
+JANGAN EKSEKUSI SIGNAL.
+
+IMPORTANT:
+- Signal harus berasal dari strategy asli.
+- Jangan membuat signal hanya karena sudah lama menunggu.
+- Jangan menurunkan threshold.
+- Jangan mengubah Support/Resistance.
+- Jangan mengubah definisi engulfing.
+- Jangan mengubah trend/reversal rules.
+- Jika market tidak menghasilkan signal selama sesi observasi, teruskan monitoring; jangan mengarang signal.
+
+Jika ada error teknis:
+berhenti dan laporkan error.
+Jangan memperbaiki kode.
+
+Jika signal valid berhasil ditemukan:
+berhenti setelah menampilkan detail signal.
+
+GIT:
+code changed = NO
+commit = NONE
+push = NO
 ```
 # 
 ```
