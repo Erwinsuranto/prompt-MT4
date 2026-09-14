@@ -14,7 +14,202 @@
 ```
 # 
 ```
+AUDIT STRATEGY DESIGN — S/R-FIRST REVERSAL
+JANGAN CODING / JANGAN UBAH KODE
 
+Saya ingin mengoreksi pemahaman strategy.
+
+Strategy TIDAK boleh terlalu bergantung pada ENGULFING sebagai satu-satunya validasi reversal.
+
+Yang saya inginkan:
+
+M15 SUPPORT/RESISTANCE harus menjadi CONTEXT UTAMA reversal.
+
+Kemudian M5 mencari bukti PRICE REJECTION / REVERSAL di area S/R.
+
+Engulfing adalah SALAH SATU bentuk confirmation, bukan satu-satunya bentuk confirmation.
+
+Contoh konsep:
+
+M15 resistance valid
+→ harga mencapai/menembus area resistance secara wajar
+→ terjadi rejection / gagal melanjutkan breakout
+→ M5 menunjukkan bearish reversal/confirmation
+→ SELL dapat valid meskipun candle confirmation bukan textbook bearish engulfing.
+
+Begitu juga sebaliknya:
+
+M15 support valid
+→ harga mencapai/menembus area support secara wajar
+→ terjadi rejection / gagal melanjutkan breakdown
+→ M5 menunjukkan bullish reversal/confirmation
+→ BUY dapat valid meskipun candle confirmation bukan textbook bullish engulfing.
+
+PENTING:
+Jangan langsung mengubah kode.
+
+Saya ingin kamu menentukan apakah desain ini lebih sesuai dengan tujuan strategy reversal daripada implementation sekarang yang terlalu ketat pada engulfing.
+
+==================================================
+1. AUDIT STRATEGY SEKARANG
+==================================================
+
+Jelaskan secara konkret:
+- seberapa besar engulfing menjadi gate wajib
+- apakah S/R saat ini benar-benar menjadi faktor utama
+- apakah rejection price action sudah diperhitungkan
+- kondisi apa yang otomatis NO_TRADE hanya karena tidak ada engulfing
+
+==================================================
+2. ANALISIS KASUS LIVE BUY YANG KALAH
+==================================================
+
+Gunakan signal BUY live:
+
+2026-09-14 08:50
+XAUUSD.m
+BUY
+entry reference 4334.58
+SL 4321.93857
+TP 4359.86286
+
+Analisis apakah:
+- S/R sebenarnya cukup kuat
+- reversal confirmation terlalu cepat
+- engulfing menyebabkan signal dianggap valid padahal rejection belum cukup kuat
+- atau masalah sebenarnya bukan engulfing.
+
+Jangan menggunakan candle setelah signal untuk membenarkan keputusan saat signal dibuat.
+
+==================================================
+3. ANALISIS KASUS SELL YANG SAYA MAKSUD
+==================================================
+
+Gunakan data real MT5 pada area setelah BUY tersebut.
+
+Cari kandidat reversal SELL di resistance.
+
+Analisis:
+- resistance M15
+- harga mencapai resistance
+- rejection
+- struktur M5
+- bearish pressure
+- confirmation
+- engulfing
+
+Tentukan apakah kandidat SELL bisa valid TANPA textbook engulfing jika seluruh konteks S/R + rejection + confirmation terpenuhi.
+
+==================================================
+4. DEFINISIKAN KONSEP S/R-FIRST
+==================================================
+
+Buat proposal rule yang deterministic.
+
+Minimal pisahkan:
+
+A. LOCATION
+Apakah harga berada di Support/Resistance yang valid?
+
+B. REACTION
+Apakah terjadi rejection/failed continuation dari level tersebut?
+
+C. CONFIRMATION
+Apakah M5 memberikan bukti reversal?
+
+D. ENTRY
+Kapan signal dianggap valid?
+
+E. INVALIDATION
+Kapan setup dibatalkan?
+
+Engulfing harus menjadi salah satu possible confirmation, bukan otomatis satu-satunya confirmation.
+
+==================================================
+5. JANGAN BUAT RULE LONGGAR
+==================================================
+
+Proposal TIDAK boleh menjadi:
+
+"S/R + candle merah = SELL"
+
+atau
+
+"S/R + candle hijau = BUY"
+
+Harus ada bukti reversal yang objektif dan deterministic.
+
+Jangan menggunakan:
+- subjective visual judgment
+- "kelihatannya akan turun"
+- hindsight
+- future candle
+- parameter yang diubah supaya signal bertambah banyak
+
+==================================================
+6. SELECTIVITY
+==================================================
+
+Strategy harus tetap selective.
+
+Jika hanya menyentuh S/R tetapi belum ada rejection/confirmation:
+=> NO_TRADE
+
+Jika rejection lemah:
+=> NO_TRADE
+
+Jika breakout valid dan harga menerima level baru:
+=> jangan melawan breakout hanya karena sebelumnya ada S/R
+
+Jika reversal benar-benar terkonfirmasi:
+=> signal boleh muncul
+
+==================================================
+7. NO LOOK-AHEAD
+==================================================
+
+Semua rule harus bisa dihitung hanya dari informasi yang tersedia pada saat candle confirmation CLOSE.
+
+Tidak boleh menggunakan:
+- candle masa depan
+- future swing
+- future S/R
+- future confirmation
+- outcome trade
+
+==================================================
+8. OUTPUT
+
+Berikan:
+
+CURRENT DESIGN:
+jelaskan bagaimana strategy sekarang bekerja.
+
+PROBLEM:
+apa kelemahan jika engulfing menjadi gate utama.
+
+S/R-FIRST PROPOSAL:
+rule deterministic yang diusulkan.
+
+ENGULFING ROLE:
+jelaskan posisi engulfing sebagai confirmation, bukan mandatory gate.
+
+SELECTIVITY:
+jelaskan bagaimana mencegah terlalu banyak signal.
+
+LIVE BUY CASE:
+apakah masalahnya berasal dari rule atau bukan.
+
+MISSED SELL CASE:
+apakah S/R + rejection + confirmation dapat menghasilkan SELL tanpa engulfing.
+
+IMPORTANT:
+JANGAN CODING.
+JANGAN MODIFY FILE.
+JANGAN COMMIT.
+JANGAN PUSH.
+
+Kita akan menentukan rule final terlebih dahulu.
 ```
 # 
 ```
