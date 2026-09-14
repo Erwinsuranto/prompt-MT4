@@ -18,7 +18,209 @@
 ```
 # 
 ```
+AUDIT MISSED SELL — XAUUSD M5 — JANGAN CODING DULU
 
+Saya menemukan satu kasus live yang perlu dibedah.
+
+Pada 2026-09-14, XAUUSD.m M5 menghasilkan sebelumnya:
+
+BUY signal:
+- signal candle: 08:50
+- entry reference: 4334.58
+- SL: 4321.93857
+- TP: 4359.86286
+- setup: R_SUPPORT_REVERSAL_ENGULFING
+- engulfing: TRUE
+
+Setelah itu harga bergerak turun kuat dan kemudian berada sekitar 4317–4318.
+
+Pada chart M5 yang saya lihat, ada area/pergerakan yang menurut operator seharusnya menghasilkan SIGNAL SELL.
+
+TUJUAN AUDIT:
+Tentukan apakah pada titik yang dimaksud memang ada SELL yang seharusnya dihasilkan oleh RULE STRATEGY SAAT ITU, atau apakah anggapan SELL tersebut hanya terlihat benar karena kita sudah melihat candle-candle berikutnya.
+
+PENTING:
+JANGAN coding.
+JANGAN mengubah strategy.
+JANGAN mengubah parameter.
+JANGAN optimasi.
+JANGAN menambahkan rule baru.
+JANGAN memaksa hasil SELL.
+
+Gunakan DATA HISTORIS REAL dari MT5 untuk kasus tersebut dan lakukan analisis CAUSAL.
+
+==================================================
+1. IDENTIFIKASI TITIK SELL
+==================================================
+
+Tentukan secara eksplisit candle M5 mana yang menjadi kandidat SELL.
+
+Untuk setiap kandidat, tampilkan:
+- candle timestamp
+- OHLC
+- candle sudah CLOSED atau belum
+- data yang tersedia tepat pada saat candle close
+
+Jangan memilih titik berdasarkan pengetahuan candle setelahnya.
+
+==================================================
+2. REKONSTRUKSI KEPUTUSAN
+==================================================
+
+Untuk candle kandidat SELL, rekonstruksi strategy seolah-olah sistem berada tepat pada candle tersebut.
+
+Gunakan hanya:
+- candle M5 sampai candle kandidat
+- M15 yang sudah CLOSED pada saat itu
+- S/R yang sudah diketahui saat itu
+- trend/structure yang sudah diketahui saat itu
+- engulfing yang sudah selesai saat itu
+
+JANGAN gunakan candle setelah kandidat.
+
+==================================================
+3. CHECK SETIAP RULE SELL
+==================================================
+
+Periksa satu per satu:
+
+M15 structure:
+PASS / FAIL
+
+Support/Resistance:
+PASS / FAIL
+
+Reversal condition:
+PASS / FAIL
+
+M5 confirmation:
+PASS / FAIL
+
+Bearish engulfing:
+PASS / FAIL
+
+Closed candle:
+PASS / FAIL
+
+No look-ahead:
+PASS / FAIL
+
+Final SELL condition:
+PASS / FAIL
+
+==================================================
+4. BANDINKAN DENGAN ENGINE
+
+Jalankan/inspeksi strategy pada timestamp kandidat tersebut.
+
+Bandingkan:
+
+EXPECTED BY CURRENT RULE:
+BUY / SELL / NO_TRADE
+
+ACTUAL ENGINE:
+BUY / SELL / NO_TRADE
+
+Jika berbeda:
+jelaskan root cause secara tepat.
+
+==================================================
+5. SANGAT PENTING — HINDSIGHT TEST
+
+Lakukan dua analisis:
+
+A. INFORMATION AVAILABLE AT SIGNAL TIME
+Apa yang memang diketahui saat itu?
+
+B. INFORMATION VISIBLE AFTERWARD
+Apa yang baru diketahui setelah candle berikutnya?
+
+Jika SELL hanya terlihat benar setelah candle berikutnya turun,
+jangan menyebutnya missed signal.
+
+Jika SELL memang sudah valid berdasarkan informasi yang tersedia saat candle close,
+dan engine menghasilkan NO_TRADE,
+maka itu adalah kandidat BUG.
+
+==================================================
+6. CHART VS STRATEGY
+
+Operator menganggap area tersebut seharusnya SELL.
+
+Jangan otomatis menerima asumsi operator.
+
+Tentukan apakah pola visual pada chart benar-benar sesuai definisi strategy saat ini.
+
+Jika visual terlihat seperti SELL tetapi rule strategy memang tidak mengizinkannya:
+nyatakan dengan jelas.
+
+Jika ternyata rule strategy seharusnya mengizinkan SELL tetapi implementation menolaknya:
+nyatakan sebagai bug.
+
+==================================================
+7. HASIL AKHIR
+
+OUTPUT:
+
+=== MISSED SELL AUDIT ===
+
+Candidate candle:
+Timestamp:
+OHLC:
+
+M15 structure:
+PASS/FAIL
+
+S/R:
+PASS/FAIL
+
+Reversal:
+PASS/FAIL
+
+M5 confirmation:
+PASS/FAIL
+
+Bearish engulfing:
+PASS/FAIL
+
+Closed candle:
+PASS/FAIL
+
+Look-ahead:
+PASS/FAIL
+
+EXPECTED:
+...
+
+ACTUAL ENGINE:
+...
+
+MISS:
+YES / NO
+
+ROOT CAUSE:
+...
+
+HINDSIGHT CONTAMINATION:
+YES / NO
+
+KESIMPULAN:
+1. SELL memang valid menurut rule saat itu
+atau
+2. SELL tidak valid menurut rule saat itu
+atau
+3. Rule strategy saat ini tidak merepresentasikan pola yang diinginkan operator
+
+CODE:
+Changed: NO
+Commit: NONE
+Push: NO
+
+JANGAN memperbaiki apa pun.
+JANGAN commit.
+JANGAN push.
+
+Kita akan menentukan langkah berikutnya hanya setelah melihat hasil audit ini.
 ```
 # 
 ```
