@@ -46,7 +46,211 @@
 ```
 # 
 ```
+AUDIT NO. 4 SAJA — RISK & EXECUTION mt-info
 
+Lakukan audit terarah terhadap RISK MANAGEMENT dan EXECUTION SAFETY project mt-info.
+
+FOKUS HANYA:
+SIGNAL → RISK APPROVAL → EXECUTION GATES → MT5 PRE-TRADE CHECK
+
+Jangan audit trading strategy logic atau live feed secara umum karena No. 2 dan No. 3 sudah selesai.
+Jangan melakukan real trading.
+
+TUJUAN:
+Memastikan jika suatu saat signal valid muncul, sistem:
+- tidak melanggar risk limit
+- tidak menggandakan posisi
+- fail-closed jika state tidak diketahui
+- tidak mengirim order sebelum semua gate terpenuhi
+- tidak salah sizing
+- tidak salah membaca kondisi akun/symbol
+- tidak bisa melewati safety gate
+
+WAJIB PERIKSA:
+
+1. STARTUP RISK RECONCILIATION
+Audit:
+- RiskManager state setelah restart
+- broker positions reconciliation
+- existing risk
+- max_open_positions
+- unverified positions
+- fail-closed behavior
+- duplicate exposure setelah restart
+
+Pastikan posisi broker yang sudah ada tidak diabaikan hanya karena state in-memory kosong setelah restart.
+
+2. POSITION LIMIT
+Pastikan:
+- max_open_positions benar-benar ditegakkan
+- existing broker position ikut dihitung
+- pending/unverified state tidak dianggap aman
+- duplicate signal tidak bisa menghasilkan exposure tambahan
+
+3. RISK SIZING
+Audit:
+- account balance/equity input
+- risk percentage
+- stop distance
+- tick value/tick size
+- volume min/max/step
+- rounding
+- zero/negative/NaN handling
+- oversized volume rejection
+
+Pastikan sizing tidak menghasilkan volume di luar symbol specification.
+
+4. FAIL-CLOSED
+Pastikan approval ditolak jika:
+- risk state belum reconciled
+- broker position tidak dapat diverifikasi
+- account data invalid
+- symbol spec invalid
+- quote invalid
+- SL/TP invalid
+- volume invalid
+- market state tidak diketahui
+- required execution information missing
+
+Jangan gunakan fallback yang menganggap kondisi aman.
+
+5. EXECUTION GATES
+Telusuri urutan:
+
+SIGNAL
+→ RISK APPROVAL
+→ SYMBOL/QUOTE VALIDATION
+→ STOPS/FREEZE VALIDATION
+→ MT5 READINESS
+→ order_check
+→ order_send
+
+Pastikan tidak ada jalur yang dapat melewati gate.
+
+6. MT5 READINESS
+Audit integrasi mt5_ready.py dan mt5_execution.py:
+- terminal_info
+- account_info
+- exact symbol
+- symbol specification
+- tick sanity
+- trade permissions
+- stops level
+- freeze level
+- filling mode
+- order_check
+
+Pastikan `order_check()` hanya pre-trade validation dan TIDAK mengirim order.
+
+7. ORDER REQUEST CONSISTENCY
+Bandingkan request yang dibangun untuk:
+- order_check
+- eventual place/order_send
+
+Pastikan parameter penting tidak berbeda secara diam-diam:
+- symbol
+- volume
+- order type
+- price
+- SL/TP
+- deviation
+- filling
+- time-in-force
+
+8. ORDER_SEND SAFETY
+Pastikan:
+- order_send hanya dapat dipanggil setelah seluruh gate
+- execution disabled/future mode benar-benar fail-closed
+- exceptions/error tidak menyebabkan fallback ke send
+- failed order tidak dianggap filled
+- duplicate send tidak terjadi
+
+JANGAN menjalankan `order_send`.
+
+9. REAL MT5 DEMO READ-ONLY
+Jika diperlukan, lakukan:
+- account_info()
+- positions_get()
+- symbol_info()
+- symbol_info_tick()
+- terminal_info()
+- order_check() READ-ONLY boleh dilakukan
+
+DILARANG:
+- order_send
+- membuka posisi
+- menutup posisi
+- modify position
+- mengubah pending order
+
+Catat:
+order_send calls = HARUS 0
+position changes = HARUS 0
+order changes = HARUS 0
+
+10. REGRESSION TEST
+Jika menemukan bug nyata:
+- identifikasi root cause
+- buat regression test
+- fix minimal
+- jalankan test relevan
+
+Jika tidak ada bug:
+- JANGAN ubah kode
+- JANGAN commit
+- JANGAN push
+
+Jika ada fix:
+- tampilkan file/function yang berubah
+- test result
+- commit SHA
+- push status
+
+OUTPUT WAJIB:
+
+=== NO. 4 RISK & EXECUTION AUDIT ===
+
+Startup reconciliation: PASS/FAIL
+Position limit: PASS/FAIL
+Risk sizing: PASS/FAIL
+Fail-closed: PASS/FAIL
+Execution gates: PASS/FAIL
+MT5 readiness: PASS/FAIL
+Order request consistency: PASS/FAIL
+order_check safety: PASS/FAIL
+order_send gate: PASS/FAIL
+Duplicate execution protection: PASS/FAIL
+
+REAL MT5 READ-ONLY:
+Account:
+Symbol:
+Position count:
+Trade mode:
+Volume constraints:
+Stops/freeze:
+Tick:
+order_check:
+order_send:
+Position changes:
+Order changes:
+
+TEMUAN:
+Untuk setiap temuan:
+- severity
+- file
+- function/line
+- root cause
+- bukti
+- dampak
+
+VERDICT:
+PASS / FIX REQUIRED / BLOCKED
+
+PENTING:
+Jangan mengubah risk percentage, SL/TP, volume, atau parameter strategy untuk memperbaiki hasil.
+Jangan melakukan live trading.
+Jangan menganggap order_check sukses berarti order pasti akan dieksekusi.
+Jika semuanya PASS, berhenti tanpa commit/push.
 ```
 # 
 ```
