@@ -34,7 +34,232 @@
 ```
 # 
 ```
+FINAL GO / NO-GO AUDIT — mt-info
 
+Lakukan FINAL AUDIT terhadap kondisi project mt-info saat ini.
+
+AUDIT SEBELUMNYA:
+- No. 2 Trading Logic: PASS
+- No. 3 Live Pipeline: PASS
+- No. 4 Risk & Execution: PASS
+- No. 5 Windows Bridge & Handoff: PASS
+- No. 6 Paper/Shadow E2E: PASS
+
+JANGAN mengulang full audit No. 2–6.
+Gunakan hasil dan bukti yang sudah ada, lalu lakukan verifikasi tambahan HANYA jika diperlukan untuk keputusan final.
+
+TUJUAN:
+Menentukan secara jujur apakah mt-info:
+A. siap untuk LIVE SHADOW / PAPER OBSERVATION,
+B. siap untuk DEMO EXECUTION TEST,
+C. siap untuk REAL MONEY,
+atau
+D. masih BLOCKED.
+
+PENTING:
+Technical readiness dan trading-edge readiness HARUS dipisahkan.
+
+==================================================
+1. TECHNICAL READINESS
+==================================================
+
+Verifikasi status akhir:
+
+- Trading logic causal
+- closed candle only
+- no look-ahead
+- no repaint
+- M5/M15 alignment
+- live feed
+- clock/offset
+- stale/future data protection
+- risk reconciliation
+- position limits
+- risk sizing
+- MT5 readiness
+- order_check
+- execution gates
+- Windows bridge
+- handoff
+- validation
+- duplicate protection
+- shadow E2E
+- journal integrity
+- fail-closed behavior
+
+Jangan mengklaim PASS tanpa bukti dari audit sebelumnya atau verification yang memang diperlukan.
+
+==================================================
+2. SAFETY
+==================================================
+
+Pastikan:
+
+- order_send tetap 0 selama seluruh verification
+- tidak ada position change
+- tidak ada order change
+- NoExecution/shadow tetap aman
+- tidak ada execution bypass
+- existing demo position tidak berubah
+
+==================================================
+3. TRADING EDGE
+==================================================
+
+Ini HARUS dipisahkan dari technical readiness.
+
+Gunakan bukti yang sudah tersedia.
+
+Periksa apakah project memiliki bukti statistik yang cukup untuk menyatakan strategy mempunyai positive edge.
+
+JANGAN:
+- mengubah parameter
+- optimize
+- cherry-pick trade
+- mempercantik backtest
+- menggunakan synthetic data
+- menganggap 1–few live signals sebagai bukti edge
+
+Jika bukti edge belum cukup:
+=> REAL MONEY = NO-GO.
+
+Jika sebelumnya hanya ada hasil seperti jumlah trade kecil / expectancy tidak meyakinkan:
+=> nyatakan secara eksplisit bahwa edge belum terbukti.
+
+==================================================
+4. CURRENT LIVE STATUS
+==================================================
+
+Jika market masih buka dan verification aman, boleh lakukan smoke check READ-ONLY.
+
+Catat:
+- exact XAUUSD symbol
+- tick
+- latest CLOSED M5
+- latest CLOSED M15
+- freshness
+- offset
+- current decision
+- order_send
+- position/order changes
+
+Jangan membuka atau mengubah posisi.
+
+==================================================
+5. DECISION MATRIX
+==================================================
+
+Berikan keputusan terpisah:
+
+TECHNICAL:
+GO / CONDITIONAL / NO-GO
+
+SHADOW/PAPER:
+GO / CONDITIONAL / NO-GO
+
+DEMO EXECUTION:
+GO / CONDITIONAL / NO-GO
+
+REAL MONEY:
+GO / NO-GO
+
+Aturan:
+- Jika technical safety PASS tetapi edge belum terbukti:
+  TECHNICAL = GO
+  SHADOW/PAPER = GO
+  DEMO EXECUTION = CONDITIONAL/GO hanya jika semua broker validation memang cukup
+  REAL MONEY = NO-GO
+
+Jangan pernah mengubah NO-GO menjadi GO hanya karena pipeline secara teknis sehat.
+
+==================================================
+6. REMAINING BLOCKERS
+==================================================
+
+Daftar hanya blocker yang BENAR-BENAR masih ada.
+
+Pisahkan:
+
+CRITICAL
+MEDIUM
+OPERATIONAL
+NOT A BLOCKER
+
+Jika tidak ada technical blocker, katakan jelas:
+"No technical blocker found."
+
+==================================================
+7. MONDAY / NEXT STEP
+==================================================
+
+Berikan langkah berikutnya yang paling tepat.
+
+Jika technical system sudah GO tetapi edge belum terbukti:
+rekomendasi utama adalah melanjutkan Shadow/Paper dengan data market REAL dan mengumpulkan sample yang cukup.
+
+Jangan membuat angka minimum sample secara asal.
+Jika menyebut statistical requirement, jelaskan bahwa itu untuk confidence, bukan jaminan profit.
+
+==================================================
+8. CODE CHANGE POLICY
+==================================================
+
+JANGAN mengubah kode hanya demi final audit.
+
+Jika semua PASS:
+- code changed: NO
+- commit: NONE
+- push: NO
+
+Jika ditemukan blocker teknis yang benar-benar terbukti:
+- jelaskan root cause
+- buat regression test
+- fix minimal
+- test ulang
+- commit/push hanya jika diperlukan
+
+==================================================
+OUTPUT WAJIB
+==================================================
+
+=== FINAL GO / NO-GO ===
+
+Technical readiness:
+Shadow/Paper:
+Demo execution:
+Real money:
+
+Trading edge:
+PROVEN / NOT PROVEN / INSUFFICIENT DATA
+
+Safety:
+order_send:
+position changes:
+order changes:
+
+Technical blockers:
+- ...
+
+Operational blockers:
+- ...
+
+Remaining work:
+1.
+2.
+3.
+
+FINAL VERDICT:
+...
+
+GIT:
+Code changed:
+Commit:
+Push:
+
+PENTING:
+Jangan menyatakan strategy profitable hanya karena semua technical audit PASS.
+Technical PASS ≠ profitable strategy.
+Jika edge belum terbukti, REAL MONEY wajib NO-GO.
 ```
 # 
 ```
