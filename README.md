@@ -30,7 +30,275 @@
 ```
 # 
 ```
+REAL SHADOW / PAPER OBSERVATION — XAUUSD M5
 
+Jalankan observasi SHADOW/PAPER menggunakan XAUUSD AKTUAL dari MT5 DEMO.
+
+STATUS SISTEM:
+- Trading Logic: PASS
+- Live Pipeline: PASS
+- Risk & Execution: PASS
+- Windows Bridge & Handoff: PASS
+- Shadow E2E: PASS
+- Final Technical Readiness: GO
+- Real Money: NO-GO karena trading edge belum terbukti
+
+TUJUAN:
+Mulai mengumpulkan data observasi real-market untuk menilai apakah strategy reversal memiliki edge.
+
+MODE WAJIB:
+- Shadow / NoExecution
+- order_send = 0
+- tidak membuka posisi
+- tidak menutup posisi
+- tidak modify posisi
+- jangan menyentuh posisi demo existing
+
+JANGAN:
+- mengubah strategy
+- mengubah parameter
+- melakukan optimization
+- membuat signal manual
+- memaksa BUY/SELL
+- menggunakan synthetic data
+- mengubah kode hanya untuk mendapatkan lebih banyak signal
+
+==================================================
+1. MARKET DATA
+==================================================
+
+Gunakan:
+- exact XAUUSD broker symbol
+- MT5 Demo
+- tick aktual
+- M5 aktual
+- M15 aktual
+
+Pastikan:
+- forming candle excluded
+- hanya closed candle
+- M15 structure tersedia secara causal
+- tidak ada look-ahead
+- timestamp/freshness/offset valid
+
+==================================================
+2. SHADOW RUN
+==================================================
+
+Jalankan shadow engine pada market live.
+
+Biarkan strategy menghasilkan keputusan secara natural:
+
+BUY
+SELL
+NO_TRADE
+
+Jangan memaksa munculnya signal.
+
+Jika tidak ada setup:
+NO_TRADE adalah hasil yang valid.
+
+Jika ada signal:
+CATAT signal secara lengkap tetapi JANGAN EKSEKUSI.
+
+==================================================
+3. SETIAP SIGNAL
+==================================================
+
+Untuk setiap BUY/SELL yang muncul, catat:
+
+- timestamp
+- symbol
+- timeframe
+- M15 structure
+- Support/Resistance yang digunakan
+- M5 confirmation candle
+- engulfing status
+- entry reference
+- SL/TP reference jika strategy menyediakan
+- risk decision
+- alasan signal diterima
+- journal identifier
+
+Jangan mengubah signal setelah terbentuk.
+
+==================================================
+4. SETIAP NO_TRADE
+==================================================
+
+Catat alasan NO_TRADE jika tersedia, misalnya:
+- no_reversal
+- partial_engulfing
+- no_support
+- no_resistance
+- invalid_confirmation
+- risk rejection
+- feed/data condition
+
+Jangan menganggap NO_TRADE sebagai kegagalan.
+
+==================================================
+5. OBSERVATION WINDOW
+==================================================
+
+Biarkan berjalan melewati beberapa CLOSED M5 candles selama market aktif.
+
+Jangan berhenti hanya karena signal pertama tidak muncul.
+
+Jika environment memungkinkan, observasikan setidaknya beberapa candle baru.
+
+Jika belum ada candle baru:
+laporkan secara eksplisit dan jangan mengarang hasil.
+
+==================================================
+6. OUTCOME TRACKING
+==================================================
+
+Untuk signal yang muncul, JANGAN menggunakan future information untuk mengubah keputusan.
+
+Simpan keputusan pada saat signal terjadi.
+
+Untuk evaluasi outcome setelahnya, gunakan hanya candle/tick yang benar-benar terjadi SETELAH signal timestamp.
+
+Pisahkan:
+- signal time
+- subsequent outcome observation
+
+Jangan melakukan look-ahead saat membuat keputusan.
+
+==================================================
+7. SAFETY
+==================================================
+
+WAJIB:
+
+order_send = 0
+execution attempts = 0
+position changes = 0
+order changes = 0
+
+Pre-existing demo position harus tetap tidak berubah.
+
+==================================================
+8. JOURNAL
+==================================================
+
+Pastikan setiap decision yang memang diproses tercatat.
+
+Catat:
+- journal rows
+- duplicate
+- partial
+- rejected
+- BUY
+- SELL
+- NO_TRADE
+
+Jangan membuat journal entry palsu untuk candle yang tidak diproses.
+
+==================================================
+9. STATISTICS
+==================================================
+
+Jangan menyimpulkan profitability dari jumlah signal yang sedikit.
+
+Jika signal masih sedikit:
+nyatakan DATA INSUFFICIENT.
+
+Jangan mengubah parameter untuk meningkatkan:
+- win rate
+- profit
+- trade count
+- expectancy
+
+Tujuan tahap ini adalah OBSERVASI, bukan optimasi.
+
+==================================================
+10. CODE POLICY
+==================================================
+
+JANGAN mengubah kode selama observation.
+
+Jika menemukan ERROR TEKNIS nyata:
+- berhenti
+- laporkan error
+- file/function terkait
+- jangan melakukan fix otomatis
+
+Jangan commit/push.
+
+==================================================
+OUTPUT AKHIR
+==================================================
+
+=== REAL SHADOW OBSERVATION ===
+
+Market:
+Symbol:
+MT5:
+Market status:
+
+DATA:
+Latest closed M5:
+Latest closed M15:
+Tick:
+Freshness:
+Offset:
+
+OBSERVATION:
+New closed M5 candles:
+Total decisions:
+BUY:
+SELL:
+NO_TRADE:
+Rejected:
+Duplicates:
+Journal rows:
+
+SIGNALS:
+Untuk setiap BUY/SELL:
+timestamp:
+direction:
+setup:
+M15 structure:
+S/R:
+M5 confirmation:
+engulfing:
+entry reference:
+SL/TP reference:
+risk status:
+
+OUTCOME:
+Signal outcomes observed:
+Wins:
+Losses:
+Open/undetermined:
+Expectancy:
+Edge status:
+
+SAFETY:
+Execution mode:
+execution attempts:
+order_check:
+order_send:
+position changes:
+order changes:
+
+VERDICT:
+SHADOW OBSERVATION VALID / CONDITIONAL / INVALID
+
+EDGE:
+PROVEN / NOT PROVEN / DATA INSUFFICIENT
+
+GIT:
+Code changed: NO
+Commit: NONE
+Push: NO
+
+PENTING:
+Technical PASS tidak berarti strategy profitable.
+Jangan menyatakan edge terbukti dari beberapa trade.
+Gunakan data market REAL saja.
 ```
 # 
 ```
