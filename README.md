@@ -10,7 +10,526 @@
 ```
 # 
 ```
+STRATEGY REVISION — S/R-FIRST REVERSAL SIGNAL
+AUDIT → DESIGN → IMPLEMENT → TEST
 
+PROJECT:
+mt-info
+
+TUJUAN UTAMA:
+Perbaiki logic signal agar strategy tidak menjadikan ENGULFING sebagai syarat wajib untuk setiap signal.
+
+DESAIN YANG DIINGINKAN:
+
+S/R = FILTER / CONTEXT UTAMA
+ENGULFING = OPTIONAL CONFIRMATION
+
+Ada DUA jalur signal yang valid:
+
+PATH A — S/R DIRECT SIGNAL
+M15 Support/Resistance valid
++
+seluruh rule reversal S/R terpenuhi
++
+M5 confirmation yang memang diwajibkan oleh rule S/R
+=
+SIGNAL BUY/SELL
+
+Tidak perlu engulfing.
+
+PATH B — S/R + ENGULFING
+M15 Support/Resistance valid
++
+setup S/R valid
++
+engulfing memenuhi definisi strategy
+=
+SIGNAL BUY/SELL
+
+Engulfing hanya confirmation tambahan.
+
+YANG TIDAK BOLEH:
+
+Engulfing valid tetapi tidak berada pada S/R valid
+=
+NO TRADE
+
+S/R lemah/tidak valid
+=
+NO TRADE
+
+Hanya candle besar/rejection tanpa S/R valid
+=
+NO TRADE
+
+Jangan membuat semua engulfing menjadi signal.
+
+==================================================
+ATURAN BESAR
+==================================================
+
+1. S/R HARUS MENJADI FILTER UTAMA
+
+Strategy harus terlebih dahulu menentukan apakah harga berada pada Support atau Resistance yang valid.
+
+Jangan memulai signal detection dari engulfing lalu mencari S/R sebagai pembenaran.
+
+Urutan harus:
+
+M15
+→ identifikasi S/R
+→ validasi kualitas S/R
+→ cek price reaction
+→ cek reversal condition
+→ cek M5 confirmation
+→ signal
+
+Engulfing hanya salah satu confirmation yang boleh memperkuat setup.
+
+==================================================
+2. SUPPORT / RESISTANCE
+==================================================
+
+Audit implementation S/R yang sekarang.
+
+Pastikan S/R:
+- berasal dari data yang sudah tersedia
+- causal
+- tidak menggunakan future candle
+- tidak repaint
+- tidak berubah secara hindsight
+- memiliki rule yang deterministic
+- bukan sekadar setiap swing high/low
+
+Bedakan:
+- valid support
+- valid resistance
+- weak level
+- broken level
+- breakout
+- rejection
+- retest
+
+Jangan menganggap semua level sebagai S/R valid.
+
+==================================================
+3. S/R DIRECT SIGNAL
+
+Jika seluruh rule S/R reversal sudah terpenuhi, signal BOLEH muncul walaupun tidak ada engulfing.
+
+Tetapi jangan membuat:
+
+"S/R tersentuh = signal."
+
+Harus ada seluruh kondisi reversal yang telah ditentukan.
+
+Contoh struktur:
+
+VALID S/R
++
+harga bereaksi/reject terhadap S/R
++
+reversal confirmation sesuai rule
+=
+SIGNAL
+
+Engulfing tidak wajib.
+
+==================================================
+4. S/R + ENGULFING
+
+Engulfing dapat menjadi confirmation tambahan.
+
+Contoh:
+
+VALID SUPPORT
++
+bullish reaction
++
+valid bullish engulfing
+=
+BUY
+
+VALID RESISTANCE
++
+bearish reaction
++
+valid bearish engulfing
+=
+SELL
+
+Tetapi engulfing harus:
+- memenuhi definisi yang sebenarnya
+- berada pada konteks S/R
+- menggunakan candle CLOSED
+- causal
+- tidak memakai future data
+
+==================================================
+5. ENGULFING DI LUAR S/R
+
+WAJIB NO_TRADE.
+
+Contoh:
+
+bullish engulfing di tengah range
+→ NO_TRADE
+
+bearish engulfing di tengah trend
+→ NO_TRADE
+
+engulfing tanpa valid S/R
+→ NO_TRADE
+
+Jangan membuat fallback signal dari engulfing.
+
+==================================================
+6. M5 / M15
+
+M15:
+- structure
+- Support/Resistance
+
+M5:
+- reaction
+- confirmation
+- entry timing
+
+Hanya closed candles.
+
+Index 0/forming candle tidak boleh digunakan.
+
+Pastikan M15 candle yang dipakai memang sudah CLOSED pada saat keputusan M5 dibuat.
+
+==================================================
+7. REVERSAL VS BREAKOUT
+
+S/R strategy tidak boleh melawan breakout valid hanya karena level S/R sebelumnya ada.
+
+Jika resistance ditembus dan harga menerima breakout:
+→ jangan SELL hanya karena resistance.
+
+Jika support ditembus dan harga menerima breakdown:
+→ jangan BUY hanya karena support.
+
+Jika breakout gagal dan terjadi rejection/reversal yang memenuhi rule:
+→ setup reversal boleh dipertimbangkan.
+
+==================================================
+8. SIGNAL QUALITY
+
+Strategy harus SELECTIVE.
+
+Jangan meningkatkan jumlah signal hanya agar lebih banyak trade.
+
+Prioritas:
+
+QUALITY > FREQUENCY
+
+Lebih baik:
+NO_TRADE
+
+daripada:
+signal yang lemah.
+
+==================================================
+9. KASUS LIVE YANG SUDAH TERJADI
+
+Gunakan kasus real XAUUSD.m pada 2026-09-14.
+
+Signal BUY sebelumnya:
+08:50
+entry 4334.58
+SL 4321.93857
+TP 4359.86286
+
+Signal tersebut kemudian gagal.
+
+Analisis apakah:
+- S/R memang valid
+- reaction sudah cukup
+- reversal confirmation terlalu lemah
+- engulfing membuat setup terlihat valid padahal S/R/reaction belum cukup kuat
+- atau ada masalah lain
+
+Jangan menggunakan future outcome untuk mengubah keputusan saat 08:50.
+
+==================================================
+10. KASUS SELL YANG OPERATOR TUNJUK
+
+Analisis area SELL yang sebelumnya ditunjukkan pada chart.
+
+Jangan otomatis menganggap SELL benar hanya karena harga kemudian turun.
+
+Tentukan secara causal:
+- S/R mana
+- apakah resistance valid
+- apakah rejection valid
+- apakah reversal valid
+- kapan confirmation terjadi
+- apakah S/R-only dapat menghasilkan signal
+- apakah S/R + engulfing dapat menghasilkan signal
+- apakah sebenarnya itu breakout/continuation
+
+==================================================
+11. DEFINISI FINAL SIGNAL
+
+Buat architecture yang jelas seperti:
+
+S/R VALID?
+NO → NO_TRADE
+
+YES
+↓
+S/R REVERSAL RULES COMPLETE?
+YES → SIGNAL
+
+NO
+↓
+VALID ENGULFING CONFIRMATION AT VALID S/R?
+YES → SIGNAL
+NO → NO_TRADE
+
+Tetapi jangan implementasikan struktur di atas secara literal jika bertentangan dengan rule existing.
+
+Yang penting adalah konsep:
+
+S/R harus menjadi prerequisite.
+
+Engulfing tidak boleh menjadi prerequisite untuk S/R setup yang memang sudah lengkap.
+
+==================================================
+12. NO LOOK-AHEAD
+
+Semua keputusan harus dapat dibuat hanya berdasarkan informasi yang tersedia saat candle confirmation CLOSED.
+
+Tidak boleh menggunakan:
+- future candles
+- future swing
+- future S/R
+- future outcome
+- future trend classification
+
+Jika S/R level baru diketahui setelah candle berikutnya:
+level tersebut tidak boleh dipakai untuk signal sebelumnya.
+
+==================================================
+13. BACKTEST COMPATIBILITY
+
+Pastikan desain baru dapat diuji pada historical REAL XAUUSD data.
+
+Tidak boleh:
+- synthetic evidence
+- hindsight
+- parameter fitting
+- cherry-picking
+- optimization hanya untuk menaikkan win rate
+
+Jika perubahan membuat signal bertambah banyak, itu bukan alasan menganggap strategy lebih baik.
+
+==================================================
+14. AUDIT CODE EXISTING
+
+Sebelum coding:
+
+Cari:
+- fungsi signal
+- fungsi S/R
+- fungsi engulfing
+- reversal logic
+- M5/M15 alignment
+- signal gates
+- tests
+
+Identifikasi tepat di mana engulfing saat ini menjadi mandatory gate.
+
+Tunjukkan root cause.
+
+==================================================
+15. IMPLEMENTATION POLICY
+
+Jika implementation sekarang SUDAH mendukung konsep ini:
+- jangan ubah code.
+
+Jika implementation TIDAK mendukung:
+- lakukan perubahan MINIMAL yang diperlukan.
+
+Jangan refactor besar.
+Jangan mengubah risk system.
+Jangan mengubah execution system.
+Jangan mengubah Windows bridge.
+Jangan mengubah MT5 feed.
+
+==================================================
+16. TEST WAJIB
+
+Tambahkan regression tests untuk minimal:
+
+TEST 1:
+Valid S/R reversal tanpa engulfing
+→ SIGNAL
+
+TEST 2:
+Valid S/R reversal + valid engulfing
+→ SIGNAL
+
+TEST 3:
+Valid engulfing tanpa S/R
+→ NO_TRADE
+
+TEST 4:
+S/R tidak valid + engulfing
+→ NO_TRADE
+
+TEST 5:
+S/R valid tetapi reaction/reversal belum lengkap
+→ NO_TRADE
+
+TEST 6:
+Valid S/R + forming candle
+→ NO_TRADE
+
+TEST 7:
+Valid S/R + closed confirmation
+→ SIGNAL
+
+TEST 8:
+Future candle diperlukan untuk menentukan S/R
+→ tidak boleh digunakan / NO_TRADE
+
+TEST 9:
+Valid breakout dari resistance
+→ jangan menghasilkan SELL reversal
+
+TEST 10:
+Valid breakdown dari support
+→ jangan menghasilkan BUY reversal
+
+Pastikan test membuktikan causality dan bukan hanya output signal.
+
+==================================================
+17. REAL DATA TEST
+
+Setelah coding jika memang diperlukan:
+
+Gunakan REAL XAUUSD data.
+
+Jangan synthetic data sebagai bukti.
+
+Jalankan historical test atau live shadow test yang relevan.
+
+Jangan real trading.
+
+order_send HARUS = 0.
+
+==================================================
+18. JANGAN OPTIMASI
+
+DILARANG mengubah threshold hanya untuk:
+- meningkatkan win rate
+- meningkatkan profit
+- meningkatkan trade count
+- mengurangi losing trade
+- membuat chart terlihat bagus
+
+Rule harus berasal dari definisi strategy, bukan hasil curve fitting.
+
+==================================================
+19. OUTPUT
+
+Sebelum perubahan:
+
+CURRENT LOGIC:
+...
+
+ROOT CAUSE:
+...
+
+DESIRED LOGIC:
+...
+
+SIGNAL HIERARCHY:
+...
+
+Kemudian:
+
+IMPLEMENTATION:
+Changed: YES/NO
+
+Jika YES:
+Files:
+Functions:
+Exact change:
+Why necessary:
+
+TEST:
+Passed:
+Failed:
+Skipped:
+
+REAL DATA:
+Result:
+
+SAFETY:
+order_send:
+Position changes:
+Order changes:
+
+GIT:
+Commit:
+Push:
+
+FINAL VERDICT:
+PASS / FIXED / BLOCKED
+
+==================================================
+20. GIT POLICY
+
+Jika tidak ada bug/perubahan yang diperlukan:
+- code changed = NO
+- commit = NONE
+- push = NO
+
+Jika perubahan diperlukan:
+- fix minimal
+- regression tests
+- full relevant test suite
+- commit
+- push origin/main
+
+Jangan membuat commit kosong.
+
+==================================================
+PENTING PALING UTAMA:
+
+Jangan salah memahami rule.
+
+BUKAN:
+"Engulfing = signal."
+
+BUKAN:
+"S/R = harus selalu ada engulfing."
+
+YANG DIINGINKAN:
+
+"S/R valid adalah dasar signal."
+
+Jika rule S/R reversal SUDAH LENGKAP:
+→ SIGNAL LANGSUNG, tanpa perlu engulfing.
+
+Jika S/R membutuhkan confirmation tambahan dan engulfing memenuhi rule:
+→ SIGNAL.
+
+Engulfing di luar S/R:
+→ NO_TRADE.
+
+Jangan memaksakan signal.
+
+Jangan mengejar jumlah signal.
+
+Jangan menggunakan hindsight.
+
+Jangan mengubah kode sebelum root cause ditemukan.
 ```
 # 
 ```
