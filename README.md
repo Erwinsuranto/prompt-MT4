@@ -42,7 +42,214 @@
 ```
 # 
 ```
+AUDIT NO. 5 SAJA — WINDOWS BRIDGE & HANDOFF mt-info
 
+Lakukan audit terarah terhadap Windows Bridge dan signal handoff project mt-info.
+
+FOKUS HANYA:
+MT5 WORKER → xausr_signals.jsonl → WINDOWS LOCAL SERVICE BRIDGE → VALIDATION / ACCEPTOR
+
+No. 2 Trading Logic, No. 3 Live Pipeline, dan No. 4 Risk & Execution sudah diaudit.
+Jangan mengulang audit tersebut kecuali ada dependency langsung pada bridge.
+
+TUJUAN:
+Memastikan bridge Windows aman, deterministic, fail-closed, tidak menerima signal stale/duplicate/corrupt, dan tidak dapat menjadi jalur bypass menuju execution.
+
+WAJIB PERIKSA:
+
+1. SIGNAL HANDOFF FILE
+Audit:
+- path
+- format JSONL
+- atomic/write behavior
+- partial/truncated file
+- malformed JSON
+- empty file
+- duplicate signal
+- stale signal
+- timestamp validation
+- identifier/idempotency
+- file locking jika digunakan
+
+Pastikan bridge tidak membaca file yang sedang ditulis secara parsial.
+
+2. WORKER → BRIDGE
+Verifikasi alur aktual:
+MT5 worker
+→ signal generation
+→ handoff file
+→ LocalService bridge
+→ validation
+
+Pastikan:
+- writer dan reader memakai path yang benar
+- tidak ada race condition yang memungkinkan partial read
+- bridge tidak membaca signal lama sebagai signal baru
+- duplicate signal tidak diteruskan
+
+3. LOCAL SERVICE
+Audit Windows Task:
+- account = LocalService
+- ServiceAccount logon
+- LeastPrivilege
+- non-interactive
+- absolute WorkingDirectory
+- executable/path correctness
+- startup behavior
+- restart policy
+- Stop/Disable behavior
+
+Jangan mengubah deployment.
+
+4. ACL / PERMISSION
+Pastikan:
+- worker hanya memiliki permission yang memang diperlukan
+- bridge memiliki permission minimum
+- secret files tidak writable oleh user biasa
+- signal handoff tidak dapat dimodifikasi sembarang user untuk bypass validation
+- tidak ada Everyone/Users full-control yang berbahaya
+
+5. VALIDATION
+Audit semua validation sebelum signal diterima:
+- schema
+- required fields
+- timestamp
+- symbol
+- side
+- volume
+- price
+- SL/TP bila ada
+- identifier
+- stale/replay
+- malformed data
+
+Signal invalid harus:
+=> REJECT / FAIL-CLOSED
+
+Jangan membuat fallback accept.
+
+6. REPLAY / DUPLICATE
+Pastikan signal yang sama tidak dapat diproses berulang kali karena:
+- bridge restart
+- file reread
+- worker retry
+- duplicate JSONL line
+
+Audit bagaimana state/idempotency disimpan.
+
+7. CRASH / RESTART
+Uji bila aman:
+- bridge stop/start
+- malformed handoff
+- partial handoff
+- stale handoff
+
+Pastikan setelah restart:
+- tidak memproses signal lama secara tidak sengaja
+- tidak duplicate-process signal
+- tidak membuka execution path
+
+8. EXECUTION BYPASS
+Telusuri seluruh bridge code.
+
+Pastikan bridge TIDAK dapat:
+- bypass RiskManager
+- bypass readiness
+- bypass validation
+- bypass execution mode
+- langsung memanggil order_send
+
+Jika ada execution integration, harus tetap melewati semua gate yang sudah diaudit.
+
+9. REAL WINDOWS VERIFICATION
+Gunakan Windows host yang sekarang dipakai.
+
+Verifikasi read-only:
+- Task status
+- Task XML
+- owner/account
+- handoff file
+- bridge process owner
+- validation behavior
+
+Boleh membuat test signal NON-EXECUTING untuk menguji handoff.
+
+DILARANG:
+- order_send
+- membuka posisi
+- menutup posisi
+- modify posisi
+- mengubah broker state
+
+WAJIB:
+order_send = 0
+position changes = 0
+order changes = 0
+
+10. REGRESSION TEST
+Jika menemukan bug:
+- cari root cause
+- buat regression test
+- fix minimal
+- jalankan test terkait
+
+Jika tidak ada bug:
+- jangan ubah kode
+- jangan commit
+- jangan push
+
+Jika ada fix:
+- tampilkan file/function yang berubah
+- test result
+- commit SHA
+- push status
+
+OUTPUT:
+
+=== NO. 5 WINDOWS BRIDGE & HANDOFF AUDIT ===
+
+Handoff integrity: PASS/FAIL
+Partial-write protection: PASS/FAIL
+Malformed input handling: PASS/FAIL
+Stale signal protection: PASS/FAIL
+Duplicate/replay protection: PASS/FAIL
+Worker → bridge path: PASS/FAIL
+LocalService isolation: PASS/FAIL
+ACL: PASS/FAIL
+Validation: PASS/FAIL
+Crash/restart safety: PASS/FAIL
+Execution bypass protection: PASS/FAIL
+
+REAL WINDOWS:
+Task:
+Owner:
+Logon type:
+Run level:
+WorkingDirectory:
+Bridge status:
+Bridge owner:
+Handoff:
+Validation:
+order_send:
+Position changes:
+Order changes:
+
+TEMUAN:
+Untuk setiap temuan:
+- severity
+- file/function/line
+- root cause
+- bukti
+- dampak
+
+VERDICT:
+PASS / FIX REQUIRED / BLOCKED
+
+PENTING:
+Jangan memperbaiki masalah yang hanya berupa asumsi.
+Jangan melakukan perubahan deployment.
+Jangan melakukan real trading.
+Jika semua PASS, berhenti tanpa commit/push.
 ```
 # 
 ```
