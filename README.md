@@ -30,7 +30,136 @@
 ```
 # 
 ```
+LANJUTKAN LIVE SHADOW MONITORING — JANGAN CODING
 
+Hasil sementara:
+VALID SIGNAL=2
+WIN=1
+LOSS=1
+UNRESOLVED=0
+FALSE POSITIVE=0
+
+Jangan mengubah rule berdasarkan sample kecil ini.
+
+LANJUTKAN monitoring REAL XAUUSD.m sampai:
+- memperoleh sampel signal yang jauh lebih besar, ATAU
+- sesi market berakhir.
+
+MODE WAJIB:
+- Shadow / NoExecution
+- order_send=0
+- execution_attempts=0
+- jangan membuka posisi
+- jangan mengubah posisi existing
+- jangan menggunakan hindsight
+- jangan menggunakan candle yang belum close
+- entry/SL/TP dikunci pada saat signal dibuat
+
+PRINSIP STRATEGY YANG HARUS DIPERTAHANKAN:
+
+1. S/R adalah dasar utama reversal.
+2. Jika S/R/reaction sudah memenuhi rule dan reversal valid,
+   SIGNAL BOLEH KELUAR TANPA ENGULFING.
+3. Jika S/R valid + engulfing valid sesuai rule,
+   SIGNAL BOLEH KELUAR.
+4. ENGULFING SAJA TANPA S/R VALID = NO_TRADE.
+5. Jangan menganggap setiap engulfing sebagai signal.
+6. Jangan memaksa signal hanya supaya jumlah signal bertambah.
+7. Jangan membuat S/R menjadi terlalu ketat hanya untuk menghilangkan loss.
+8. Jangan menambahkan indikator baru hanya karena sample kecil menghasilkan loss.
+
+UNTUK SETIAP SIGNAL:
+
+Catat:
+- timestamp
+- direction
+- M15 S/R
+- zone
+- reaction/rejection
+- apakah engulfing ada/tidak
+- confirmation yang digunakan
+- alasan signal
+- entry
+- SL
+- TP
+- risk/reward
+- decision_id
+
+Kemudian monitor outcome secara causal.
+
+KLASIFIKASI OUTCOME:
+
+VALID WIN
+VALID LOSS
+UNRESOLVED
+FALSE POSITIVE
+
+FALSE POSITIVE hanya jika setelah diperiksa menggunakan informasi yang tersedia PADA SAAT SIGNAL dibuat ternyata signal memang melanggar rule.
+
+Jangan menyebut signal FALSE POSITIVE hanya karena akhirnya kena SL.
+
+UNTUK NO_TRADE:
+kelompokkan alasan:
+- no_reversal
+- weak_s_r
+- broken_zone
+- no/partial engulfing
+- close_against_rule
+- continuation/breakdown
+- alasan lain yang memang berasal dari rule.
+
+KHUSUS:
+Cari dan laporkan contoh berikut jika terjadi:
+
+A. S/R valid + reaction valid + tidak ada engulfing
+   → apakah engine memberikan signal?
+
+B. S/R valid + engulfing valid
+   → apakah engine memberikan signal?
+
+C. Engulfing valid tetapi tidak berada pada S/R/reversal area
+   → pastikan NO_TRADE.
+
+D. Harga breakdown support/resistance
+   → jangan diklaim sebagai reversal.
+
+E. Rejection yang terlihat bagus tetapi zone sudah broken/degraded
+   → NO_TRADE.
+
+Jangan melakukan optimasi parameter.
+Jangan mengubah threshold.
+Jangan menambah indikator.
+Jangan mengubah entry/SL/TP setelah signal.
+
+DI AKHIR MONITORING LAPORKAN:
+
+TOTAL CLOSED M5:
+VALID SIGNAL:
+WIN:
+LOSS:
+UNRESOLVED:
+FALSE POSITIVE:
+VALID LOSS:
+
+SIGNAL TANPA ENGULFING:
+SIGNAL DENGAN ENGULFING:
+
+NO_TRADE REASONS:
+
+Untuk setiap signal, berikan ringkasan apakah signal tersebut benar-benar memenuhi rule saat dibuat.
+
+SAFETY:
+order_send=0
+order_check=0
+position_changes=0
+order_changes=0
+
+NO CODE
+NO COMMIT
+NO PUSH
+NO REAL ORDER
+
+Jangan menyimpulkan profitability atau accuracy final dari sample kecil.
 ```
 # 
 ```
