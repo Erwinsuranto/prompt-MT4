@@ -14,7 +14,103 @@
 ```
 # 
 ```
+LANJUTKAN TEST — REAL XAUUSD M5 SHADOW S/R-DIRECT
 
+Tujuan:
+Menguji implementasi S/R-direct terbaru pada DATA REAL XAUUSD, khususnya signal reversal yang TIDAK membutuhkan engulfing.
+
+ATURAN YANG HARUS DIPERTAHANKAN:
+1. M5 hanya memakai candle yang SUDAH CLOSED. Tidak boleh memakai candle forming.
+2. M15 tetap sebagai konteks/struktur S/R.
+3. S/R yang valid + reaction/rejection valid + close searah = BOLEH SIGNAL meskipun TIDAK ada engulfing.
+4. Engulfing bukan syarat wajib.
+5. Tetapi ENGULFING SAJA tanpa S/R valid = NO_TRADE.
+6. Jangan menganggap setiap candle merah/hijau sebagai rejection.
+7. Jangan memaksakan signal hanya karena harga kemudian bergerak sesuai arah.
+8. Tidak boleh look-ahead/hindsight.
+9. Breakdown support/resistance jangan diklaim sebagai reversal.
+10. Zone broken/degraded/weak/stall/probe/through/close melawan arah tetap NO_TRADE.
+11. Jangan menambah indikator atau threshold baru hanya untuk memperbanyak signal.
+12. Jangan mengubah rule hanya berdasarkan hasil satu trade.
+13. Live execution tetap OFF / Shadow atau NoExecution.
+14. ORDER_SEND HARUS 0.
+15. Jangan menyentuh posisi demo yang sudah ada.
+16. Jangan menggunakan data sintetis sebagai bukti.
+
+TEST:
+- Gunakan real XAUUSD.m dari MT5.
+- Jalankan shadow monitoring untuk M5.
+- Catat setiap closed candle yang dievaluasi.
+- Pisahkan hasil menjadi:
+  A. VALID SIGNAL — S/R-direct tanpa engulfing
+  B. VALID SIGNAL — S/R + engulfing
+  C. NO_TRADE karena S/R tidak valid
+  D. NO_TRADE karena reaction/rejection tidak valid
+  E. NO_TRADE karena zone broken/degraded
+  F. NO_TRADE karena close berlawanan
+  G. NO_TRADE karena alasan causal lainnya.
+
+UNTUK SETIAP SIGNAL A:
+Tampilkan:
+- waktu candle
+- BUY/SELL
+- S/R zone
+- jarak/relation candle terhadap zone
+- alasan reaction/rejection dianggap valid
+- close candle
+- apakah engulfing = false
+- M15 context
+- entry reference
+- SL/TP reference
+- decision ID
+
+YANG PALING PENTING:
+Cari apakah engine sekarang bisa menangkap pola seperti contoh manual:
+SELL:
+resistance valid → harga melakukan rejection → candle M5 closed bearish/searah → tidak harus engulfing → SELL SIGNAL.
+
+BUY:
+support valid → harga melakukan rejection → candle M5 closed bullish/searah → tidak harus engulfing → BUY SIGNAL.
+
+Setelah signal muncul, JANGAN mengubah entry/SL/TP berdasarkan candle berikutnya.
+Outcome boleh dicatat hanya sebagai observasi setelah keputusan dibuat.
+
+AUDIT CAUSAL:
+Untuk setiap signal, pastikan semua informasi yang dipakai engine memang tersedia pada saat candle tersebut CLOSE.
+Jangan menggunakan candle setelah signal untuk menentukan apakah signal tadi "valid".
+
+OUTPUT AKHIR:
+1. jumlah candle dievaluasi
+2. jumlah S/R-direct candidate
+3. jumlah signal tanpa engulfing
+4. jumlah signal dengan engulfing
+5. jumlah NO_TRADE dan alasan utama
+6. contoh 5 kandidat terbaik secara chronological, bukan dipilih berdasarkan outcome
+7. outcome sementara jika sudah tersedia, tetapi jangan menyimpulkan profitability dari sampel kecil
+8. ORDER_SEND / ORDER_CHECK / position changes
+9. apakah ada look-ahead
+10. apakah ada perubahan file
+
+JIKA TIDAK ADA SIGNAL:
+Jangan coding dan jangan melonggarkan rule.
+Jelaskan apakah memang belum ada setup causal yang memenuhi rule.
+
+JIKA MENEMUKAN BUG IMPLEMENTASI:
+- jangan langsung mengubah rule strategi;
+- identifikasi root cause terlebih dahulu;
+- buat regression test;
+- lakukan perubahan seminimal mungkin;
+- test ulang;
+- hanya commit/push jika memang perubahan kode diperlukan.
+
+JANGAN:
+- mengaktifkan live trading
+- order_send
+- mengubah parameter demi memperbanyak signal
+- menambahkan indikator baru tanpa bukti kebutuhan
+- menganggap engulfing sebagai syarat wajib
+- menganggap semua rejection sebagai signal
+- menggunakan hindsight.
 ```
 # 
 ```
