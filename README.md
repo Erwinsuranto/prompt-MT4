@@ -54,7 +54,375 @@
 ```
 # 
 ```
+LIVE SHADOW TEST — WAIT UNTIL VALID SIGNAL
 
+PROJECT: mt-info
+MODE: REAL MT5 DATA + SHADOW/NoExecution
+EXECUTION: FORBIDDEN
+
+Tujuan:
+Uji strategy terbaru setelah commit da00667 pada MARKET REAL dan terus berjalan sampai mendapatkan VALID BUY atau VALID SELL.
+
+JANGAN coding.
+JANGAN modify file.
+JANGAN commit.
+JANGAN push.
+JANGAN order_send.
+JANGAN membuka posisi.
+
+==================================================
+1. STARTUP CHECK
+==================================================
+
+Pastikan:
+
+- MT5 connected
+- exact symbol XAUUSD.m
+- M5 tersedia
+- M15 tersedia
+- market aktif
+- feed timestamp valid
+- server offset verified
+- forming candle excluded
+- no look-ahead
+- shadow/NoExecution aktif
+- order_send = 0
+
+Jika startup gagal, jelaskan penyebab dan berhenti.
+
+==================================================
+2. LIVE MONITORING
+==================================================
+
+Jalankan live shadow menggunakan REAL MT5 data.
+
+JANGAN berhenti setelah 5 candle.
+
+TERUSKAN monitoring sampai terjadi salah satu:
+
+A. VALID BUY
+atau
+B. VALID SELL
+
+Jika belum ada signal:
+NO_TRADE adalah hasil yang valid.
+
+Jangan memaksa signal.
+
+==================================================
+3. SETIAP CLOSED M5
+==================================================
+
+Pada setiap candle M5 yang CLOSED:
+
+evaluasi ulang:
+
+M15 structure
+→ S/R
+→ S/R quality
+→ reaction
+→ reversal condition
+→ M5 confirmation
+→ Path A
+→ Path B
+→ final decision
+
+Catat setiap keputusan.
+
+==================================================
+4. PATH A
+==================================================
+
+Path A:
+
+VALID S/R
++
+seluruh S/R reversal rules terpenuhi
++
+confirmation yang diwajibkan rule terpenuhi
+=
+SIGNAL
+
+ENGULFING TIDAK WAJIB.
+
+Jangan membuat signal hanya karena harga menyentuh S/R.
+
+==================================================
+5. PATH B
+==================================================
+
+Path B:
+
+VALID S/R
++
+setup reversal valid
++
+VALID engulfing
+=
+SIGNAL
+
+Engulfing harus sesuai definisi strategy.
+
+==================================================
+6. ENGFULING TANPA S/R
+==================================================
+
+WAJIB:
+
+NO_TRADE
+
+Jangan pernah menjadikan engulfing standalone sebagai signal.
+
+==================================================
+7. BREAKOUT / CONTINUATION
+==================================================
+
+Jika harga menembus S/R dengan continuation yang valid:
+
+NO_TRADE reversal.
+
+Jangan melawan trend hanya karena sebelumnya ada S/R.
+
+Jika failed breakout/rejection memenuhi rule:
+
+boleh signal reversal.
+
+==================================================
+8. SIGNAL YANG DITEMUKAN
+==================================================
+
+Saat VALID SIGNAL ditemukan, STOP monitoring sementara dan tampilkan:
+
+=== VALID LIVE SIGNAL FOUND ===
+
+Symbol:
+Timestamp:
+Direction:
+
+Path:
+A / B
+
+M15:
+structure:
+S/R type:
+S/R zone:
+S/R quality:
+
+M5:
+OHLC:
+reaction:
+confirmation:
+engulfing:
+
+Entry:
+SL:
+TP:
+RR:
+
+Risk:
+Risk status:
+
+Causality:
+PASS/FAIL
+
+M5 closed:
+PASS/FAIL
+
+M15 closed:
+PASS/FAIL
+
+Forming excluded:
+PASS/FAIL
+
+Look-ahead:
+PASS/FAIL
+
+Reason:
+
+==================================================
+9. QUALITY AUDIT SIGNAL
+==================================================
+
+Jangan hanya mengatakan signal valid.
+
+Jelaskan WHY signal valid.
+
+Pastikan:
+- S/R memang sudah tersedia sebelum signal
+- reaction terjadi sebelum signal
+- confirmation sudah CLOSED
+- tidak ada future information
+- tidak ada hindsight
+- tidak ada future outcome
+- signal bukan hanya akibat candle besar
+- signal bukan hanya engulfing
+- signal bukan hanya proximity terhadap S/R
+
+==================================================
+10. OUTCOME MONITORING
+==================================================
+
+Setelah signal ditemukan:
+
+TETAP JANGAN EKSEKUSI.
+
+Catat hypothetical entry/SL/TP.
+
+Monitor outcome secara causal.
+
+Jangan mengubah:
+- entry
+- SL
+- TP
+- direction
+- decision
+
+berdasarkan candle berikutnya.
+
+Tentukan hasil hanya berdasarkan rule yang sudah ditetapkan:
+
+TP HIT
+atau
+SL HIT
+atau
+INVALID/UNRESOLVED
+
+Jika keduanya belum tercapai:
+tetap monitor.
+
+==================================================
+11. JANGAN BERHENTI TERLALU CEPAT
+==================================================
+
+Satu signal bukan bukti edge.
+
+Setelah outcome signal pertama selesai,
+LANJUTKAN monitoring untuk signal berikutnya jika memungkinkan.
+
+Target pengamatan:
+beberapa signal konjungsi real yang cukup untuk evaluasi awal.
+
+Jangan menetapkan angka win-rate minimum secara arbitrer.
+
+Jika sesi berakhir sebelum cukup sample:
+laporkan DATA INSUFFICIENT.
+
+==================================================
+12. SAFETY
+==================================================
+
+WAJIB:
+
+order_send = 0
+order_check = 0 jika tidak diperlukan
+position changes = 0
+order changes = 0
+execution attempts = 0
+
+Pre-existing position harus tetap tidak disentuh.
+
+Jika ada risiko execution aktif:
+STOP SEGERA.
+
+==================================================
+13. OUTPUT BERKALA
+==================================================
+
+Setiap closed M5 boleh tampilkan ringkas:
+
+timestamp
+decision
+reason
+S/R
+reaction
+confirmation
+path
+
+Contoh:
+
+08:55 NO_TRADE
+reason: no_valid_SR
+
+09:00 NO_TRADE
+reason: reversal_not_confirmed
+
+09:05 NO_TRADE
+reason: breakout_continuation
+
+...
+
+Jangan mengubah rule hanya karena banyak NO_TRADE.
+
+==================================================
+14. FINAL REPORT
+==================================================
+
+Jika signal ditemukan:
+
+Signal:
+...
+
+Outcome:
+...
+
+Signal quality:
+...
+
+Causality:
+PASS/FAIL
+
+Safety:
+order_send:
+position changes:
+
+Jika belum ditemukan signal:
+
+LIVE OBSERVATION:
+NO VALID SIGNAL YET
+
+Jumlah closed M5:
+...
+
+NO_TRADE reasons:
+...
+
+Data tetap insufficient:
+YES/NO
+
+JANGAN membuat kesimpulan profitable hanya karena satu signal menang.
+
+JANGAN membuat kesimpulan strategy buruk hanya karena satu signal kalah.
+
+==================================================
+FINAL RULE
+
+Yang kita cari adalah:
+
+SIGNAL YANG BENAR,
+BUKAN SIGNAL YANG BANYAK.
+
+S/R adalah dasar utama.
+
+Engulfing adalah optional confirmation.
+
+S/R valid + rule reversal lengkap
+→ boleh SIGNAL tanpa engulfing.
+
+S/R valid + engulfing valid
+→ boleh SIGNAL.
+
+Engulfing tanpa S/R
+→ NO_TRADE.
+
+Tidak ada setup valid
+→ NO_TRADE.
+
+TERUSKAN LIVE SHADOW SAMPAI ADA VALID SIGNAL ATAU SESI MARKET BERAKHIR.
+
+NO CODING.
+NO COMMIT.
+NO PUSH.
+NO REAL ORDER.
 ```
 
 # 
