@@ -42,7 +42,315 @@
 ```
 # 
 ```
+IMPLEMENTASI PATH A — S/R DIRECT REVERSAL DENGAN KUALITAS TETAP TERJAGA
 
+PROJECT: mt-info
+REPO: zenolambee/mt-info
+
+HASIL AUDIT SEBELUMNYA:
+- Path A S/R-direct sudah dirancang tetapi default OFF.
+- Setup seperti candle #1 menunjukkan kemungkinan false negative karena strategy terlalu bergantung pada engulfing/reversal gate.
+- Engulfing tidak boleh menjadi syarat wajib untuk semua signal.
+- S/R tetap harus menjadi dasar utama.
+- Gate kualitas reversal TIDAK boleh dihapus sembarangan.
+- Breakdown/continuation jangan dipaksa menjadi reversal.
+
+TUJUAN:
+Perbaiki implementasi agar setup S/R reversal yang valid dapat menghasilkan signal meskipun tidak berbentuk engulfing textbook.
+
+PRINSIP UTAMA:
+
+PATH A:
+
+VALID M15 S/R
++
+harga benar-benar berada/berinteraksi dengan zone
++
+reaction/rejection yang valid
++
+bukti perubahan tekanan/reversal yang causal
++
+M5 closed confirmation
+=
+VALID SIGNAL
+
+ENGULFING TIDAK WAJIB.
+
+PATH B:
+
+VALID M15 S/R
++
+reversal valid
++
+VALID ENGULFING
+=
+VALID SIGNAL
+
+ENGULFING TANPA S/R
+=
+NO_TRADE.
+
+==================================================
+ATURAN KERAS
+==================================================
+
+JANGAN:
+- menghapus S/R validation
+- menghapus reaction/rejection validation
+- menghapus causality
+- menghapus closed-candle requirement
+- menggunakan candle masa depan
+- menggunakan future high/low
+- menggunakan outcome untuk menentukan signal
+- mengubah strategy supaya jumlah signal banyak
+- mengoptimalkan parameter berdasarkan profit
+- mengaktifkan real execution
+- memanggil order_send
+
+JANGAN membuat semua bearish candle menjadi SELL.
+
+JANGAN membuat semua bullish candle menjadi BUY.
+
+==================================================
+PATH A CONFIRMATION
+==================================================
+
+Cari confirmation price-action yang objektif dan sudah tersedia saat candle CLOSED.
+
+Contoh kandidat confirmation yang boleh digunakan jika memang sesuai struktur kode/repo:
+
+SELL:
+- rejection dari resistance
+- bearish close setelah rejection
+- lower high / failure to make new high
+- break struktur minor M5 setelah rejection
+- bearish displacement yang cukup terhadap range/ATR
+- close kembali di bawah area resistance setelah penetration
+
+BUY:
+- rejection dari support
+- bullish close setelah rejection
+- higher low / failure to make new low
+- break struktur minor M5 setelah rejection
+- bullish displacement yang cukup terhadap range/ATR
+- close kembali di atas area support setelah penetration
+
+Tidak harus semuanya terpenuhi.
+
+Pilih kombinasi yang paling konsisten dengan architecture/rules yang sudah ada.
+
+Jangan menciptakan threshold baru hanya untuk mendapatkan signal.
+
+==================================================
+CONTOH CANDLE #1
+==================================================
+
+Audit implementasi terhadap pola seperti:
+
+Resistance
+→ price rejection/failure
+→ tekanan bearish
+→ M5 closed bearish confirmation
+→ tidak ada engulfing textbook
+
+Jika seluruh rule S/R-direct terpenuhi:
+
+Path A harus dapat menghasilkan SELL.
+
+Jika ternyata belum memenuhi rule:
+NO_TRADE dan jelaskan gate yang kurang.
+
+JANGAN menggunakan candle setelah signal untuk membuat candle #1 terlihat valid.
+
+==================================================
+CONTOH CANDLE #2
+==================================================
+
+Jangan otomatis memasukkan #2 sebagai reversal.
+
+Jika struktur menunjukkan:
+
+support
+→ compression
+→ break support
+→ bearish continuation
+
+klasifikasikan sebagai BREAKDOWN/CONTINUATION.
+
+Jika repo memang sudah mempunyai engine continuation/ZoneTracker, gunakan architecture tersebut.
+
+Jangan mencampurkan statistik reversal dengan continuation.
+
+==================================================
+ENGULFING
+==================================================
+
+Engulfing tetap dipertahankan sebagai confirmation Path B.
+
+Tetapi Path A tidak boleh gagal hanya karena:
+
+no_engulfing
+atau
+partial_engulfing
+
+apabila seluruh syarat Path A sudah terpenuhi.
+
+Namun jika engulfing tidak ada DAN S/R/reaction/structure confirmation tidak cukup:
+NO_TRADE.
+
+==================================================
+IMPLEMENTASI
+==================================================
+
+Sebelum coding:
+
+1. baca implementation saat ini
+2. identifikasi gate yang menyebabkan Path A praktis tidak pernah signal
+3. lakukan perubahan MINIMAL
+4. jangan refactor besar
+5. jangan mengubah risk/execution/bridge
+
+Fokus file strategy yang memang diperlukan.
+
+==================================================
+TEST
+==================================================
+
+Tambahkan regression test untuk minimal:
+
+1. valid S/R reversal TANPA engulfing → SIGNAL
+2. valid S/R + engulfing → SIGNAL
+3. engulfing tanpa S/R → NO_TRADE
+4. S/R tanpa reaction → NO_TRADE
+5. rejection tanpa confirmation → NO_TRADE
+6. breakdown support → tidak diklasifikasikan sebagai reversal SELL
+7. forming candle → NO SIGNAL
+8. future candle tidak boleh memengaruhi decision
+9. opposite direction tidak boleh terjadi
+10. existing risk/execution safety tetap unchanged
+
+Gunakan REAL DATA fixture yang sudah ada jika memungkinkan.
+
+Jangan membuat synthetic market evidence.
+
+==================================================
+VALIDASI
+==================================================
+
+Jalankan:
+
+- targeted strategy tests
+- reversal_real_data tests
+- walk-forward validation
+- seluruh regression suite yang relevan
+
+Bandingkan sebelum vs sesudah:
+
+- jumlah signal
+- jumlah NO_TRADE
+- alasan NO_TRADE
+- Path A vs Path B
+- expectancy
+- profit factor
+- drawdown
+- sample size
+- OOS result
+
+PENTING:
+
+Jangan menganggap peningkatan jumlah signal sebagai improvement.
+
+Jika signal bertambah tetapi kualitas/out-of-sample memburuk:
+JANGAN mempertahankan perubahan hanya karena signal lebih banyak.
+
+Jika data insufficient:
+laporkan DATA INSUFFICIENT.
+
+==================================================
+REAL-DATA SANITY
+==================================================
+
+Cari kembali contoh REAL XAUUSD seperti pola #1.
+
+Jawab:
+
+- apakah sekarang dikenali?
+- pada timestamp berapa?
+- Path apa?
+- mengapa signal/no-trade?
+- apakah keputusan causal?
+
+Jika ada contoh setup bagus yang tetap ditolak:
+jelaskan gate yang menolaknya.
+
+==================================================
+EXECUTION SAFETY
+==================================================
+
+WAJIB:
+
+order_send = 0
+no live order
+no position changes
+bridge tidak disentuh
+MT5 execution tidak diaktifkan
+
+==================================================
+GIT
+==================================================
+
+Jika implementasi benar dan semua regression test relevan PASS:
+
+git status
+git diff
+commit dengan message:
+
+feat(strategy): add validated sr direct reversal path
+
+push origin main
+
+Jika test gagal atau edge/OOS menjadi lebih buruk secara material:
+
+JANGAN commit
+JANGAN push
+
+Laporkan masalahnya terlebih dahulu.
+
+==================================================
+FINAL REPORT
+==================================================
+
+Tampilkan:
+
+1. ROOT CAUSE
+2. FILE CHANGED
+3. RULE PATH A
+4. RULE PATH B
+5. TEST RESULTS
+6. REAL-DATA RESULTS
+7. BEFORE vs AFTER SIGNAL COUNT
+8. OOS/WALK-FORWARD RESULT
+9. SAFETY RESULT
+10. GIT COMMIT/PUSH
+
+FINAL PRINCIPLE:
+
+Kita tidak mengejar banyak signal.
+
+Kita mengejar:
+
+S/R VALID
++
+REACTION VALID
++
+CONFIRMATION VALID
+=
+SIGNAL YANG MASUK AKAL.
+
+Engulfing adalah salah satu confirmation,
+BUKAN syarat mutlak seluruh strategy.
+
+Jangan mengorbankan kualitas hanya supaya signal muncul.
 ```
 # 
 ```
