@@ -18,7 +18,268 @@
 ```
 # 
 ```
+TARGETED AUDIT — DEFINISI S/R REVERSAL TANPA ENGULFING
+JANGAN AKTIFKAN LIVE DULU
 
+Kita sudah menemukan:
+
+- PATH A saat ini masih disabled untuk live.
+- test_sr_direct.py = 19/19 PASS.
+- Dari evaluasi sebelumnya tidak ditemukan salah klasifikasi yang terbukti.
+- Banyak candidate S/R-direct belum menjadi signal.
+- Audit menyebut candle user dapat menjadi signal hanya pada varian
+  "rejection", bukan "stall".
+
+SEKARANG FOKUS PADA MASALAH INI:
+
+User TIDAK ingin:
+S/R + engulfing = satu-satunya cara mendapatkan signal.
+
+User ingin:
+
+S/R VALID
++
+REAKSI HARGA VALID
++
+KONFIRMASI ARAH YANG VALID
+=
+SIGNAL
+
+Engulfing hanyalah salah satu bentuk confirmation, BUKAN kewajiban.
+
+Namun:
+S/R saja tidak cukup.
+Candle warna merah/hijau saja tidak cukup.
+Candle stall saja tidak cukup.
+Jangan menggunakan candle masa depan.
+
+==================================================
+1. AUDIT POLA YANG DIMAKSUD USER
+==================================================
+
+Gunakan contoh chart user sebagai konsep test:
+
+SELL:
+harga naik menuju resistance
+→ masuk/menyentuh resistance
+→ rejection/stall di area resistance
+→ candle close bearish / confirmation bearish
+→ reversal turun
+
+BUY secara simetris:
+harga turun menuju support
+→ masuk/menyentuh support
+→ rejection/stall di area support
+→ candle close bullish / confirmation bullish
+→ reversal naik
+
+Tentukan secara objektif:
+
+APA BEDANYA:
+A. rejection reversal yang valid
+B. stall biasa
+C. candle biasa
+D. continuation
+E. breakdown/breakout
+
+Jangan menggunakan outcome candle berikutnya untuk menentukan klasifikasi
+pada saat signal.
+
+==================================================
+2. JANGAN TERKUNCI PADA ENGULFING
+==================================================
+
+Buat matriks keputusan:
+
+S/R valid + reaction valid + engulfing valid
+=> SIGNAL
+
+S/R valid + reaction valid + tidak engulfing
+=> BOLEH SIGNAL JIKA confirmation non-engulfing memenuhi rule
+
+S/R valid + stall tetapi tidak ada directional confirmation
+=> NO_TRADE
+
+Engulfing valid tetapi tidak ada S/R valid
+=> NO_TRADE
+
+S/R broken/degraded
+=> NO_TRADE
+
+Breakdown/continuation
+=> NO_TRADE
+
+Candle biasa tanpa reaction valid
+=> NO_TRADE
+
+==================================================
+3. CARI CONFIRMATION NON-ENGULFING
+==================================================
+
+Jangan langsung menambah threshold.
+
+Audit apakah data/rule yang sudah ada dapat membedakan:
+
+- close directional
+- penetration terhadap zone
+- wick/rejection geometry
+- posisi close terhadap range candle
+- rejection terhadap S/R
+- candle range dibanding konteks sebelumnya
+- re-entry ke zone
+- close kembali ke sisi reversal
+- invalidation/broken zone
+
+Cari kombinasi rule yang SUDAH DIDUKUNG oleh konsep strategy,
+bukan parameter baru yang dipilih karena membuat backtest bagus.
+
+Jika tidak ada kombinasi causal yang cukup kuat:
+JANGAN membuat-buat rule.
+
+==================================================
+4. TEST KHUSUS CANDLE USER
+==================================================
+
+Buat fixture causal yang menyerupai chart user:
+
+CASE SELL:
+- resistance valid
+- harga mendekati/masuk resistance
+- reaction/rejection terjadi
+- candle signal bearish
+- candle signal tidak engulfing
+- zone belum broken
+- tidak membutuhkan candle sesudahnya
+
+Expected:
+SIGNAL SELL jika seluruh rule non-engulfing terpenuhi.
+
+Buat case negatif:
+
+- resistance valid tetapi hanya stall
+=> NO_TRADE
+
+- resistance valid tetapi candle bearish biasa tanpa rejection
+=> NO_TRADE
+
+- bearish engulfing tetapi tidak berada pada S/R
+=> NO_TRADE
+
+- resistance sudah broken
+=> NO_TRADE
+
+- continuation setelah breakdown
+=> NO_TRADE
+
+BUY harus diuji secara simetris.
+
+==================================================
+5. JANGAN OPTIMASI
+==================================================
+
+DILARANG:
+
+- menaikkan/menurunkan threshold demi win rate
+- memilih parameter terbaik dari historical outcome
+- menggunakan hasil trade untuk menentukan apakah candle signal valid
+- look-ahead
+- repaint
+- mengaktifkan PATH A live hanya karena signal bertambah
+
+Jika definisi non-engulfing belum cukup objektif:
+laporkan bahwa belum cukup dan JANGAN coding.
+
+==================================================
+6. REAL DATA
+==================================================
+
+Cari contoh real XAUUSD yang secara causal memenuhi pola:
+
+S/R + rejection + directional close
+tanpa engulfing.
+
+Untuk setiap candidate laporkan:
+
+timestamp
+direction
+S/R
+zone
+reaction
+close confirmation
+engulfing yes/no
+decision
+reason
+
+Pisahkan:
+
+VALID NON-ENGULFING SIGNAL
+REJECTED NON-ENGULFING
+STALL
+CONTINUATION
+BREAKDOWN
+WEAK/INVALID S/R
+
+==================================================
+7. IMPLEMENTASI
+==================================================
+
+Hanya coding jika audit menemukan definisi yang sudah objektif dan
+causal tetapi implementasi engine belum merepresentasikannya.
+
+Jika perlu coding:
+- perubahan seminimal mungkin
+- jangan merusak PATH B
+- regression test wajib
+- test causal/look-ahead wajib
+- full suite wajib jika production code berubah
+
+Jika belum cukup terbukti:
+NO CODE
+NO COMMIT
+NO PUSH
+
+==================================================
+8. SAFETY
+==================================================
+
+Tetap Shadow/NoExecution.
+
+order_send=0
+order_check=0
+execution_attempts=0
+position_changes=0
+order_changes=0
+
+Tidak ada real order.
+
+==================================================
+HASIL AKHIR
+==================================================
+
+Jawab dengan jelas:
+
+1. Apa definisi rejection yang objektif?
+2. Apa definisi stall?
+3. Apa definisi directional confirmation tanpa engulfing?
+4. Apakah candle seperti contoh user dapat menjadi SIGNAL tanpa engulfing?
+5. Kalau bisa, rule causal-nya apa?
+6. Kalau tidak bisa, apa informasi yang masih kurang?
+7. Berapa contoh real non-engulfing yang memenuhi rule?
+8. Berapa yang ditolak dan kenapa?
+9. Ada perubahan kode atau tidak?
+10. Test result?
+11. Commit/push atau tidak?
+
+PRINSIP UTAMA:
+
+Jangan membuat signal lebih banyak hanya demi frekuensi.
+
+Tetapi jangan juga menolak signal valid hanya karena candle tersebut
+tidak berbentuk engulfing.
+
+Tujuan akhirnya:
+S/R yang benar + reaction/reversal yang benar = signal,
+dengan engulfing sebagai OPTIONAL confirmation.
 ```
 # 
 ```
