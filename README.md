@@ -10,7 +10,78 @@
 ```
 # 
 ```
+AUDIT KHUSUS PATH A — JANGAN CODING DULU
 
+Analisis 30 signal Path A pada hasil shadow/replay terakhir.
+
+TUJUAN:
+Cari tahu kenapa Path A menghasilkan sekitar 30 signal dengan sekitar 10 WIN dan 20 LOSS pada window tersebut.
+
+JANGAN:
+- ubah kode
+- ubah parameter
+- tambah indikator
+- longgarkan rule
+- paksa meningkatkan win rate
+- gunakan candle setelah entry untuk menentukan apakah setup valid saat keputusan dibuat
+- mengaktifkan live
+- order_send
+
+PERTAHANKAN PRINSIP STRATEGI:
+S/R valid + reaction/rejection valid + close searah = signal.
+Engulfing OPTIONAL, bukan syarat wajib.
+Engulfing tanpa S/R valid = NO_TRADE.
+
+Untuk setiap 30 Path A:
+1. timestamp signal
+2. BUY/SELL
+3. S/R zone yang digunakan
+4. M15 context
+5. reaction/rejection yang menyebabkan signal
+6. apakah engulfing ada/tidak
+7. close searah atau tidak
+8. apakah zone masih intact saat signal
+9. apakah ada re-entry
+10. apakah setup sebenarnya continuation/breakdown
+11. MFE/MAE setelah entry
+12. outcome berdasarkan exit rule yang SUDAH ADA
+13. klasifikasi penyebab loss
+
+KELOMPOKKAN LOSS:
+A. S/R sebenarnya valid tetapi reaction gagal
+B. S/R salah/terlalu lemah
+C. rejection salah klasifikasi
+D. continuation/breakdown yang keliru dianggap reversal
+E. entry terlalu cepat
+F. SL/TP geometry
+G. market regime
+H. lainnya
+
+SANGAT PENTING:
+Bedakan:
+- "signal valid secara causal tetapi trade kemudian loss"
+dengan
+- "signal sebenarnya melanggar rule sejak candle close".
+
+Jangan menyebut sebuah signal buruk hanya karena candle berikutnya bergerak melawan.
+
+OUTPUT:
+- tabel ringkas 30 signal
+- jumlah tiap kategori
+- 5 contoh loss paling representatif
+- 5 contoh WIN
+- apakah ada pola kesalahan implementasi
+- apakah ada rule yang sebenarnya belum diterapkan dengan benar
+- rekomendasi apakah perlu coding atau cukup lanjut observasi
+
+Jika tidak ditemukan bug implementasi:
+NO CODE, NO COMMIT, NO PUSH.
+
+Tetap tampilkan:
+ORDER_SEND=0
+ORDER_CHECK=0
+POSITION_CHANGES=0
+LOOKAHEAD=PASS
 ```
 # 
 ```
