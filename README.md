@@ -46,6 +46,243 @@
 ```
 # 
 ```
+AUDIT KHUSUS — VALIDASI SETUP S/R SEPERTI CANDLE #1 DAN #2
+
+PROJECT: mt-info
+REPO: zenolambee/mt-info
+
+TUJUAN:
+Audit apakah strategy saat ini terlalu bergantung pada engulfing/reversal gate sehingga setup S/R + price action yang secara logis valid justru selalu menjadi NO_TRADE.
+
+INI AUDIT SAJA.
+
+WAJIB:
+- JANGAN MODIFY FILE
+- JANGAN CODING
+- JANGAN COMMIT
+- JANGAN PUSH
+- JANGAN mengubah parameter
+- JANGAN mengoptimalkan hasil agar terlihat bagus
+
+==================================================
+KONSEP YANG HARUS DIAUDIT
+==================================================
+
+Strategy yang kita inginkan bukan:
+
+ENGULFING → SIGNAL
+
+Tetapi:
+
+S/R VALID
+→ PRICE ACTION / REACTION VALID
+→ CONFIRMATION SESUAI SETUP
+→ SIGNAL
+
+Engulfing hanya salah satu bentuk confirmation.
+
+==================================================
+SETUP #1 — S/R REVERSAL
+==================================================
+
+Audit apakah engine bisa mengenali kondisi seperti:
+
+- resistance M15 valid
+- harga berada/masuk area resistance
+- beberapa rejection/failure untuk menembus resistance
+- buyer gagal mempertahankan harga di atas resistance
+- tekanan bearish mulai muncul
+- M5 closed candle memberikan bearish confirmation
+- tidak harus berupa textbook bearish engulfing
+
+Pertanyaan utama:
+
+APAKAH setup seperti ini sekarang bisa menghasilkan SELL?
+
+Jika TIDAK:
+jelaskan gate/rule mana yang menolaknya.
+
+Jangan mengubah rule.
+
+==================================================
+SETUP #2 — SUPPORT BREAKDOWN
+==================================================
+
+Audit kondisi seperti:
+
+- support valid
+- harga berkonsolidasi/menekan support
+- terjadi rejection kecil berulang
+- kemudian candle bearish close menembus support
+- continuation/downside momentum terlihat
+
+Tentukan apakah engine saat ini menganggap kondisi tersebut:
+
+A. valid SELL reversal
+B. valid SELL continuation/breakdown
+C. NO_TRADE
+D. tidak memiliki path yang sesuai
+
+Jelaskan kenapa.
+
+PENTING:
+Jangan memaksa #2 menjadi reversal jika secara definisi sebenarnya continuation.
+
+==================================================
+ENGULFING AUDIT
+==================================================
+
+Audit semua gate engulfing.
+
+Tentukan:
+
+1. Apakah engulfing saat ini menjadi prerequisite wajib?
+2. Apakah ada kondisi S/R valid yang sebenarnya tidak membutuhkan engulfing?
+3. Apakah rejection candle/non-engulfing confirmation bisa menghasilkan signal?
+4. Apakah engine terlalu mudah menolak candle karena body_ratio/body_frac/prior_high/prior_low atau gate lain?
+5. Apakah gate tersebut benar-benar diperlukan secara strategi atau hanya warisan implementasi lama?
+
+JANGAN mengubah apa pun.
+
+==================================================
+S/R AUDIT
+==================================================
+
+Audit definisi:
+
+- valid support
+- valid resistance
+- zone width
+- touches
+- historical validation
+- freshness
+- distance/proximity
+- reaction
+- penetration
+- break
+- rejection
+
+Cari apakah S/R sudah valid tetapi kemudian dibatalkan oleh gate candle yang terlalu ketat.
+
+==================================================
+CAUSALITY
+==================================================
+
+Untuk setiap kemungkinan setup:
+
+Pastikan keputusan hanya menggunakan data yang tersedia ketika candle signal CLOSED.
+
+Jangan menggunakan:
+
+- candle sesudah signal
+- future high/low
+- future outcome
+- hindsight
+- repaint
+
+Jangan melonggarkan rule dengan cara yang menyebabkan look-ahead.
+
+==================================================
+REAL DATA
+==================================================
+
+Gunakan historical REAL XAUUSD M5/M15 yang tersedia di repo untuk replay/audit.
+
+Cari contoh nyata sebanyak mungkin dari dataset yang sudah ada.
+
+Jangan synthetic data.
+
+Jangan membuat contoh candle buatan.
+
+Cari setup:
+
+1. S/R + rejection + bearish confirmation tanpa engulfing
+2. S/R + engulfing
+3. support breakdown
+4. resistance rejection
+5. engulfing tanpa S/R
+
+Untuk masing-masing, laporkan:
+
+timestamp
+S/R
+reaction
+candle structure
+current engine decision
+rejection reason
+
+==================================================
+HAL YANG SANGAT PENTING
+==================================================
+
+Jangan menganggap:
+
+"harga akhirnya turun"
+
+berarti signal sebelumnya valid.
+
+Validitas harus ditentukan berdasarkan informasi yang tersedia PADA SAAT SIGNAL.
+
+Sebaliknya, jangan menolak setup hanya karena candle confirmation bukan engulfing jika rule S/R-direct memang seharusnya memungkinkan signal.
+
+==================================================
+OUTPUT
+==================================================
+
+Buat laporan:
+
+=== S/R SIGNAL PATH AUDIT ===
+
+1. CURRENT ENGINE LOGIC
+jelaskan alur decision saat ini.
+
+2. MAIN BLOCKER
+gate apa yang paling sering menyebabkan NO_TRADE?
+
+3. SETUP #1
+bisa/tidak bisa dikenali?
+kenapa?
+
+4. SETUP #2
+bisa/tidak bisa dikenali?
+kenapa?
+
+5. ENGFULING
+wajib atau optional secara implementasi saat ini?
+
+6. S/R-DIRECT
+apakah Path A benar-benar bekerja atau secara praktis masih dikunci oleh gate lain?
+
+7. REAL DATA EXAMPLES
+tabel contoh setup nyata.
+
+8. FALSE NEGATIVE CANDIDATES
+contoh setup yang kemungkinan ditolak terlalu ketat.
+
+9. FALSE POSITIVE RISK
+apa risiko jika gate tersebut dilonggarkan?
+
+10. RECOMMENDED RULE DESIGN
+usulkan desain rule baru secara konseptual saja.
+
+Pisahkan dengan jelas:
+
+BUG IMPLEMENTASI
+vs
+RULE STRATEGY YANG MEMANG KETAT
+vs
+DATA YANG BELUM CUKUP
+
+11. RECOMMENDATION
+Apakah perlu coding?
+Jika ya, file mana dan perubahan apa secara konseptual.
+
+JANGAN CODING.
+
+FINAL:
+NO FILE CHANGE
+NO COMMIT
+NO PUSH
 
 ```
 # 
