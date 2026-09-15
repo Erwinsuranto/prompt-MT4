@@ -22,7 +22,163 @@
 ```
 # 
 ```
+AUDIT LANJUT — KUALITAS PATH A S/R-DIRECT, JANGAN AKTIFKAN LIVE
 
+Hasil sebelumnya:
+- PATH A opt-in: 39 signal = 12 WIN / 27 LOSS / 0 UNRESOLVED
+- PATH B: 6 signal = 2 WIN / 4 LOSS / 0 UNRESOLVED
+- FALSE POSITIVE dilaporkan 0
+- test_sr_direct_regression: 18/18 PASS
+- full suite belum dijalankan
+- belum ada commit/push
+
+KESIMPULAN SEMENTARA:
+Jangan mengaktifkan PATH A sebagai default/live.
+39 signal bukan berarti rule sudah benar; loss rate yang tinggi menunjukkan
+kualitas setup perlu diaudit.
+
+FOKUS AUDIT:
+Cari tahu MENGAPA PATH A menghasilkan 27 loss.
+
+JANGAN melakukan optimasi parameter untuk memperbaiki angka.
+
+JANGAN mengubah rule hanya agar backtest terlihat bagus.
+
+JANGAN memakai candle setelah signal untuk menentukan apakah signal valid.
+
+AUDIT SETIAP SIGNAL PATH A SECARA CAUSAL:
+
+Untuk setiap PATH A signal:
+1. Apakah M15 S/R benar-benar valid?
+2. Apakah harga benar-benar berada/berinteraksi dengan zone?
+3. Apakah ada reaction/rejection yang cukup kuat?
+4. Apakah candle signal memberikan close confirmation yang objektif?
+5. Apakah arah signal sesuai reaction?
+6. Apakah zone masih valid dan belum broken/degraded?
+7. Apakah setup sebenarnya continuation/breakdown?
+8. Apakah signal hanya terlihat bagus setelah candle berikutnya?
+9. Apakah entry terlalu jauh dari zone?
+10. Apakah SL/TP placement membuat signal buruk walaupun arah awal benar?
+11. Apakah setup sebenarnya hanya candle biasa yang kebetulan bergerak
+    sesudahnya?
+
+SANGAT PENTING:
+
+Jangan jadikan "tidak engulfing" sebagai alasan otomatis NO_TRADE.
+
+Tetapi jangan juga menjadikan "ada rejection" sebagai alasan otomatis SIGNAL.
+
+Yang kita cari adalah:
+
+VALID S/R
++
+VALID REACTION/REJECTION
++
+VALID REVERSAL GEOMETRY
++
+VALID CLOSE CONFIRMATION
++
+ZONE MASIH VALID
++
+BUKAN BREAKDOWN/CONTINUATION
++
+CAUSAL
+
+Engulfing = OPTIONAL confirmation.
+
+Buat klasifikasi loss PATH A:
+
+A. Loss karena setup memang tidak valid menurut rule
+B. Loss karena valid setup tetapi market gagal reversal
+C. Loss karena entry/SL/TP geometry
+D. Loss karena zone salah/terlalu lemah
+E. Loss karena continuation/breakdown salah diklasifikasikan reversal
+F. Tidak dapat ditentukan dari data causal
+
+UNTUK CONTOH CHART USER:
+
+Representasikan pola:
+resistance → harga menyentuh/masuk zone → rejection/stall →
+close bearish → kemudian turun kuat.
+
+Dan simetris:
+support → harga menyentuh/masuk zone → rejection/stall →
+close bullish → kemudian naik kuat.
+
+Periksa apakah pola tersebut dapat memenuhi PATH A TANPA ENGULFING
+secara causal.
+
+Jika YA:
+buat test fixture yang merepresentasikan pola tersebut.
+
+Jika TIDAK:
+jelaskan persis syarat objektif apa yang kurang.
+
+JANGAN menggunakan hasil candle berikutnya untuk meloloskan fixture.
+
+BANDINGKAN:
+
+PATH A:
+S/R + reaction/rejection + close confirmation
+
+PATH B:
+S/R + engulfing
+
+Laporkan:
+- candidates
+- signals
+- wins
+- losses
+- unresolved
+- false positives
+- alasan loss
+- alasan NO_TRADE
+
+JANGAN menyimpulkan strategi profitable/akurat dari sample ini.
+
+IMPLEMENTASI:
+
+Untuk audit ini:
+- boleh coding HANYA jika ditemukan bug atau definisi rule yang memang
+  salah secara implementasi.
+- jika hanya masalah bahwa rule belum terbukti bagus, JANGAN coding.
+- jangan mengaktifkan enable_sr_direct untuk live.
+- jangan mengubah threshold demi meningkatkan win rate.
+
+SAFETY:
+order_send=0
+order_check=0
+NoExecution/Shadow
+tidak membuka posisi
+tidak mengubah posisi existing
+
+SETELAH AUDIT:
+- jalankan regression test yang relevan;
+- jika ada perubahan, jalankan full suite;
+- periksa git diff.
+
+GIT:
+Jika tidak ada bug yang terbukti:
+NO CODE
+NO COMMIT
+NO PUSH
+
+Jika ada bug nyata:
+fix minimal + regression test + full suite,
+lalu laporkan sebelum commit/push.
+
+HASIL AKHIR HARUS MENJAWAB:
+1. Dari 27 LOSS PATH A, berapa yang sebenarnya salah klasifikasi?
+2. Apa pola kesalahan paling sering?
+3. Apakah PATH A perlu diperbaiki atau memang belum terbukti?
+4. Apakah candle seperti contoh user bisa menjadi signal tanpa engulfing?
+5. Rule apa yang secara objektif membedakannya dari candle biasa?
+6. Apakah ada look-ahead?
+7. Apakah ada perubahan kode?
+8. Apakah full test PASS?
+
+Jangan mengejar jumlah signal.
+Kita mengejar kualitas setup S/R yang benar-benar valid.
 ```
 # 
 ```
