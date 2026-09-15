@@ -34,7 +34,81 @@
 ```
 # 
 ```
+AUDIT SIGNAL PATH A YANG SUDAH MUNCUL — JANGAN CODING
 
+Analisis signal Path A yang baru saja ditemukan dan outcome-nya.
+
+WAJIB:
+- jangan ubah kode
+- jangan ubah rule
+- jangan commit
+- jangan push
+- jangan order
+- tetap Shadow/NoExecution
+
+Untuk signal yang LOSS/SL:
+
+1. tampilkan timestamp signal
+2. tampilkan M15 S/R yang digunakan
+3. tampilkan zone dan kualitasnya
+4. tampilkan reaction/rejection
+5. tampilkan M5 confirmation
+6. tampilkan structure confirmation
+7. tampilkan entry/SL/TP yang DIKUNCI saat signal
+8. tunjukkan seluruh informasi yang tersedia tepat saat signal dibuat
+
+Kemudian jawab:
+
+A. Apakah signal tersebut VALID secara rule pada saat itu?
+B. Apakah ada look-ahead/hindsight?
+C. Apakah S/R memang valid?
+D. Apakah reaction benar-benar valid?
+E. Apakah confirmation cukup?
+F. Apakah ada gate yang seharusnya menolak signal tersebut?
+G. Apakah loss tersebut hanya LOSS VALID atau FALSE POSITIVE?
+
+SANGAT PENTING:
+
+Jangan mengatakan signal salah hanya karena setelah entry harga turun/naik.
+
+Evaluasi hanya berdasarkan data yang tersedia ketika signal dibuat.
+
+Setelah audit signal pertama selesai, LANJUTKAN LIVE SHADOW.
+
+Jangan berhenti.
+
+Teruskan sampai ada beberapa VALID SIGNAL berikutnya atau sesi market berakhir.
+
+Untuk setiap signal baru:
+- kunci entry/SL/TP saat signal dibuat
+- jangan ubah setelah melihat candle berikutnya
+- monitor outcome secara causal
+
+Tetap:
+
+order_send = 0
+position_changes = 0
+order_changes = 0
+execution_attempts = 0
+
+Di akhir laporkan:
+
+VALID SIGNAL:
+WIN:
+LOSS:
+UNRESOLVED:
+
+FALSE POSITIVE:
+VALID LOSS:
+
+NO_TRADE reasons:
+
+Jangan menyimpulkan profitable/akurasi dari sample kecil.
+
+NO CODE
+NO COMMIT
+NO PUSH
+NO REAL ORDER
 ```
 # 
 ```
