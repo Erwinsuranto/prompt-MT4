@@ -26,7 +26,259 @@
 ```
 # 
 ```
+AUDIT + PERBAIKI PATH A S/R-DIRECT — FOKUS UTAMA VALIDITAS SIGNAL
 
+KONTEKS PENTING:
+
+User tidak ingin strategi hanya bergantung pada engulfing.
+
+Prinsip yang diinginkan:
+
+1. S/R valid + reaction/rejection valid + rule reversal terpenuhi
+   => BOLEH SIGNAL walaupun TIDAK ada engulfing.
+
+2. S/R valid + engulfing valid
+   => BOLEH SIGNAL.
+
+3. Engulfing tanpa S/R/reversal yang valid
+   => NO_TRADE.
+
+4. Jangan menganggap semua engulfing sebagai signal.
+
+5. Breakdown support/resistance bukan reversal.
+
+6. Jangan memaksa signal hanya agar signal lebih banyak.
+
+7. Jangan menggunakan candle masa depan/hindsight.
+
+8. Signal harus dibuat hanya dari informasi yang tersedia ketika candle konfirmasi CLOSE.
+
+HASIL AUDIT TERAKHIR:
+
+- PATH A S/R-direct masih OFF.
+- Ditemukan sekitar 287 contoh S/R valid + reaction tanpa engulfing,
+  tetapi engine tidak memberikan signal karena PATH A disabled.
+- PATH B: S/R + engulfing valid dapat menghasilkan signal.
+- Contoh live/chart user menunjukkan kasus ketika harga melakukan
+  rejection/reversal dari resistance/support dan kemudian bergerak kuat,
+  tetapi candle tersebut bukan TRUE engulfing.
+- Ini adalah kasus yang harus dapat ditangani jika memang memenuhi
+  definisi S/R reversal yang objektif.
+
+TUGAS:
+
+A. AUDIT IMPLEMENTASI SEKARANG
+
+Periksa secara langsung:
+
+- config.py
+- final_setup.py
+- reversal.py
+- reversal_quality.py
+- reversal_rules.py
+- live_signal.py
+- continuation/ZoneTracker bila terlibat
+- test_sr_direct_regression.py
+- test_reversal_real_data.py
+- test_walk_forward_validation.py
+
+Jelaskan root cause sebenarnya mengapa PATH A tidak aktif.
+
+Jangan berasumsi hanya karena ada 287 contoh berarti semuanya valid.
+Validasi ulang contoh-contoh tersebut menggunakan data causal.
+
+B. DEFINISIKAN PATH A YANG OBJEKTIF
+
+PATH A harus berupa:
+
+VALID S/R
++
+VALID REACTION/REJECTION
++
+VALID REVERSAL GEOMETRY
++
+VALID CLOSE CONFIRMATION
++
+NO BROKEN/DEGRADED ZONE
++
+NO CONTINUATION/BREAKDOWN
++
+NO LOOK-AHEAD
+
+Engulfing TIDAK wajib.
+
+Gunakan informasi yang benar-benar tersedia sampai candle signal
+ditutup.
+
+JANGAN membuat syarat baru yang hanya bertujuan mengurangi jumlah
+signal atau menghilangkan loss pada dataset tertentu.
+
+C. BEDAKAN REJECTION DENGAN CANDLE BIASA
+
+Ini sangat penting.
+
+Jangan menganggap candle merah setelah naik sebagai SELL hanya karena
+setelahnya harga turun.
+
+Contoh harus diperiksa:
+
+SELL dapat dipertimbangkan jika:
+- harga benar-benar berada/berinteraksi dengan resistance valid;
+- terdapat rejection/reversal evidence yang objektif;
+- close memberikan konfirmasi arah SELL;
+- struktur candle/geometry memenuhi rule;
+- resistance masih valid;
+- bukan sekadar candle bearish biasa;
+- bukan continuation dari breakdown;
+- tidak membutuhkan candle masa depan untuk mengetahui validitasnya.
+
+BUY berlaku simetris pada support.
+
+D. ENGULFING
+
+Engulfing tetap digunakan sebagai salah satu confirmation.
+
+Tetapi:
+
+S/R + valid rejection + valid close
+tidak boleh otomatis ditolak hanya karena
+engulfing=False.
+
+Sebaliknya:
+
+engulfing=True
+tidak boleh otomatis menghasilkan signal jika S/R/reversal tidak valid.
+
+E. GUNAKAN CONTOH CHART USER SEBAGAI TEST CASE
+
+Buat regression fixture yang merepresentasikan pola seperti:
+
+Resistance
+→ harga naik menuju resistance
+→ rejection/stall
+→ candle bearish confirmation
+→ turun kuat
+
+Jika candle tersebut memenuhi rule S/R-direct secara causal,
+engine harus dapat menghasilkan SELL tanpa membutuhkan engulfing.
+
+Buat juga kasus simetris:
+
+Support
+→ harga turun menuju support
+→ rejection/stall
+→ candle bullish confirmation
+→ naik
+
+Jika memenuhi rule, harus dapat menghasilkan BUY tanpa engulfing.
+
+Jangan memasukkan harga/candle setelah signal untuk menentukan
+apakah setup valid.
+
+F. TEST NEGATIF WAJIB
+
+Pastikan kasus berikut tetap NO_TRADE:
+
+1. Engulfing tetapi tidak berada pada S/R.
+2. Engulfing tetapi zone broken.
+3. Rejection tetapi zone sudah degraded.
+4. Candle bearish biasa tanpa valid resistance.
+5. Candle bullish biasa tanpa valid support.
+6. Breakdown resistance/support.
+7. Continuation yang terlihat seperti reversal.
+8. Signal yang hanya terlihat valid setelah candle berikutnya.
+9. Setup yang membutuhkan hindsight.
+10. Candle di tengah range/no meaningful S/R.
+
+G. REAL-DATA EVALUATION
+
+Jalankan evaluasi pada real XAUUSD data yang tersedia.
+
+Bandingkan:
+
+PATH B:
+S/R + engulfing
+
+versus
+
+PATH A:
+S/R + reaction/rejection tanpa engulfing
+
+Laporkan secara terpisah:
+
+- jumlah candidate
+- jumlah signal
+- WIN
+- LOSS
+- UNRESOLVED
+- FALSE POSITIVE
+- expectancy/R
+- sample size
+- walk-forward/OOS jika tersedia
+
+JANGAN memilih parameter berdasarkan hasil terbaik.
+
+JANGAN menyebut PATH A bagus hanya karena signal bertambah.
+
+JANGAN menyebut profitable/accurate jika sample belum cukup.
+
+H. SAFETY
+
+Tetap:
+
+order_send=0
+order_check=0
+NoExecution/Shadow only
+Tidak membuka posisi
+Tidak mengubah posisi existing
+Tidak mengubah execution/bridge/MT5 deployment.
+
+I. IMPLEMENTASI
+
+Jika audit membuktikan PATH A memang valid secara causal:
+
+- implementasikan PATH A dengan perubahan seminimal mungkin;
+- jangan merusak PATH B;
+- buat regression tests;
+- jalankan test terkait;
+- jalankan full test suite;
+- audit diff;
+- pastikan tidak ada look-ahead/repaint.
+
+Jika audit TIDAK membuktikan rule yang cukup kuat:
+JANGAN CODING.
+Laporkan apa yang masih kurang dan jangan memaksa PATH A aktif.
+
+J. GIT
+
+Jika dan hanya jika ada perubahan kode yang benar-benar justified:
+
+- tampilkan file yang berubah;
+- test result;
+- git diff summary;
+- commit dengan pesan yang jelas;
+- push origin main hanya jika seluruh test/regression aman.
+
+Jika tidak ada perubahan yang justified:
+
+NO CODE
+NO COMMIT
+NO PUSH
+
+HASIL AKHIR WAJIB MENJAWAB:
+
+1. Apakah PATH A memang perlu diaktifkan?
+2. Apa definisi S/R-direct yang digunakan?
+3. Apakah signal tanpa engulfing sekarang bisa keluar secara causal?
+4. Apakah contoh chart seperti user tunjuk dapat direpresentasikan
+   oleh rule tanpa hindsight?
+5. Berapa signal PATH A dan PATH B pada real data?
+6. Apakah ada false positive?
+7. Apakah test suite tetap PASS?
+8. Apakah ada perubahan kode/commit/push?
+
+Jangan mengejar banyak signal.
+Target utama adalah SIGNAL YANG VALID DAN DAPAT DIPERTANGGUNGJAWABKAN.
 ```
 # 
 ```
