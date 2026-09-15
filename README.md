@@ -50,6 +50,464 @@
 ```
 # 
 ```
+LANJUTKAN IMPLEMENTASI — WEEKDAY AUTO POSTING RULES
+
+Proses sebelumnya ter-interrupt setelah audit/planning.
+
+Sekarang lanjutkan IMPLEMENTASI sesuai hasil audit dan Next Move yang sudah dibuat.
+
+JANGAN mengulang audit dari awal.
+JANGAN mengerjakan fitur lain.
+
+TARGET:
+Auto Posting Rules harus berbasis HARI (Monday–Sunday), bukan Week 1/Week 2/Week 3.
+
+Contoh:
+
+Monday    = 3 slot: 08:00, 13:00, 20:00
+Tuesday   = 3 slot: 08:00, 13:00, 20:00
+Wednesday = 4 slot: 08:00, 11:00, 15:00, 20:00
+Thursday  = konfigurasi Thursday
+Friday    = konfigurasi Friday
+Saturday  = bisa disabled / 0 slot
+Sunday    = konfigurasi Sunday
+
+Konfigurasi tersebut otomatis berlaku pada setiap tanggal dengan weekday yang sama.
+
+==================================================
+PHASE 1 — CORE + DB
+==================================================
+
+Mulai dari:
+
+1. packages/db/prisma/schema.prisma
+2. migration weekday
+3. packages/core/src/scheduling/
+4. packages/db/src/auto-rules.ts
+5. tests terkait.
+
+Implementasikan:
+
+- weekday
+- weekdayOf()
+- resolveDayPlan()
+- AutoPostingRuleDef
+- create/update epoch secara immutable
+- list rules
+- delete future epoch
+- unique constraint
+- validation.
+
+PENTING:
+
+Jangan merusak rule legacy yang sudah ada.
+
+Existing production rule harus tetap dapat di-resolve selama masa compatibility.
+
+Jangan mengubah existing scheduled/published assignments.
+
+==================================================
+RULE SEMANTICS
+==================================================
+
+Rule berlaku berdasarkan:
+
+destinationId + effectiveFrom + weekday.
+
+Bukan:
+
+- week number
+- ISO week
+- tanggal tertentu
+- bulan
+- tahun.
+
+Untuk localDate:
+
+1. pilih epoch terbaru dengan effectiveFrom <= localDate
+2. resolve weekday localDate
+3. ambil slotTimes weekday tersebut
+4. jika disabled/empty → tidak ada slot
+5. allocator mencari hari berikutnya.
+
+postsPerDay HARUS derived:
+
+slotTimes.length
+
+Tidak boleh ada global postsPerDay yang mengalahkan konfigurasi per hari.
+
+==================================================
+WEEK BOUNDARY
+==================================================
+
+WAJIB:
+
+Friday penuh
+Saturday disabled
+Sunday 10:00
+Monday 08:00
+
+Maka:
+
+Friday → skip Saturday → Sunday → Monday.
+
+Pastikan day-walk memiliki bounded horizon existing.
+
+Tidak boleh infinite loop.
+
+==================================================
+TIMEZONE
+==================================================
+
+Gunakan timezone workspace/destination yang sudah ada.
+
+Asia/Jakarta:
+
+20:00 WIB harus dikonversi menjadi UTC instant yang benar.
+
+Jangan gunakan server timezone.
+
+Pertahankan pola test fixed-offset Etc/GMT yang sudah digunakan project agar deterministic.
+
+==================================================
+PHASE 2 — EXISTING ALLOCATOR
+==================================================
+
+Integrasikan weekday resolver ke:
+
+findNextFreeSlot()
+allocateSlotForMedia()
+
+JANGAN membuat allocator kedua.
+
+Pertahankan:
+
+- occupancy
+- CAS
+- idempotency
+- sequenceNumber
+- rate limit
+- minimum lead
+- horizon
+- existing scheduled jobs.
+
+Rule hanya menentukan candidate slot.
+
+Existing execution pipeline tidak boleh berubah.
+
+==================================================
+PHASE 3 — API
+==================================================
+
+Implementasikan sesuai audit:
+
+POST /api/scheduling/rules
+GET /api/scheduling/rules
+DELETE /api/scheduling/rules/:id
+
+atau bentuk route yang sudah disepakati oleh architecture existing.
+
+POST menerima konfigurasi 7 hari.
+
+Contoh conceptual payload:
+
+{
+  destinationId,
+  effectiveFrom,
+  days: [
+    {
+      weekday: 1,
+      enabled: true,
+      slotTimes: ["08:00", "13:00", "20:00"]
+    },
+    ...
+  ]
+}
+
+Jangan memaksakan payload ini jika existing contract punya bentuk berbeda; adaptasikan dengan contract project.
+
+Validasi:
+
+- weekday valid
+- HH:mm valid
+- duplicate time ditolak
+- slot sorted ascending
+- effectiveFrom valid
+- destination ownership
+- timezone
+- epoch duplicate → 409
+- foreign destination → 404/403 sesuai convention existing.
+
+Semua mutasi wajib melalui authorization existing.
+
+==================================================
+PHASE 4 — AUTO SCHEDULE PREVIEW
+==================================================
+
+Update existing:
+
+GET /api/queues/:id/auto-schedule/preview
+
+agar menggunakan weekday rules.
+
+Preview contoh:
+
+Wed 16 Sep
+08:00
+13:00
+15:00
+20:00
+
+Thu 17 Sep
+08:00
+13:00
+
+dst.
+
+Preview harus READ-ONLY.
+
+Tidak boleh membuat:
+
+- QueueItem
+- SlotAssignment
+- PublishingJob
+- audit mutation.
+
+==================================================
+PHASE 5 — WEB UI
+==================================================
+
+Update:
+
+settings/auto-posting
+
+menjadi editor 7 hari.
+
+UI:
+
+Auto Posting Rules
+
+Destination:
+[Yourdreels]
+
+Timezone:
+Asia/Jakarta
+
+Effective From:
+[date]
+
+MONDAY
+[08:00] [13:00] [20:00] [+ Add time]
+3 posts/day
+[Enabled]
+
+TUESDAY
+...
+
+WEDNESDAY
+[08:00] [11:00] [15:00] [20:00]
+4 posts/day
+
+SATURDAY
+Disabled
+0 posts/day
+
+Tidak ada:
+
+Week 1
+Week 2
+Week 3
+
+User mengatur weekday sekali.
+
+Rule otomatis digunakan lagi pada minggu berikutnya.
+
+Jika user mengubah Wednesday dari 3 → 4 slot:
+
+existing Wednesday jobs tetap.
+
+Wednesday future yang belum dialokasikan menggunakan konfigurasi baru.
+
+==================================================
+PHASE 6 — CALENDAR
+==================================================
+
+Calendar menggunakan resolver yang sama.
+
+Tidak membuat Calendar scheduling engine baru.
+
+Planned Auto harus mengikuti weekday rule.
+
+Existing Calendar behavior tetap.
+
+==================================================
+PHASE 7 — TEST
+==================================================
+
+Tambahkan tests minimal:
+
+1. Monday 3 slots
+2. Tuesday 3 slots
+3. Wednesday 4 slots
+4. different count per weekday
+5. disabled weekday
+6. empty weekday
+7. Saturday → Sunday
+8. Sunday → Monday
+9. occupied slot
+10. all slots occupied
+11. multiple epochs
+12. latest effectiveFrom
+13. future epoch belum aktif
+14. existing assignment immutable
+15. timezone
+16. 23:xx/00:xx boundary
+17. multi-destination
+18. queue order
+19. preview consistency
+20. Calendar consistency
+21. duplicate slot
+22. invalid weekday
+23. invalid HH:mm
+24. past effectiveFrom
+25. bounded day-walk/no infinite loop.
+
+Tambahkan regression terhadap legacy resolver.
+
+==================================================
+PHASE 8 — GATES
+==================================================
+
+Setelah implementation:
+
+pnpm typecheck
+pnpm lint
+pnpm test
+pnpm build
+git diff --check
+
+Secret scan.
+
+Jika ada failure:
+
+FIX sebelum lanjut.
+
+Jangan menutupi failure.
+
+==================================================
+TASK 017 ISOLATION
+==================================================
+
+WAJIB:
+
+Task 017:
+
+9 modified + 3 untracked
+
+harus tetap untouched.
+
+JANGAN:
+
+git add .
+git add -A
+
+Gunakan explicit staging hanya file weekday task.
+
+Sebelum commit:
+
+git status --short
+
+Pastikan perubahan Task 017 tidak ikut.
+
+==================================================
+PRODUCTION SMOKE
+==================================================
+
+Setelah semua test hijau:
+
+production smoke READ/SAFE.
+
+Verifikasi:
+
+- existing rules
+- new weekday rule
+- Monday/Tuesday/Wednesday resolution
+- empty weekday skip
+- future epoch
+- preview
+- Calendar
+- existing jobs tidak berubah.
+
+JANGAN membuat publish Facebook baru untuk smoke ini.
+
+JANGAN membuat PublishingJob baru jika tidak diperlukan.
+
+==================================================
+GIT
+==================================================
+
+Jika semua PASS:
+
+commit:
+
+feat(scheduling): add weekday auto posting rules
+
+push origin/main
+
+Verifikasi:
+
+git rev-parse HEAD
+git rev-parse origin/main
+git status --short
+
+HEAD == origin/main wajib.
+
+==================================================
+INFRA SAFETY
+==================================================
+
+Jangan sentuh:
+
+Caddy
+Cloudflare
+Meta configuration
+MinIO
+Genspark
+OpenClaw
+port existing
+service lain.
+
+Restart hanya content-pilot-api/worker/web jika benar-benar diperlukan.
+
+Jangan restart VPS.
+
+==================================================
+FINAL REPORT
+==================================================
+
+Laporkan:
+
+1. files changed
+2. migration
+3. schema
+4. core resolver
+5. allocator integration
+6. API
+7. UI
+8. Auto Schedule preview
+9. Calendar
+10. tests
+11. typecheck/lint/build
+12. production smoke
+13. commit hash
+14. HEAD == origin/main
+15. Task 017 isolation
+16. services restarted
+17. infrastructure untouched
+
+STOP setelah report.
+
+JANGAN mengerjakan fitur berikutnya.
 
 ```
 # 
