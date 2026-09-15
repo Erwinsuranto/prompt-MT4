@@ -38,7 +38,276 @@
 ```
 # 
 ```
+LIVE SHADOW TEST PATH A — OPT-IN SAJA, NO EXECUTION
 
+PROJECT: mt-info
+REPO: zenolambee/mt-info
+
+TUJUAN:
+Uji Path A S/R-direct yang baru pada REAL MT5 XAUUSD.m.
+
+PENTING:
+Ini hanya EXPERIMENTAL SHADOW TEST.
+Jangan mengaktifkan live execution.
+
+WAJIB:
+- real MT5 data
+- XAUUSD.m
+- M5 + M15
+- closed candles only
+- no look-ahead
+- Shadow/NoExecution
+- order_send = 0
+- position changes = 0
+
+JANGAN:
+- coding
+- modify file
+- commit
+- push
+- mengubah rule
+- mengubah threshold
+- optimasi
+- mengaktifkan execution
+
+==================================================
+PATH A OPT-IN
+==================================================
+
+Aktifkan Path A HANYA pada konfigurasi runtime/shadow
+yang memang sudah disediakan untuk opt-in.
+
+Jangan mengubah source code.
+
+Path A:
+
+VALID M15 S/R
++
+harga berinteraksi dengan zone
++
+rejection/reaction valid
++
+reversal/structure confirmation valid
++
+M5 CLOSED
+=
+SIGNAL
+
+ENGULFING TIDAK WAJIB.
+
+Tetap pertahankan seluruh quality gate yang sudah ada.
+
+Jangan menganggap candle bearish biasa sebagai signal.
+
+==================================================
+PATH B
+==================================================
+
+Tetap evaluasi Path B secara normal.
+
+S/R + valid engulfing + seluruh rule
+=
+SIGNAL.
+
+Engulfing tanpa S/R
+=
+NO_TRADE.
+
+==================================================
+LIVE TEST
+==================================================
+
+Hubungkan ke REAL MT5 dan teruskan monitoring.
+
+JANGAN berhenti setelah 5 candle.
+
+Tunggu sampai:
+
+1. VALID PATH A BUY
+2. VALID PATH A SELL
+3. VALID PATH B BUY
+4. VALID PATH B SELL
+
+atau market/session berakhir.
+
+Jika belum ada signal:
+tetap NO_TRADE dan lanjutkan monitoring.
+
+==================================================
+SETIAP CLOSED M5
+==================================================
+
+Catat:
+
+timestamp
+M15 structure
+nearest S/R
+S/R quality
+distance
+reaction
+rejection
+M5 structure
+confirmation
+engulfing
+Path A decision
+Path B decision
+final decision
+reason
+
+==================================================
+KHUSUS CANDLE SEPERTI CONTOH USER
+==================================================
+
+Cari secara aktif setup yang memiliki karakter:
+
+RESISTANCE:
+- harga naik menuju resistance
+- gagal menembus / rejection
+- mulai kehilangan momentum
+- bearish pressure muncul
+- M5 confirmation close
+
+Jika semua rule Path A terpenuhi:
+
+VALID SELL PATH A
+
+Tidak perlu engulfing textbook.
+
+Untuk SUPPORT:
+
+- harga turun menuju support
+- rejection
+- gagal menembus
+- bullish pressure muncul
+- M5 confirmation close
+
+Jika seluruh Path A terpenuhi:
+
+VALID BUY PATH A
+
+==================================================
+BREAKDOWN
+==================================================
+
+Jika support benar-benar ditembus dan struktur menunjukkan continuation:
+
+JANGAN menyebutnya reversal.
+
+Laporkan:
+
+BREAKDOWN / CONTINUATION
+
+dan tetap NO_TRADE untuk reversal Path A.
+
+==================================================
+SAAT SIGNAL MUNCUL
+==================================================
+
+STOP sementara dan tampilkan:
+
+=== VALID PATH A LIVE SIGNAL ===
+
+timestamp:
+direction:
+path:
+
+M15 S/R:
+zone:
+quality:
+structure:
+
+M5:
+OHLC:
+reaction:
+rejection:
+structure:
+confirmation:
+
+engulfing:
+TRUE/FALSE
+
+entry:
+SL:
+TP:
+RR:
+
+reason:
+
+CAUSALITY:
+PASS/FAIL
+
+closed candle:
+PASS/FAIL
+
+look-ahead:
+PASS/FAIL
+
+future information:
+NONE/PRESENT
+
+==================================================
+SETELAH SIGNAL
+==================================================
+
+JANGAN EKSEKUSI.
+
+Catat hypothetical entry/SL/TP.
+
+Monitor outcome secara causal.
+
+Jangan mengubah entry, SL, TP atau direction
+setelah melihat candle berikutnya.
+
+Outcome:
+
+TP
+SL
+UNRESOLVED
+
+Satu signal menang/kalah bukan bukti edge.
+
+==================================================
+SAFETY
+==================================================
+
+WAJIB:
+
+order_send = 0
+execution_attempts = 0
+position_changes = 0
+order_changes = 0
+
+Pre-existing position harus tetap tidak disentuh.
+
+==================================================
+FINAL REPORT
+==================================================
+
+Laporkan:
+
+jumlah closed M5:
+Path A candidate:
+Path A valid:
+Path A NO_TRADE:
+Path B candidate:
+Path B valid:
+NO_TRADE reasons:
+
+Jika signal ditemukan:
+detail signal + outcome.
+
+Jika tidak ditemukan:
+DATA INSUFFICIENT / NO VALID SIGNAL.
+
+Jangan memaksa signal.
+
+Jangan menyimpulkan profitable dari satu signal.
+
+FINAL:
+NO CODE
+NO COMMIT
+NO PUSH
+NO REAL ORDER
 ```
 # 
 ```
