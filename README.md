@@ -62,7 +62,203 @@
 ```
 # 
 ```
+AUDIT & DESAIN PATH C — BEARISH/BULLISH CONTINUATION
+REAL XAUUSD M5 + M15 STRUCTURE
 
+Tujuan:
+Tambahkan konsep PATH C untuk membaca pola continuation yang jelas, seperti pola pada chart XAUUSD.m yang sedang diuji.
+
+PENTING:
+Jangan menghapus atau mengubah PATH A dan PATH B.
+PATH A tetap:
+S/R valid + reaction/rejection valid + close searah = SIGNAL, engulfing optional.
+
+PATH B tetap:
+S/R valid + reaction valid + TRUE engulfing = SIGNAL.
+
+PATH C adalah jalur TERPISAH untuk continuation.
+Jangan menyamakan continuation dengan reversal.
+
+==================================================
+CONTOH POLA YANG HARUS BISA DIBACA
+==================================================
+
+BEARISH CONTINUATION:
+
+1. Struktur sebelumnya bearish.
+2. Harga berada di bawah resistance utama.
+3. Terjadi rejection/pullback ke area resistance.
+4. Harga gagal membuat higher high.
+5. Terbentuk lower high / tekanan jual berulang.
+6. Harga kembali menguji support.
+7. Support mendapat tekanan beberapa kali atau struktur menunjukkan support melemah.
+8. Support kemudian ditembus.
+9. Candle M5 SUDAH CLOSED di bawah support.
+10. Breakdown memiliki displacement/penetrasi yang nyata, bukan hanya wick.
+11. Struktur setelah close masih konsisten bearish.
+12. Jika semua syarat causal terpenuhi → SELL CONTINUATION.
+
+BULLISH CONTINUATION adalah kebalikannya:
+
+1. Struktur sebelumnya bullish.
+2. Harga berada di atas support utama.
+3. Pullback/rejection ke support.
+4. Tidak membuat lower low.
+5. Terbentuk higher low / tekanan beli.
+6. Resistance diuji.
+7. Resistance mendapat tekanan.
+8. Resistance ditembus.
+9. Candle M5 SUDAH CLOSED di atas resistance.
+10. Breakout memiliki penetrasi nyata, bukan hanya wick.
+11. Struktur tetap bullish.
+12. Jika semua syarat causal terpenuhi → BUY CONTINUATION.
+
+==================================================
+BEDAKAN DENGAN REVERSAL
+==================================================
+
+Jangan menghasilkan PATH C hanya karena:
+- ada candle besar merah/hijau
+- support/resistance ditembus satu kali
+- ada wick
+- ada engulfing
+- harga bergerak setelah signal
+- breakout kemudian ternyata berhasil.
+
+Continuation harus dikenali dari struktur yang SUDAH TERBENTUK sebelum keputusan.
+
+Jangan memakai candle setelah signal untuk membuktikan struktur.
+
+==================================================
+FALSE BREAKOUT
+==================================================
+
+Jika:
+support ditembus tetapi candle close kembali di atas support
+→ NO_TRADE / false_breakdown.
+
+Jika:
+resistance ditembus tetapi candle close kembali di bawah resistance
+→ NO_TRADE / false_breakout.
+
+Jika penetration hanya wick:
+→ NO_TRADE.
+
+Jika zone sudah BROKEN/DEGRADED sebelum setup selesai:
+→ jangan gunakan sebagai reversal.
+
+==================================================
+STRUKTUR YANG HARUS DIEVALUASI
+==================================================
+
+Audit apakah engine dapat membaca:
+
+- swing high / swing low
+- higher high
+- higher low
+- lower high
+- lower low
+- repeated test
+- compression menuju S/R
+- pullback
+- rejection
+- breakout/breakdown
+- close outside zone
+- retest jika memang sudah terjadi secara causal
+- continuation setelah breakout/breakdown
+
+Jangan membuat definisi swing menggunakan data masa depan.
+Pastikan pivot/swing hanya memakai informasi yang tersedia pada timestamp keputusan.
+
+==================================================
+M15 + M5
+==================================================
+
+M15:
+→ struktur utama dan S/R context.
+
+M5:
+→ pattern formation dan confirmation.
+
+Jangan membuat M15 mengikuti candle M5 yang belum selesai.
+
+==================================================
+DECISION HIERARCHY
+==================================================
+
+Jika kondisi reversal terpenuhi:
+→ PATH A atau PATH B.
+
+Jika tidak ada reversal tetapi continuation terpenuhi:
+→ PATH C.
+
+Jika keduanya tidak terpenuhi:
+→ NO_TRADE.
+
+Jangan mengeluarkan dua signal yang bertentangan pada candle yang sama.
+
+==================================================
+CONTOH DARI POLA CHART
+==================================================
+
+Gunakan pola seperti:
+
+Resistance
+        ↓
+   lower high
+      ↓
+   lower high
+      ↓
+Support ─────────
+      ↓
+support ditekan
+      ↓
+CLOSE VALID BELOW SUPPORT
+      ↓
+SELL CONTINUATION
+
+Jangan menganggap candle breakdown pertama otomatis signal.
+Evaluasi struktur sebelum breakdown dan validitas close.
+
+==================================================
+AUDIT SEBELUM CODING
+==================================================
+
+Cari di repo:
+- apakah continuation logic sudah ada
+- apakah ada ZoneTracker/structure tracker
+- apakah ada classification antara reversal dan continuation
+- apakah breakdown saat ini selalu NO_TRADE
+- apakah data M15 sudah cukup untuk struktur
+- apakah M5 dapat membaca swing/structure secara causal.
+
+JANGAN coding dulu.
+
+Buat laporan:
+
+1. Apakah PATH C sudah sebagian tersedia?
+2. File mana yang relevan?
+3. Bagian mana yang bisa digunakan kembali?
+4. Bagian mana yang belum ada?
+5. Definisi causal PATH C yang paling aman.
+6. Contoh pola bearish continuation dari real-data yang tersedia.
+7. Contoh pola bullish continuation jika tersedia.
+8. Contoh false breakout yang harus ditolak.
+9. Apakah ada risiko look-ahead?
+10. Apakah PATH C perlu coding atau belum?
+
+Jika membutuhkan coding:
+JANGAN langsung coding.
+Tampilkan dahulu desain rule final PATH C dan daftar file yang akan disentuh.
+
+SAFETY:
+- Live tetap OFF.
+- No order_send.
+- No real execution.
+- Jangan mengubah PATH A/B.
+- Jangan optimasi berdasarkan win rate.
+- Jangan menambahkan indikator hanya untuk memperbanyak signal.
+- Jangan commit/push pada tahap audit ini.
 ```
 
 # 
