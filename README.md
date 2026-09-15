@@ -67,7 +67,86 @@
 
 # 
 ```
+LANJUTKAN SHADOW REAL-DATA — PATH A + PATH B
 
+Lanjutkan monitoring XAUUSD.m M5 menggunakan rule yang SUDAH COMMITTED.
+Jangan mengubah strategi atau parameter.
+
+PRINSIP:
+- S/R valid + reaction/rejection valid + close searah = SIGNAL boleh tanpa engulfing.
+- S/R + engulfing valid = SIGNAL.
+- Engulfing tanpa S/R valid = NO_TRADE.
+- Jangan menganggap semua engulfing/rejection sebagai signal.
+- Breakdown bukan reversal.
+- Stall/probe/through/weak/broken/re-entry/close melawan = NO_TRADE.
+- M5 closed candle saja.
+- M15 sebagai konteks S/R.
+- Tidak boleh look-ahead/hindsight.
+- Jangan memilih setup berdasarkan outcome berikutnya.
+
+MODE:
+- Real XAUUSD.m dari MT5.
+- Shadow/NoExecution.
+- Live tetap OFF.
+- ORDER_SEND wajib 0.
+- Jangan menyentuh posisi demo.
+- Jangan menambah indikator/filter/threshold.
+
+TUJUAN:
+Perbesar sampel Path A agar kita bisa menilai apakah signal tanpa engulfing memang memiliki pola yang konsisten atau hanya noise dari sampel kecil sebelumnya.
+
+CATAT TERPISAH:
+1. Path A — S/R-direct tanpa engulfing.
+2. Path B — S/R + engulfing.
+3. NO_TRADE karena S/R.
+4. NO_TRADE karena reaction/rejection.
+5. NO_TRADE karena zone broken/degraded.
+6. NO_TRADE karena close berlawanan.
+7. NO_TRADE karena stall/probe/through/re-entry.
+8. NO_TRADE lainnya.
+
+UNTUK SETIAP SIGNAL:
+Catat timestamp, arah, S/R zone, reaction/rejection, close searah, engulfing yes/no, M15 context, entry, SL, TP, decision ID.
+
+OUTCOME:
+Jika outcome sudah tersedia, catat WIN/LOSS/UNRESOLVED dan MFE/MAE berdasarkan rule exit yang sudah ada.
+Jangan mengubah klasifikasi setup menggunakan candle setelah entry.
+
+TARGET:
+Kumpulkan sebanyak mungkin observasi real yang tersedia pada sesi ini.
+Jangan berhenti hanya karena beberapa signal LOSS.
+Jangan juga memaksakan signal jika setup tidak memenuhi rule.
+
+AUDIT:
+Pastikan tidak ada look-ahead.
+Pastikan forming candle dikeluarkan.
+Pastikan semua keputusan causal pada saat candle CLOSE.
+Pastikan RULE_VIOLATION = 0.
+
+JIKA MENEMUKAN BUG:
+Berhenti dan laporkan root cause terlebih dahulu.
+Jangan coding kecuali memang ada bug implementasi yang terbukti.
+Jika tidak ada bug:
+NO CODE
+NO COMMIT
+NO PUSH
+
+OUTPUT AKHIR:
+- total closed M5
+- total Path A
+- total Path B
+- total NO_TRADE + breakdown alasan
+- WIN/LOSS/UNRESOLVED masing-masing Path
+- contoh signal tanpa engulfing yang paling jelas secara causal
+- contoh signal yang ditolak dengan benar
+- ORDER_SEND
+- ORDER_CHECK
+- POSITION_CHANGES
+- LOOKAHEAD
+- RULE_VIOLATION
+- perubahan file/commit/push
+
+Jangan membuat kesimpulan profitability dari sampel kecil.
 ```
 # 
 ```
