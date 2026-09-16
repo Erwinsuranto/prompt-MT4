@@ -66,7 +66,70 @@
 ```
 # 
 ```
+LIVE SHADOW MONITOR — TUNGGU SAMPAI VALID SIGNAL
 
+Sekarang PATH C sudah diaktifkan dan sudah PASS validation + push origin/main.
+
+JANGAN CODING.
+JANGAN mengubah file.
+JANGAN commit/push.
+JANGAN optimasi parameter.
+
+Jalankan LIVE SHADOW MONITOR menggunakan data MT5 XAUUSD yang nyata dan terus monitor sampai muncul VALID SIGNAL.
+
+Target:
+- PATH A reversal
+- PATH B engulfing reversal
+- PATH C trend-aligned pullback continuation
+
+Prioritas:
+Jika ada VALID SIGNAL, langsung tampilkan signal lengkap.
+Jangan tampilkan daftar panjang NO_TRADE setiap candle.
+Jangan berhenti hanya karena beberapa candle tidak valid.
+Teruskan monitoring pada candle M5 CLOSED berikutnya sampai ada VALID SIGNAL.
+
+WAJIB:
+- hanya candle CLOSED
+- forming candle dilarang
+- no look-ahead
+- real MT5 data
+- exact broker symbol yang sedang digunakan
+- M15 sebagai structure/trend
+- M5 sebagai confirmation
+- tidak memaksa signal
+- jika kondisi belum lengkap tetap tunggu
+- jangan mengubah strategi hanya agar signal muncul
+
+FORMAT SAAT VALID SIGNAL:
+
+VALID SIGNAL
+Timestamp:
+Direction: BUY/SELL
+PATH: A/B/C
+Pattern:
+M15 trend:
+S/R zone:
+Pullback/rejection:
+Confirmation candle:
+Entry:
+SL:
+TP:
+RR:
+Causal reason:
+LOOKAHEAD:
+ORDER_SEND=0
+ORDER_CHECK=0
+POSITION_CHANGES=0
+
+SETELAH SIGNAL MUNCUL:
+1. STOP monitoring.
+2. Jangan melakukan order.
+3. Jangan memanggil order_send.
+4. Jangan memanggil order_check.
+5. Jangan coding.
+6. Laporkan signal tersebut agar bisa saya cocokkan langsung dengan chart MT5.
+
+Jika belum ada signal, tetap MONITOR — jangan berhenti.
 ```
 # 
 ```
