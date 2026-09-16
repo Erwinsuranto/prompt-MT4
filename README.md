@@ -25,7 +25,140 @@
 
 ```
 # 
-```
+```IMPLEMENT PATH C — TREND-ALIGNED PULLBACK CONTINUATION
+
+Implementasikan PATH C sesuai desain audit terakhir.
+
+TUJUAN:
+Engine harus bisa membaca pola:
+
+SELL:
+M15 trend bearish
+→ impuls turun
+→ pullback/retracement naik
+→ retest level/resistance yang qualified
+→ reaction/rejection valid
+→ candle M5 CLOSED bearish / close kembali searah trend
+→ SIGNAL SELL_CONTINUATION
+
+BUY:
+M15 trend bullish
+→ impuls naik
+→ pullback/retracement turun
+→ retest support/level qualified
+→ reaction/rejection valid
+→ candle M5 CLOSED bullish / close kembali searah trend
+→ SIGNAL BUY_CONTINUATION
+
+ATURAN KERAS:
+
+1. PATH A dan PATH B JANGAN DIUBAH.
+2. Jangan melonggarkan rule reversal.
+3. Jangan mengubah parameter existing.
+4. Jangan menambah indikator baru.
+5. Jangan membuat threshold baru hanya agar signal bertambah.
+6. Gunakan existing:
+   - qualified LIVE level
+   - reversal lag0
+   - close searah
+   - geometry
+   - existing reaction/rejection
+   - existing ZoneTracker
+   - M15 trend context
+7. Entry/decision hanya berdasarkan candle CLOSED.
+8. Forming candle selalu dikecualikan.
+9. Tidak boleh memakai outcome masa depan.
+10. Tidak boleh membaca break pertama sebagai continuation setelah pullback jika belum ada pullback/retest.
+11. Breakout murni tanpa pullback/retest bukan PATH C.
+12. Wick-only bukan PATH C.
+13. weak/broken/through zone bukan PATH C.
+14. wrong-direction bukan PATH C.
+15. false-break bukan PATH C.
+16. Jika struktur continuation tidak lengkap → NO_TRADE.
+17. Jika M15 trend tidak jelas → NO_TRADE.
+18. Jika pullback/retest tidak terbukti → NO_TRADE.
+19. Jika confirmation candle belum close → NO_TRADE.
+
+IMPLEMENTASI:
+- Gunakan struktur/fungsi existing sebanyak mungkin.
+- Jangan membuat engine kedua yang duplikatif.
+- Reuse ZoneTracker yang sudah ada.
+- PATH C harus diberi reason/tag yang jelas, misalnya:
+  BUY_CONTINUATION / SELL_CONTINUATION.
+- live_signal.py hanya melakukan wiring terhadap hasil PATH C.
+- final_setup.py menjadi tempat decision logic jika memang itu lokasi arsitektur existing.
+- config.py hanya memakai flag/config existing yang sudah disepakati; jangan menambah tuning parameter baru kecuali benar-benar diperlukan oleh arsitektur dan nilainya bukan optimization parameter.
+
+TEST WAJIB:
+
+Tambahkan regression tests untuk minimal:
+
+A. VALID SELL continuation
+trend bearish + pullback + retest resistance + bearish close
+→ SELL_CONTINUATION
+
+B. VALID BUY continuation
+trend bullish + pullback + retest support + bullish close
+→ BUY_CONTINUATION
+
+C. BREAKOUT tanpa pullback
+→ NO_TRADE
+
+D. wick-only
+→ NO_TRADE
+
+E. weak/broken zone
+→ NO_TRADE
+
+F. wrong direction
+→ NO_TRADE
+
+G. forming candle
+→ NO_TRADE
+
+H. no M15 trend alignment
+→ NO_TRADE
+
+I. no valid retest
+→ NO_TRADE
+
+J. look-ahead/truncation
+Gunakan fixture yang dipotong pada decision candle dan pastikan hasil
+decision tetap identik.
+
+REAL DATA:
+- Jalankan pemeriksaan pada candidate continuation real-data yang sudah
+  ditemukan sebelumnya.
+- Jangan mengubah rule berdasarkan outcome.
+- Laporkan berapa candidate yang sekarang dikenali PATH C.
+- Tampilkan beberapa contoh timestamp + direction + reason.
+- Jangan klaim profitability/accuracy dari sample tersebut.
+
+SAFETY:
+ORDER_SEND=0
+ORDER_CHECK=0
+EXECUTION_ATTEMPTS=0
+POSITION_CHANGES=0
+ORDER_CHANGES=0
+
+FULL TEST:
+- Jalankan regression PATH C.
+- Jalankan test terkait A/B untuk memastikan tidak berubah.
+- Jalankan full suite karena production code berubah.
+- Pastikan LOOKAHEAD=PASS.
+
+GIT:
+Jika implementasi dan test semuanya PASS:
+- git status
+- commit dengan message:
+  feat(strategy): add trend-aligned pullback continuation path
+- push ke origin/main.
+
+Jika ada test gagal:
+- jangan commit/push.
+- laporkan root cause dan file yang gagal.
+
+Jangan mengaktifkan real trading.
 
 ```
 # 
