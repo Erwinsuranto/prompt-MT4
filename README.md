@@ -30,7 +30,111 @@
 ```
 # 
 ```
+AUDIT + VALIDASI PATH C CONTINUATION — JANGAN UBAH PATH A/B
 
+Kita sudah menemukan:
+- PATH A/B tetap ketat dan tidak boleh dilonggarkan.
+- Ada 45 VALID CONTINUATION candidate pada real-data audit.
+- Candidate tersebut saat ini ditolak live karena PATH C masih opt-in/gated.
+- Tujuan sekarang: memastikan PATH C benar-benar dapat membaca pola continuation seperti chart XAUUSD M5 yang dimaksud user, terutama continuation setelah trend + pullback/retest level.
+
+JANGAN langsung coding.
+
+Tugas:
+
+1. Audit implementasi PATH C yang sekarang:
+   - final_setup.py
+   - config.py
+   - live_signal.py
+   - file rule/continuation terkait
+   - test yang sudah ada
+
+2. Jelaskan secara konkret definisi PATH C dari kode saat ini:
+   - bagaimana menentukan trend M15/M5
+   - bagaimana menentukan pullback
+   - bagaimana menentukan level/S&R
+   - bagaimana menentukan retest
+   - bagaimana menentukan rejection/close continuation
+   - bagaimana menentukan direction
+   - kapan candidate menjadi SIGNAL
+   - semua gate yang dapat menyebabkan NO_TRADE
+
+3. Ambil REAL-DATA candidate continuation yang sudah ditemukan.
+   Periksa minimal 10 candidate:
+   - timestamp
+   - BUY/SELL
+   - trend
+   - level
+   - pullback
+   - retest
+   - candle confirmation
+   - alasan valid menurut PATH C
+   - alasan ditolak live
+
+4. Khusus pola penerusan turun:
+   Cari bentuk seperti:
+   DOWN TREND
+   -> impuls turun
+   -> pullback/retracement naik
+   -> harga kembali/retest area resistance atau level yang relevan
+   -> rejection / bearish continuation candle CLOSED
+   -> continuation turun
+
+   Dan kebalikannya untuk BUY:
+   UP TREND
+   -> pullback turun
+   -> retest support
+   -> bullish confirmation CLOSED
+   -> continuation naik.
+
+5. Pastikan PATH C bukan:
+   - breakout asal
+   - wick-only
+   - candle forming
+   - false break
+   - broken zone
+   - weak/unclear trend
+   - hindsight
+   - menggunakan candle masa depan
+   - memakai outcome WIN/LOSS untuk menentukan signal.
+
+6. Jangan gunakan indikator tambahan hanya supaya signal lebih banyak.
+   Jangan optimasi parameter.
+   Jangan mengubah PATH A/B.
+
+7. Tentukan apakah PATH C saat ini:
+   A. Sudah benar dan hanya perlu gate live diaktifkan,
+   B. Sudah ada tetapi definisinya belum cukup tepat,
+   C. Belum benar-benar terimplementasi,
+   D. Candidate continuation sebelumnya ternyata tidak valid setelah audit causal.
+
+8. Jika A:
+   tampilkan gate yang perlu diaktifkan dan bukti regression test yang diperlukan.
+   JANGAN coding dulu.
+
+9. Jika B/C:
+   berikan desain minimal PATH C yang benar-benar merepresentasikan pola continuation di atas.
+   Sertakan fungsi/file yang perlu diubah dan regression test yang harus dibuat.
+   JANGAN coding dulu.
+
+10. Jika D:
+   jelaskan mengapa candidate tersebut bukan continuation valid.
+
+SAFETY:
+ORDER_SEND=0
+ORDER_CHECK=0
+EXECUTION_ATTEMPTS=0
+POSITION_CHANGES=0
+ORDER_CHANGES=0
+LOOKAHEAD=PASS
+PATH A/B tidak berubah.
+
+FINAL:
+NO FILE CHANGE
+NO COMMIT
+NO PUSH
+
+Jangan menyimpulkan profitability atau accuracy dari sample kecil.
 ```
 # 
 ```
