@@ -34,7 +34,128 @@
 ```
 # 
 ```
+AUDIT KHUSUS: SIGNAL TERLALU KETAT — JANGAN CODING DULU
 
+Tujuan:
+Cari tahu apakah engine mt-info benar-benar terlalu ketat sehingga
+melewatkan pola XAUUSD M5 yang secara causal dan struktural layak
+menjadi signal.
+
+PENTING:
+- Jangan ubah file.
+- Jangan ubah parameter.
+- Jangan commit.
+- Jangan push.
+- Jangan aktifkan live.
+- order_send=0.
+- order_check=0.
+- Gunakan REAL XAUUSD data yang sudah tersedia di repo.
+- Jangan gunakan synthetic data sebagai bukti.
+- Jangan menilai berdasarkan WIN/LOSS terlebih dahulu.
+- Jangan mengoptimasi parameter untuk memperbanyak signal.
+
+Audit 3 PATH:
+A = S/R + reaction/rejection valid
+B = S/R + TRUE engulfing
+C = continuation structure valid
+
+Cari secara khusus kasus yang saat ini berakhir:
+no_reversal
+no_engulfing
+partial_engulfing
+weak_s_r
+invalid_after_confirmation
+wrong_direction
+stall
+probe
+broken/through
+
+Untuk setiap kandidat yang ditolak, klasifikasikan:
+
+1. BENAR-BENAR INVALID
+   -> rule memang benar menolak.
+
+2. BORDERLINE
+   -> pola menarik tetapi bukti struktural belum cukup.
+
+3. MISSED VALID CANDIDATE
+   -> berdasarkan rule yang sudah disepakati, seharusnya
+      bisa menjadi signal tetapi terblokir oleh implementasi/gate.
+
+4. VALID CONTINUATION CANDIDATE
+   -> bukan reversal, tetapi memenuhi karakter continuation
+      yang memang kita inginkan.
+
+Khusus pola continuation:
+Cari bentuk seperti:
+- trend turun/naik yang sudah jelas,
+- retracement/pullback,
+- harga kembali ke area level,
+- rejection atau compression di area tersebut,
+- kemudian candle CLOSED melanjutkan arah trend,
+- bukan breakout palsu,
+- bukan candle forming,
+- bukan hindsight.
+
+Jangan mengubah PATH A/B.
+Jangan mempromosikan engulfing-only.
+Jangan memakai outcome masa depan untuk menentukan apakah
+candidate awal adalah signal.
+
+Untuk setiap MISSED VALID CANDIDATE atau VALID CONTINUATION CANDIDATE,
+tampilkan:
+- timestamp
+- direction
+- PATH
+- S/R/level
+- M15 context
+- M5 candle structure
+- alasan engine sekarang menolak
+- alasan objektif mengapa candidate layak dipertimbangkan
+- apakah keputusan dapat dibuat hanya dari data <= candle decision
+
+Buat tally:
+A valid:
+A borderline:
+A invalid:
+B valid:
+B borderline:
+B invalid:
+C valid:
+C borderline:
+C invalid:
+missed valid:
+total reviewed:
+
+TERAKHIR:
+Jawab tegas salah satu:
+
+A. RULE SUDAH BENAR, SIGNAL MEMANG LANGKA
+B. ADA GATE IMPLEMENTASI YANG TERLALU KETAT
+C. PATH C/CONTINUATION BELUM TERIMPLEMENTASI SESUAI DESAIN
+D. DATA/SESSION BELUM CUKUP UNTUK MENILAI
+
+Jika hasilnya B atau C:
+JANGAN CODING.
+Berikan hanya:
+- root cause
+- file/fungsi yang kemungkinan perlu diperbaiki
+- perubahan minimal yang diperlukan
+- regression test yang harus ditambahkan
+
+Jika hasilnya A atau D:
+JANGAN CODING dan jangan mengubah rule.
+
+Safety report:
+ORDER_SEND=0
+ORDER_CHECK=0
+EXECUTION_ATTEMPTS=0
+POSITION_CHANGES=0
+ORDER_CHANGES=0
+LOOKAHEAD=PASS
+GIT_STATUS=clean
+
+FINAL: NO FILE CHANGE / NO COMMIT / NO PUSH.
 ```
 # 
 ```
