@@ -70,7 +70,62 @@
 ```
 # 
 ```
+VALIDASI FINAL PATH C — JANGAN UBAH STRATEGI
 
+Perubahan PATH C sudah dibuat pada:
+- python/tests/test_path_c.py
+- python/xausr/live_signal.py
+- python/xausr/shadow.py
+
+Hasil awal:
+- Real-data opt-in C: 2999 closed
+- C=8
+- BUY dan SELL continuation terdeteksi
+- order_send=0
+- order_check=0
+- LOOKAHEAD=PASS
+
+Satu kegagalan sebelumnya hanya karena host test tidak memiliki package MetaTrader5. Jangan mengubah kode hanya untuk mengatasi environment issue tersebut.
+
+Sekarang lakukan VALIDASI saja:
+
+1. Jalankan seluruh targeted test PATH C.
+2. Jalankan test causal/look-ahead PATH C.
+3. Jalankan test negative cases PATH C.
+4. Jalankan parity PATH A/B untuk memastikan tidak berubah.
+5. Jalankan real-data opt-in C menggunakan data XAUUSD yang sudah tersedia.
+6. Pastikan BUY continuation dan SELL continuation dapat terdeteksi secara kausal.
+7. Pastikan forming candle tidak pernah menghasilkan signal.
+8. Pastikan breakout tanpa pullback tetap NO_TRADE.
+9. Pastikan wick-only, weak S/R, sideways, wrong-direction, stall/re-entry tetap NO_TRADE.
+10. Pastikan duplicate A/B/C tidak terjadi.
+11. order_send=0, order_check=0, execution_attempts=0, position_changes=0, order_changes=0.
+12. Jangan optimasi parameter.
+13. Jangan mengubah aturan strategi.
+14. Jangan memasang workaround yang hanya membuat test hijau.
+15. Jika hanya test yang membutuhkan package MetaTrader5 yang gagal karena package tidak tersedia, laporkan sebagai ENVIRONMENT BLOCKER dan jangan ubah production code.
+
+Jika semua test yang relevan PASS:
+- review git diff
+- pastikan hanya 3 file tersebut yang berubah
+- pastikan tidak ada secret/artifact
+- commit dengan pesan yang jelas
+- push ke origin/main
+
+Jika ada kegagalan kode:
+- JANGAN commit/push
+- jelaskan failure dan root cause.
+
+Output akhir wajib:
+- PATH C BUY: PASS/FAIL + contoh
+- PATH C SELL: PASS/FAIL + contoh
+- negative cases: PASS/FAIL
+- look-ahead: PASS/FAIL
+- A/B parity: PASS/FAIL
+- safety counters
+- test summary
+- git SHA
+- push status
 ```
 
 # 
