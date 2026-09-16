@@ -58,7 +58,186 @@
 ```
 # 
 ```
+IMPLEMENT PATH C — CONTINUATION XAUUSD M5/M15
 
+Berdasarkan audit sebelumnya, sekarang implementasikan PATH C.
+
+TUJUAN:
+Engine harus bisa mengenali continuation bearish/bullish yang benar-benar terbentuk, seperti pola chart yang telah dibahas, bukan hanya menunggu engulfing.
+
+JANGAN mengubah:
+- PATH A
+- PATH B
+- reversal rules existing
+- risk/execution/bridge
+- live execution
+- parameter existing hanya demi menaikkan win rate
+
+==================================================
+PATH C — CAUSAL CONTINUATION
+==================================================
+
+BEARISH CONTINUATION wajib memiliki:
+
+1. M15 context bearish atau struktur bearish yang terkonfirmasi.
+2. M5 menunjukkan sequence bearish:
+   - lower high / gagal membuat higher high
+   - tekanan kembali ke support
+   - atau compression/repeated test terhadap support.
+3. Support yang digunakan harus masih qualified/intact sampai keputusan.
+4. Breakdown harus menembus support secara BODY/CLOSE,
+   bukan wick-only.
+5. Candle breakdown harus sudah CLOSED.
+6. Close berada di bawah support dengan penetrasi yang valid.
+7. Tidak boleh:
+   - false breakout
+   - wick-only break
+   - zone broken/degraded sebelum setup valid
+   - stall
+   - weak/probe
+   - re-entry yang terlambat
+   - data forming candle.
+8. Direction = SELL_CONTINUATION.
+
+BULLISH CONTINUATION adalah mirror image:
+- M15 bullish context
+- higher low / gagal membuat lower low
+- tekanan menuju resistance
+- repeated test/compression
+- resistance masih qualified
+- BODY/CLOSE menembus resistance
+- candle sudah closed
+- bukan wick-only/false breakout
+- direction = BUY_CONTINUATION.
+
+==================================================
+PENTING: JANGAN MEMAKSA SIGNAL
+==================================================
+
+PATH C hanya aktif jika struktur lengkap.
+
+Jika struktur tidak lengkap:
+NO_TRADE.
+
+Jangan membuat signal hanya karena:
+- candle merah besar
+- candle hijau besar
+- engulfing
+- break tipis
+- satu wick
+- harga kemudian bergerak sesuai arah.
+
+Outcome setelah entry TIDAK BOLEH digunakan untuk menentukan
+apakah candle sebelumnya valid.
+
+==================================================
+CAUSAL / NO LOOK-AHEAD
+==================================================
+
+Semua swing, LH/LL, HL/HH, repeated-test,
+compression dan breakout harus memakai data <= decision candle.
+
+Tidak boleh:
+- memakai future candle untuk mengonfirmasi swing
+- mengubah status zone berdasarkan candle masa depan
+- memakai future retest untuk membuat breakout sebelumnya terlihat valid
+- memakai outcome untuk memilih signal.
+
+Tambahkan regression test khusus untuk memastikan truncation data
+menghasilkan keputusan yang sama seperti full data sampai timestamp
+keputusan.
+
+==================================================
+PRIORITAS PATH
+==================================================
+
+Urutan:
+
+PATH A reversal
+    ↓
+PATH B reversal + engulfing
+    ↓
+PATH C continuation
+    ↓
+NO_TRADE
+
+PATH C tidak boleh mengubah hasil PATH A/B.
+
+Jika candle memenuhi reversal:
+gunakan reversal.
+
+Jika bukan reversal tetapi memenuhi continuation:
+gunakan continuation.
+
+Jika tidak memenuhi keduanya:
+NO_TRADE.
+
+==================================================
+TEST WAJIB
+==================================================
+
+Buat/ubah test khusus PATH C.
+
+Minimal:
+
+1. valid bearish continuation → SELL_CONTINUATION
+2. valid bullish continuation → BUY_CONTINUATION
+3. wick-only breakdown → NO_TRADE
+4. wick-only breakout → NO_TRADE
+5. false breakdown close kembali ke zone → NO_TRADE
+6. false breakout close kembali ke zone → NO_TRADE
+7. weak/probe → NO_TRADE
+8. broken/degraded zone → NO_TRADE
+9. forming candle → NO_TRADE
+10. insufficient structure → NO_TRADE
+11. future-data truncation → keputusan tetap sama
+12. PATH A/B regression tetap PASS.
+
+Gunakan synthetic fixtures HANYA untuk unit/regression test.
+Untuk validasi strategy edge, gunakan REAL XAUUSD data.
+
+==================================================
+REAL DATA VALIDATION
+==================================================
+
+Setelah coding:
+
+- jalankan test PATH C
+- jalankan test reversal existing
+- jalankan causal/look-ahead tests
+- jalankan real-data evaluation
+- laporkan jumlah:
+  SELL_CONTINUATION
+  BUY_CONTINUATION
+  NO_TRADE
+- tampilkan beberapa contoh timestamp real-data
+  yang memenuhi PATH C dan alasan setiap syarat terpenuhi.
+
+Jangan memilih contoh berdasarkan hasil WIN/LOSS.
+
+Jika PATH C menghasilkan 0 signal karena data memang tidak memenuhi
+syarat, TERIMA hasil tersebut. Jangan melonggarkan rule otomatis.
+
+==================================================
+SAFETY
+==================================================
+
+order_send = 0
+order_check = 0
+execution tidak boleh dipanggil.
+
+Live tetap OFF.
+
+Setelah selesai:
+1. tampilkan file yang berubah
+2. tampilkan diff/ringkasan perubahan
+3. test results
+4. real-data results
+5. pastikan PATH A/B tidak berubah
+6. pastikan git status bersih setelah commit
+7. commit dan push hanya jika seluruh test relevan PASS.
+
+Jangan melakukan optimasi parameter untuk mempercantik hasil.
 ```
 # 
 ```
