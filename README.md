@@ -10,7 +10,114 @@
 ```
 # 
 ```
+AUDIT READ-ONLY — POLA CONTINUATION BUY/SELL DARI CHART NYATA
 
+Jangan coding, jangan edit file, jangan commit, jangan push.
+
+Tujuan:
+Audit apakah engine mt-info saat ini dapat mengenali pola yang secara visual/kausal terlihat seperti:
+
+1. CONTINUATION SELL:
+   trend turun → pullback naik → harga kembali menekan resistance → rejection/close bearish dari area resistance → penerusan turun.
+
+2. CONTINUATION BUY:
+   trend naik → pullback turun → harga kembali menekan support → rejection/close bullish dari area support → penerusan naik.
+
+Konteks:
+Chart nyata yang sedang diuji menunjukkan dua peluang:
+- BUY dari area support bawah lalu harga naik.
+- SELL dari area resistance atas lalu harga turun.
+Keduanya tidak harus berbentuk engulfing.
+
+Audit kode/repo secara READ-ONLY dan jawab:
+
+A. Apakah PATH A/B saat ini memang hanya menangkap reversal tertentu sehingga pola continuation tersebut bisa MISS?
+B. Apakah PATH C yang sudah pernah dirancang memang dimaksudkan untuk pola trend-aligned pullback → level → confirmation → continuation?
+C. Tentukan secara eksplisit struktur kausal minimal untuk continuation BUY dan SELL menggunakan field/data yang SUDAH tersedia.
+D. Jangan membuat indikator baru.
+E. Jangan membuat threshold baru hanya supaya contoh chart menjadi signal.
+F. Jangan memakai outcome/future bars untuk menentukan validitas setup.
+G. Pastikan seluruh input signal <= candle confirmation yang sudah CLOSED.
+H. Pastikan forming candle, future structure, future pivot, future outcome, dan hindsight tidak digunakan.
+I. Bedakan:
+   - valid continuation
+   - reversal
+   - wick-only
+   - false break
+   - broken/through
+   - weak S/R
+   - stall/re-entry
+   - wrong direction
+   - sideways/no trend.
+J. Periksa apakah pola chart tersebut dapat direpresentasikan secara deterministik dari data OHLC + S/R + struktur M15 yang sudah ada.
+K. Ambil beberapa contoh REAL-DATA dari dataset/repo untuk mencari:
+   - continuation BUY
+   - continuation SELL
+   - continuation yang seharusnya ditolak
+Jangan menilai berdasarkan outcome saja.
+L. Hitung berapa kandidat valid yang ditemukan dan berapa yang MISS, tetapi jangan menyimpulkan profitability dari sampel kecil.
+M. Bandingkan dengan PATH A/B yang sekarang.
+N. Jika ada gap implementasi, jelaskan tepat file/fungsi mana yang perlu disentuh DAN desain minimalnya, tetapi JANGAN mengubahnya.
+
+OUTPUT WAJIB:
+
+1. CURRENT ENGINE
+   - PATH A:
+   - PATH B:
+   - PATH C:
+   - status masing-masing
+
+2. CONTINUATION BUY
+   - definisi kausal minimal
+   - contoh real-data
+   - apakah engine menangkap / MISS
+   - alasan
+
+3. CONTINUATION SELL
+   - definisi kausal minimal
+   - contoh real-data
+   - apakah engine menangkap / MISS
+   - alasan
+
+4. FALSE POSITIVE GUARDS
+   Jelaskan bagaimana continuation tidak boleh aktif pada:
+   - breakout langsung tanpa pullback
+   - wick-only
+   - broken/through zone
+   - weak S/R
+   - sideways
+   - wrong direction
+   - stall/re-entry
+   - forming candle
+
+5. LOOK-AHEAD AUDIT
+   Buktikan semua field yang dipakai tersedia <= confirmation candle.
+
+6. REAL-DATA RESULT
+   Berikan jumlah kandidat/miss berdasarkan data nyata yang diperiksa.
+   Jangan memakai synthetic data sebagai bukti.
+
+7. REKOMENDASI
+   Pilih salah satu:
+   - NO CHANGE — engine sudah dapat membaca pola
+   - IMPLEMENT PATH C — ada gap nyata
+   - FURTHER OBSERVATION — definisi belum cukup kuat
+
+8. SAFETY
+   order_send=0
+   order_check=0
+   execution_attempts=0
+   position_changes=0
+   order_changes=0
+
+TERAKHIR:
+Tegaskan:
+- apakah coding memang diperlukan atau belum;
+- file yang akan disentuh jika nanti coding disetujui;
+- jangan mengubah file sekarang;
+- jangan commit/push.
+
+Ini audit pola, bukan optimasi win-rate.
 ```
 # 
 ```
