@@ -6,7 +6,122 @@
 ```
 # 
 ```
+IMPLEMENT PATH C — AKTIFKAN CONTINUATION BUY/SELL
 
+Sekarang lanjut dari audit READ-ONLY sebelumnya.
+
+Hasil audit sudah membuktikan:
+- PATH C continuation sudah terimplementasi tetapi masih GATED/opt-in.
+- Real-data menunjukkan continuation BUY dan SELL memang dapat ditangkap secara kausal.
+- Look-ahead PASS.
+- Tidak ada MISS implementasi yang memerlukan desain baru.
+- PATH A/B tidak boleh diubah.
+- Tidak ada optimasi parameter.
+
+Sekarang BOLEH CODING.
+
+Tujuan:
+Aktifkan PATH C sebagai jalur signal yang benar-benar dapat menghasilkan VALID SIGNAL untuk:
+
+BUY:
+M15 bullish/trend-aligned
+→ pullback
+→ support qualified + LIVE
+→ rejection/confirmation bullish pada candle CLOSED
+→ continuation BUY.
+
+SELL:
+M15 bearish/trend-aligned
+→ pullback
+→ resistance qualified + LIVE
+→ rejection/confirmation bearish pada candle CLOSED
+→ continuation SELL.
+
+ATURAN KETAT:
+1. Jangan ubah PATH A.
+2. Jangan ubah PATH B.
+3. Jangan menghapus atau melonggarkan rejection, S/R, geometry, atau confirmation gate yang sudah ada.
+4. Jangan menambah indikator baru.
+5. Jangan menambah threshold hanya untuk menaikkan jumlah signal.
+6. Jangan menggunakan outcome/future candle.
+7. Semua input keputusan harus <= confirmation candle.
+8. Forming candle selalu ditolak.
+9. Breakout langsung tanpa pullback bukan continuation.
+10. Wick-only bukan continuation.
+11. Broken/through zone ditolak.
+12. Weak/unqualified S/R ditolak.
+13. Sideways ditolak.
+14. Wrong direction ditolak.
+15. Stall/re-entry ditolak.
+16. Ambiguous direction => NO_TRADE.
+17. Confirmation harus CLOSED.
+18. Tetap deterministic dan reproducible.
+19. Jangan mengubah SL/TP/RR yang sudah ada kecuali wiring PATH C memang membutuhkan field yang sama.
+20. Jangan melakukan optimasi berdasarkan win-rate/backtest outcome.
+
+IMPLEMENTASI:
+- Cari gate/config PATH C yang saat ini membuat continuation hanya opt-in.
+- Aktifkan PATH C pada mode signal/live-shadow yang memang digunakan monitoring.
+- Jangan membuat konfigurasi paralel/duplikat.
+- Gunakan config/flag existing jika tersedia.
+- Pastikan alasan signal mencantumkan bahwa ini CONTINUATION, bukan REVERSAL.
+
+AUDIT OUTPUT SIGNAL:
+Untuk PATH C, tampilkan minimal:
+- timestamp
+- BUY/SELL
+- PATH=C
+- pattern=CONTINUATION
+- M15 trend
+- S/R zone
+- pullback evidence
+- rejection/confirmation candle
+- entry
+- SL
+- TP
+- RR
+- causal reason
+
+TEST WAJIB:
+A. Unit test BUY continuation.
+B. Unit test SELL continuation.
+C. Negative test breakout tanpa pullback.
+D. Negative test wick-only.
+E. Negative test weak S/R.
+F. Negative test sideways.
+G. Negative test wrong direction.
+H. Negative test forming candle.
+I. Look-ahead/truncation test.
+J. Real-data opt-in test menggunakan data XAUUSD yang sudah ada.
+K. Pastikan PATH A/B parity tidak berubah.
+L. Pastikan tidak ada duplicate signal antara A/B/C untuk setup yang sama.
+
+REAL-DATA:
+Gunakan data nyata yang sudah tersedia di repo.
+Jangan gunakan synthetic data sebagai bukti kemampuan strategi.
+Jangan menilai validitas berdasarkan outcome.
+Jangan melakukan optimasi parameter.
+
+SAFETY:
+order_send wajib tetap 0.
+order_check wajib tetap 0.
+execution_attempts=0.
+position_changes=0.
+order_changes=0.
+
+SETELAH CODING:
+1. Jalankan targeted tests.
+2. Jalankan full test suite.
+3. Audit git diff.
+4. Pastikan tidak ada secret/artifact.
+5. Pastikan working tree hanya berisi perubahan yang memang diperlukan.
+6. Laporkan jumlah test PASS/FAIL.
+7. Laporkan contoh real-data continuation BUY dan SELL yang sekarang bisa keluar.
+8. Jika semua PASS, commit dan push ke origin/main.
+9. Jika ada test gagal, JANGAN commit/push sampai diperbaiki.
+
+JANGAN mengubah strategi untuk mengejar profit atau win-rate.
+Fokus hanya: mengaktifkan PATH C continuation yang sudah terbukti desainnya.
 ```
 # 
 ```
