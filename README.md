@@ -42,7 +42,101 @@
 ```
 # 
 ```
+LANJUTKAN LIVE SHADOW — CARI SIGNAL BERIKUTNYA
 
+Tetap gunakan REAL XAUUSD M5/M15 dari MT5.
+
+MODE WAJIB:
+- SHADOW / READ-ONLY
+- Live OFF
+- NoExecution / PaperAdapter
+- order_send=0
+- order_check=0
+- execution_attempts=0
+- jangan menyentuh posisi/order.
+
+JANGAN coding.
+JANGAN mengubah parameter/rule.
+JANGAN commit/push.
+
+Pantau CLOSED M5 candle berikutnya.
+
+Evaluasi PATH:
+A = S/R reversal, engulfing TIDAK wajib
+B = S/R reversal + valid engulfing
+C = continuation valid
+lainnya = NO_TRADE
+
+FOKUS UTAMA:
+
+1. Jika S/R valid + reaction valid + close kembali keluar zona
+   dan seluruh rule PATH A terpenuhi:
+   → SIGNAL walaupun engulfing = NONE.
+
+2. Jika S/R valid + valid engulfing:
+   → SIGNAL hanya jika seluruh rule reversal terpenuhi.
+
+3. Jika engulfing tetapi tidak ada S/R valid:
+   → NO_TRADE.
+
+4. Jika continuation memenuhi seluruh rule PATH C:
+   → SIGNAL.
+
+5. Jangan anggap candle merah/hijau besar sebagai signal sendiri.
+
+6. Jangan memaksa signal jika syarat tidak lengkap.
+
+Untuk setiap VALID SIGNAL tampilkan:
+
+VALID SIGNAL
+TIME:
+PATH:
+DIRECTION:
+S/R ZONE:
+M15 CONTEXT:
+M5 STRUCTURE:
+REACTION:
+ENGULFING:
+ENTRY:
+SL:
+TP:
+CAUSAL REASON:
+
+Kemudian cocokkan secara deskriptif dengan pola chart:
+- rejection terhadap zona
+- close kembali keluar zona
+- struktur mendukung arah
+- tidak sekadar wick
+- tidak broken/degraded
+- bukan re-entry/stall.
+
+Untuk setiap NO_TRADE penting, tampilkan:
+TIME + alasan utama.
+
+Khusus jika ada signal:
+JANGAN menilai validitas dari WIN/LOSS.
+JANGAN menggunakan candle setelah entry untuk membenarkan signal.
+
+Tetap pastikan:
+- forming candle excluded
+- no look-ahead
+- truncation/causal tetap aman
+- position/order tidak berubah.
+
+Berhenti setelah mendapatkan beberapa signal valid yang cukup
+untuk dibandingkan, atau jika sesi berakhir.
+
+OUTPUT AKHIR:
+- PATH A count
+- PATH B count
+- PATH C count
+- TOTAL SIGNAL
+- NO_TRADE reasons
+- detail semua signal yang ditemukan
+- safety counters
+- git status
+
+Tidak ada coding/commit/push.
 ```
 # 
 ```
