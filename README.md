@@ -18,7 +18,36 @@
 ```
 # 
 ```
+COMMIT + PUSH PATH C
 
+Kondisi audit sudah PASS:
+- PATH C causal PASS
+- PATH C structure PASS
+- negative cases 13/13 PASS
+- lookahead PASS
+- A/B byte-identical
+- real-data audit PASS
+- ORDER_SEND=0
+- ORDER_CHECK=0
+
+Sekarang:
+1. Jalankan test PATH C + regression A/B sekali lagi.
+2. Pastikan git diff hanya perubahan PATH C yang sudah diaudit.
+3. Pastikan tidak ada secret, artifact, atau file tidak terkait.
+4. Jika PASS, commit:
+   feat(strategy): add trend-aligned pullback continuation path
+5. Push ke origin/main.
+6. Setelah push:
+   - tampilkan commit SHA
+   - tampilkan origin/main
+   - git status
+   - pastikan working tree clean.
+
+Jangan mengubah rule lagi.
+Jangan optimasi parameter.
+Jangan mengaktifkan live trading.
+ORDER_SEND harus tetap 0.
+ORDER_CHECK harus tetap 0.
 ```
 # 
 ```
