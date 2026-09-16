@@ -46,7 +46,189 @@
 ```
 # 
 ```
+LANJUTKAN LIVE SHADOW MONITORING — XAUUSD M5
 
+Jalankan monitoring REAL XAUUSD dari MT5.
+
+MODE:
+- SHADOW / READ-ONLY
+- NO REAL TRADE
+- Live tetap OFF
+- executor NoExecution / PaperAdapter saja
+- order_send wajib 0
+- order_check wajib 0
+- execution_attempts wajib 0
+
+JANGAN coding.
+JANGAN mengubah rule.
+JANGAN mengubah parameter.
+JANGAN commit/push.
+
+==================================================
+TUJUAN
+==================================================
+
+Pantau setiap CLOSED M5 candle baru dan evaluasi:
+
+PATH A = S/R reversal tanpa wajib engulfing
+PATH B = S/R reversal + valid engulfing
+PATH C = continuation sesuai rule yang baru dibuat
+NO_TRADE = jika tidak ada setup valid.
+
+Yang paling penting:
+JANGAN menganggap semua engulfing sebagai signal.
+
+Engulfing hanya signal jika konteks S/R dan seluruh rule path terkait terpenuhi.
+
+Sebaliknya:
+Jika S/R reversal sudah memenuhi rule PATH A dan memang tidak membutuhkan
+engulfing, SIGNAL tetap boleh keluar walaupun engulfing = NONE.
+
+PATH C juga hanya signal jika struktur continuation lengkap.
+
+==================================================
+SETIAP CLOSED M5
+==================================================
+
+Catat:
+
+timestamp
+direction
+PATH
+S/R zone
+reaction / structure
+engulfing status
+entry
+SL
+TP
+reason
+
+Untuk NO_TRADE, catat alasan utama:
+- no_reversal
+- no_s_r
+- weak_s_r
+- no_engulfing
+- partial_engulfing
+- wick_only
+- probe
+- broken
+- through
+- forming
+- wrong_direction
+- reentry
+- stall
+- insufficient_structure
+- insufficient_data
+atau reason existing lain yang memang dipakai engine.
+
+Jangan membuat alasan baru jika reason existing sudah sesuai.
+
+==================================================
+KHUSUS POLA YANG KITA BAHAS
+==================================================
+
+Perhatikan pola seperti chart contoh:
+
+BEARISH:
+harga berada di area resistance/support yang relevan,
+terjadi rejection atau struktur gagal naik,
+kemudian candle bearish melakukan continuation/breakdown
+dengan close yang valid.
+
+Jika seluruh rule terpenuhi:
+SELL signal.
+
+BULLISH:
+mirror image.
+
+Jangan menunggu engulfing jika PATH A memang sudah valid.
+
+Jangan memberi signal hanya karena candle merah/hijau besar.
+
+==================================================
+CAUSALITY
+==================================================
+
+Gunakan hanya data yang sudah CLOSED sampai candle keputusan.
+
+Forming candle tidak boleh digunakan untuk signal.
+
+Tidak boleh:
+- future candle
+- future swing
+- future retest
+- future outcome
+- future zone status.
+
+==================================================
+SETIAP SIGNAL
+==================================================
+
+Jika muncul VALID SIGNAL, tampilkan jelas:
+
+VALID SIGNAL
+PATH: A/B/C
+DIRECTION: BUY/SELL
+TIME:
+S/R:
+REACTION/STRUCTURE:
+ENGULFING:
+ENTRY:
+SL:
+TP:
+CAUSAL REASON:
+
+Kemudian jangan melakukan order.
+
+==================================================
+SETIAP SIGNAL YANG DITOLAK
+==================================================
+
+Berikan contoh penting agar bisa dibandingkan dengan chart.
+
+Terutama:
+
+1. S/R valid tetapi reaction belum valid
+2. S/R valid + engulfing tetapi konteks tidak valid
+3. engulfing valid tetapi tidak berada pada S/R
+4. S/R valid tanpa engulfing dan PATH A tidak memenuhi rule
+5. PATH A valid tanpa engulfing → HARUS SIGNAL
+6. continuation valid → PATH C SIGNAL
+7. wick-only → NO_TRADE
+8. false break → NO_TRADE
+9. broken/degraded zone → NO_TRADE
+10. re-entry/stall → NO_TRADE
+
+==================================================
+OUTPUT MONITORING
+==================================================
+
+Tampilkan counter:
+
+PATH_A_SIGNAL
+PATH_B_SIGNAL
+PATH_C_SIGNAL
+TOTAL_VALID_SIGNAL
+
+NO_TRADE:
+reason -> count
+
+SAFETY:
+order_send=0
+order_check=0
+execution_attempts=0
+position_changes=0
+order_changes=0
+
+Jangan menghentikan monitoring hanya karena belum ada signal.
+Jika belum ada signal, lanjutkan sampai:
+- VALID SIGNAL muncul, atau
+- sesi monitoring selesai.
+
+Jika VALID SIGNAL muncul, berhenti pada signal tersebut dan tampilkan
+detail lengkap supaya saya bisa cocokkan dengan chart MT5.
+
+Tidak ada coding/commit/push pada sesi ini.
 ```
 # 
 ```
