@@ -54,7 +54,34 @@
 ```
 # 
 ```
+STOP menggunakan ai/learning untuk Muse.
 
+Target desain:
+Muse Spark 1.3 harus memiliki definisi/instruction/metadata PERMANEN sebagai bagian dari sistem Hermes Agent, bukan melalui learning pipeline.
+
+Jangan coding atau memindahkan file dulu.
+
+Audit source code Hermes dan tentukan:
+
+1. Di mana Model Registry berada.
+2. Di mana Provider Registry berada.
+3. Bagaimana model didefinisikan secara permanen.
+4. Di mana system instruction/model metadata seharusnya ditempatkan.
+5. Apakah ada pola module/model definition yang sudah digunakan Hermes.
+6. Tentukan lokasi permanen yang paling sesuai untuk Muse Spark 1.3.
+7. Jelaskan bagaimana isi:
+   /root/hermes-agent/ai/learning/sources/temporary/muse-spark-1.3.md
+   nantinya dapat dipindahkan ke struktur permanen tanpa bergantung pada learning.
+
+PENTING:
+- Jangan mengubah kode.
+- Jangan memindahkan muse-spark-1.3.md.
+- Jangan menghapus file.
+- Jangan mengubah provider/routing.
+- Jangan commit/push.
+- Jangan menggunakan learning pipeline untuk runtime Muse.
+
+Hanya lakukan audit dan berikan rekomendasi struktur permanennya.
 ```
 # 
 ```
