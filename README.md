@@ -50,7 +50,81 @@
 ```
 # 
 ```
+LANJUTKAN REAL-DATA SHADOW TEST PATH A + B + C
 
+Jangan ubah kode dan jangan commit/push.
+
+Tujuan:
+validasi apakah kombinasi PATH A (reversal), PATH B (reversal + engulfing), dan PATH C (continuation) benar-benar membaca pola market yang dimaksud.
+
+Gunakan REAL XAUUSD M5/M15 saja.
+Jangan gunakan synthetic data sebagai bukti strategy edge.
+
+Evaluasi minimal 8.000 closed M5 bars jika data tersedia.
+
+Untuk setiap signal tampilkan:
+- timestamp
+- direction
+- PATH A/B/C
+- M15 structure/context
+- S/R zone
+- reaction/breakdown/reversal evidence
+- candle/confirmation yang menyebabkan signal
+- entry
+- SL
+- TP
+- alasan causal mengapa signal valid
+
+Sangat penting:
+JANGAN menentukan validitas berdasarkan WIN/LOSS/outcome.
+Entry harus ditentukan pada candle keputusan yang sudah CLOSED.
+
+Khusus PATH C:
+pastikan signal memang berupa continuation seperti:
+- struktur searah
+- tekanan menuju S/R
+- level masih valid
+- breakout/breakdown benar-benar close menembus level
+- bukan wick-only
+- bukan false break
+- bukan weak/probe
+- bukan broken/degraded zone.
+
+Khusus PATH A/B:
+pastikan tetap mengikuti rule reversal existing dan tidak berubah hanya agar jumlah signal bertambah.
+
+Tampilkan juga seluruh penolakan penting:
+- engulfing tanpa S/R
+- S/R tanpa reaction valid
+- wick-only
+- false break
+- weak/probe
+- broken zone
+- forming candle
+- sideways yang tidak memenuhi setup
+- wrong direction
+- re-entry/stall
+
+Lakukan causal/look-ahead verification dengan truncation pada beberapa signal.
+
+OUTPUT:
+1. jumlah signal A/B/C
+2. jumlah NO_TRADE beserta alasan
+3. daftar seluruh signal real-data
+4. 10 contoh signal paling jelas secara struktur, dipilih berdasarkan kondisi setup, BUKAN berdasarkan WIN
+5. 10 contoh yang ditolak dan alasannya
+6. hasil look-ahead/truncation
+7. order_send = 0
+8. order_check = 0
+9. execution_attempts = 0
+10. posisi/order tidak berubah
+11. git status harus tetap bersih
+
+Jangan optimasi parameter.
+Jangan melonggarkan rule hanya untuk mendapatkan lebih banyak signal.
+Jangan menyimpulkan profitability/akurasi dari sampel kecil.
+
+Tidak ada coding, commit, atau push pada tahap ini.
 ```
 # 
 ```
