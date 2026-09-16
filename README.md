@@ -14,7 +14,71 @@
 ```
 # 
 ```
+Lanjutkan LIVE SHADOW MONITORING XAUUSD.m sampai menemukan 1 VALID SIGNAL nyata.
 
+TUJUAN:
+Jangan berhenti hanya karena sesi menghasilkan WAITING/NO_TRADE. Monitoring harus terus berjalan dan menunggu candle M5 baru sampai engine menemukan VALID SIGNAL sesuai rule yang sudah committed.
+
+ATURAN WAJIB:
+1. Gunakan real MT5 data XAUUSD.m.
+2. Evaluasi hanya candle M5 yang SUDAH CLOSED.
+3. Forming candle/index 0 wajib dikecualikan.
+4. Jangan look-ahead, jangan repaint, jangan memakai outcome untuk menentukan signal.
+5. Jangan mengubah rule strategi.
+6. Jangan tuning parameter.
+7. Jangan menambahkan indikator/filter baru.
+8. Jangan memaksa signal.
+9. Jika kondisi belum lengkap → NO_TRADE/WAITING lalu lanjut polling.
+10. Fokus mencari signal valid yang benar-benar lolos rule existing, termasuk:
+   - S/R valid
+   - reaction/rejection valid
+   - confirmation valid
+   - engulfing bila diwajibkan oleh path tersebut
+   - M15 structure/trend sesuai rule
+   - close-direction/geometry sesuai rule
+   - continuation pattern jika memang PATH continuation yang valid
+   - bukan broken/through/weak/wrong-direction/re-entry/stall/forming
+11. Jika menemukan VALID SIGNAL, JANGAN langsung order.
+12. ORDER_SEND wajib tetap 0.
+13. ORDER_CHECK wajib tetap 0.
+14. Executor tetap NoExecution/shadow only.
+
+OUTPUT:
+Selama belum ada signal, cukup tampilkan status singkat:
+WAITING — no valid signal | last_closed=<timestamp>
+
+Jangan membuat daftar panjang semua NO_TRADE.
+
+SAAT VALID SIGNAL PERTAMA MUNCUL:
+Berhenti setelah signal tersebut tercatat dan tampilkan:
+
+VALID SIGNAL
+- timestamp
+- BUY/SELL
+- PATH (A/B/C)
+- pattern
+- M15 structure/trend
+- S/R zone
+- entry
+- SL
+- TP
+- alasan kausal kenapa signal valid
+- confirmation candle yang sudah CLOSED
+- engulfing status jika relevan
+- order_send=0
+- order_check=0
+- position_changes=0
+- order_changes=0
+- lookahead=PASS
+
+SETELAH ITU:
+Jangan coding.
+Jangan commit.
+Jangan push.
+Jangan mengubah file.
+Laporkan hasil signal pertama saja agar dapat dicocokkan dengan chart MT5.
+
+Mulai monitoring sekarang dan teruskan sampai 1 VALID SIGNAL nyata ditemukan.
 ```
 # 
 ```
