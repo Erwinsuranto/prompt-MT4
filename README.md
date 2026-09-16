@@ -22,7 +22,90 @@
 ```
 # 
 ```
+TARGETED FINAL AUDIT PATH C — SEBELUM COMMIT/PUSH
 
+Audit HANYA perubahan PATH C yang baru dibuat.
+
+Changed files:
+- python/xausr/final_setup.py
+- python/tests/test_path_c.py
+
+HASIL TEST SAAT INI:
+- PATH C 13/13 PASS
+- regression A/B PASS
+- old-vs-new decide A/B byte-identical
+- real-data opt-in C = 7, B = 6
+- LOOKAHEAD=PASS
+- ORDER_SEND=0
+- ORDER_CHECK=0
+- belum commit/push
+
+TUGAS:
+
+1. Review diff final_setup.py secara line-by-line.
+2. Pastikan PATH A dan PATH B benar-benar tidak berubah secara behavior.
+3. Pastikan PATH C benar-benar continuation:
+   trend-aligned
+   -> pullback
+   -> retest level
+   -> valid reaction/confirmation
+   -> CLOSED candle
+   -> continuation searah trend.
+
+4. Pastikan PATH C TIDAK salah menganggap:
+   - first breakout sebagai continuation,
+   - wick-only,
+   - false break,
+   - weak/broken zone,
+   - wrong direction,
+   - forming candle,
+   - no-retest,
+   - trend tidak jelas
+   sebagai signal.
+
+5. Audit causal/no-lookahead:
+   setiap field yang dipakai untuk decision harus tersedia <= decision candle.
+   Pastikan tidak ada swing/pivot/zone yang baru diketahui dari candle masa depan.
+
+6. Audit real-data C=7:
+   cek beberapa candidate dan pastikan label CONTINUATION memang berasal
+   dari struktur candle/level, BUKAN dari outcome WIN/LOSS.
+
+7. Audit test_path_c.py:
+   pastikan regression tests benar-benar menguji perilaku, bukan hanya
+   assertion yang terlalu longgar.
+   Pastikan ada test negatif untuk breakout, wick-only, wrong direction,
+   broken/weak zone, no retest, forming candle, dan look-ahead.
+
+8. Jangan ubah rule.
+9. Jangan menambah parameter.
+10. Jangan optimasi supaya jumlah signal bertambah.
+11. Jangan coding kecuali menemukan bug nyata.
+
+Jika TIDAK ADA bug:
+- jangan ubah file
+- jangan commit
+- jangan push
+- laporkan PASS dan jelaskan kenapa aman untuk commit.
+
+Jika ADA bug nyata:
+- lakukan fix minimal
+- tambahkan regression test
+- jalankan test PATH C + A/B
+- jalankan full suite
+- tetap ORDER_SEND=0 / ORDER_CHECK=0
+- JANGAN commit/push sebelum hasil test PASS.
+
+FINAL REPORT:
+A/B behavior unchanged = PASS/FAIL
+PATH C causal = PASS/FAIL
+PATH C structure = PASS/FAIL
+negative cases = PASS/FAIL
+real-data audit = PASS/FAIL
+lookahead = PASS/FAIL
+unintended behavior = PASS/FAIL
+
+Belum commit/push kecuali saya minta setelah audit selesai.
 ```
 # 
 ```IMPLEMENT PATH C — TREND-ALIGNED PULLBACK CONTINUATION
