@@ -38,7 +38,101 @@
 ```
 # 
 ```
+LANJUTKAN LIVE SHADOW MONITORING XAUUSD M5
 
+Tetap:
+- REAL MT5 XAUUSD
+- M5 entry/decision, M15 context
+- CLOSED CANDLE ONLY
+- SHADOW / READ-ONLY
+- Live OFF
+- NoExecution / PaperAdapter
+- order_send=0
+- order_check=0
+- execution_attempts=0
+- jangan menyentuh posisi/order
+
+JANGAN coding.
+JANGAN mengubah parameter.
+JANGAN mengubah PATH A/B/C.
+JANGAN commit/push.
+
+Pantau candle M5 CLOSED berikutnya.
+
+RULE UTAMA:
+
+PATH A:
+S/R valid + reaction/rejection valid + close sesuai arah
+→ SIGNAL walaupun ENGULFING=NONE.
+
+PATH B:
+S/R valid + reaction valid + TRUE engulfing sesuai arah
+→ SIGNAL.
+
+PATH C:
+struktur continuation valid + S/R/level valid + breakout/breakdown
+BODY/CLOSE valid + candle sudah closed
+→ SIGNAL.
+
+ENGULFING SAJA:
+→ NO_TRADE.
+
+CANDLE BESAR SAJA:
+→ NO_TRADE.
+
+WICK-ONLY / PROBE / FALSE BREAK / BROKEN ZONE /
+STALL / RE-ENTRY / WRONG DIRECTION / FORMING:
+→ NO_TRADE.
+
+Jangan memaksa signal.
+
+Jika VALID SIGNAL muncul, tampilkan:
+
+VALID SIGNAL
+TIME:
+PATH:
+DIRECTION:
+S/R:
+M15 CONTEXT:
+M5 PATTERN:
+REACTION/STRUCTURE:
+ENGULFING:
+ENTRY:
+SL:
+TP:
+REASON:
+
+Kemudian jelaskan apakah bentuknya sesuai pola continuation/reversal
+yang sedang kita cari.
+
+Jika NO_TRADE, cukup catat alasan utamanya agar tidak mengulang
+contoh yang sama.
+
+Tetap gunakan data causal:
+tidak boleh menggunakan candle setelah decision candle untuk
+membuat signal terlihat valid.
+
+Jika signal muncul:
+JANGAN kirim order.
+JANGAN menilai validitas berdasarkan WIN/LOSS.
+
+Lanjutkan monitoring sampai signal valid baru muncul atau sesi selesai.
+
+OUTPUT:
+- PATH_A_SIGNAL
+- PATH_B_SIGNAL
+- PATH_C_SIGNAL
+- TOTAL_VALID_SIGNAL
+- NO_TRADE reasons
+- detail signal baru
+- order_send
+- order_check
+- execution_attempts
+- position_changes
+- order_changes
+- git status
+
+Tidak ada coding/commit/push.
 ```
 # 
 ```
