@@ -58,7 +58,103 @@
 ```
 # 
 ```
+PHASE 1 — H1 DATA FOUNDATION FOR S/R LEARNING
+MODE: OBSERVATION + DATA VALIDATION
+JANGAN mengubah rule strategi, JANGAN mengaktifkan learned pattern, JANGAN commit/push.
 
+Tujuan:
+Menyiapkan fondasi data H1 real XAUUSD untuk sistem learned S/R pattern yang sudah didesain sebelumnya.
+
+1. CEK DATA H1 YANG SUDAH ADA
+- Audit seluruh source/data XAUUSD yang tersedia.
+- Tentukan apakah H1 real-data tersedia.
+- Verifikasi timestamp, OHLC, timezone, symbol, continuity, duplicate, gap, dan forming candle.
+- Jangan membuat synthetic data.
+- Jangan menggunakan outcome/future sebagai feature.
+
+2. JIKA H1 BELUM ADA
+- Jangan mengubah production strategy.
+- Jangan membuat fake H1 dari data yang tidak tervalidasi.
+- Jelaskan persis data H1 apa yang dibutuhkan:
+  symbol, timeframe, minimum history, format, timestamp convention.
+- Jika environment Windows + MT5 memungkinkan export/read-only H1 real-data, siapkan prosedur/read-only validation saja.
+- Tidak boleh order_send/order_check.
+
+3. VALIDASI CAUSAL
+Untuk setiap observation pada candle T:
+- hanya data <= T boleh digunakan.
+- candle H1 forming/index 0 harus dikeluarkan.
+- pivot/swing yang membutuhkan candle masa depan tidak boleh dipakai sebagai feature live.
+- prior reaction harus berhenti sebelum reaction yang sedang dinilai.
+- outcome setelah T hanya boleh dipakai sebagai LABEL evaluasi OOS, bukan feature.
+
+4. MULTI-TIMEFRAME ALIGNMENT
+Tentukan cara causal menghubungkan:
+H1 → M15 → M5
+
+Pada setiap M5 closed candle:
+- ambil H1 closed context terakhir yang tersedia.
+- ambil M15 closed context terakhir yang tersedia.
+- jangan forward-fill informasi dari candle yang belum close.
+- dokumentasikan mapping timestamp secara eksplisit.
+
+5. S/R OBSERVATION
+Belum membuat learned profile.
+Hanya ukur kandidat feature:
+- H1 S/R zone
+- M15 S/R zone
+- M5 S/R zone
+- overlap/intersection antar-zona
+- touch count
+- rejection
+- penetration
+- close relative to zone
+- wick/body/range
+- candle direction
+- prior reactions
+- M15 trend/structure
+- jarak M5 terhadap H1/M15 zone
+
+Semua feature harus berasal dari primitive existing jika memungkinkan.
+
+6. DATA QUALITY REPORT
+Berikan:
+- jumlah H1 closed bars
+- periode awal/akhir
+- jumlah gap
+- duplicate
+- invalid OHLC
+- forming-bar contamination
+- timezone/timestamp validation
+- symbol yang digunakan
+- jumlah M15/M5 yang dapat disejajarkan dengan H1
+- contoh beberapa timestamp alignment.
+
+7. IMPORTANT
+Jangan mining pola.
+Jangan memilih threshold.
+Jangan mencari parameter terbaik.
+Jangan menghitung "akurasi" learned pattern.
+Jangan mengaktifkan profile_match.
+Jangan mengubah PATH A/B/C.
+Jangan mengubah S/R rule existing.
+
+SAFETY:
+ORDER_SEND=0
+ORDER_CHECK=0
+EXECUTION_ATTEMPTS=0
+POSITION_CHANGES=0
+ORDER_CHANGES=0
+
+OUTPUT:
+A. apakah H1 real-data tersedia dan valid?
+B. jika tidak, apa blocker persisnya?
+C. data minimum yang dibutuhkan.
+D. hasil alignment H1→M15→M5.
+E. apakah aman lanjut ke PHASE 2 (sr_profile + offline learning)?
+
+Jika belum cukup:
+NO CHANGE / NO COMMIT / NO PUSH.
 ```
 # 
 ```
