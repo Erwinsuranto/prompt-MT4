@@ -14,7 +14,84 @@
 ```
 # 
 ```
+PHASE 2F.0B — CLEAN WORKTREE + TRACE UNEXPECTED CHANGES
 
+STOP Phase 2F implementation.
+
+The previous Phase 2F.0 report says:
+- source access is now confirmed
+- but git status is NOT clean
+- python/xausr/sr_learn.py has 21 modified lines
+- python/xausr/sr_pattern.py is untracked
+
+This violates the Phase 2F.0 requirement that ZERO source files be modified.
+
+TASK:
+
+1. Work ONLY in:
+E:\mt5\mt-info
+
+2. Run and capture:
+git status --short
+git diff -- python/xausr/sr_learn.py
+git diff --stat
+git log -5 --oneline
+
+3. Inspect:
+python/xausr/sr_learn.py
+python/xausr/sr_pattern.py
+
+4. Determine EXACTLY when and why these changes appeared.
+
+5. Compare them against HEAD.
+
+6. IMPORTANT:
+Do NOT blindly delete or revert anything.
+
+Classify each change as:
+A. Pre-existing legitimate repository change
+B. Change created during Phase 2F.0
+C. Unknown provenance
+
+7. If and ONLY IF the changes were created by Phase 2F.0:
+restore the repository to the exact pre-Phase-2F.0 state.
+
+For sr_learn.py:
+- restore only the Phase 2F.0 changes
+- preserve any legitimate pre-existing changes if they existed
+
+For sr_pattern.py:
+- remove it only if it was created by Phase 2F.0
+- otherwise leave it untouched and report it
+
+8. DO NOT implement Phase 2F.
+9. DO NOT modify any other source file.
+10. DO NOT create new files.
+11. DO NOT commit.
+12. DO NOT push.
+13. DO NOT run order_send.
+14. DO NOT run order_check.
+15. Do not alter execution, backtest, bridge, profiles, or docs.
+
+FINAL STATE REQUIRED:
+The main repository must either:
+- be clean, OR
+- clearly document legitimate pre-existing changes that cannot safely be reverted.
+
+FINAL REPORT:
+- exact git status before
+- exact git diff summary
+- provenance of sr_learn.py changes
+- provenance of sr_pattern.py
+- actions taken
+- exact git status after
+- files changed
+- order_send=0
+- order_check=0
+- commit=0
+- push=0
+
+DO NOT proceed to Phase 2F coding until this report is complete.
 ```
 # 
 ```
