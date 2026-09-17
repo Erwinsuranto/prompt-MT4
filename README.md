@@ -38,7 +38,162 @@
 ```
 # 
 ```
+PHASE 2C — VALIDATE sr_pullback_v1 (READ-ONLY FIRST, NO TRADING CHANGE)
 
+Tujuan:
+Validasi apakah profile S/R pullback yang baru dibuat benar-benar stabil pada data real XAUUSD.m, bukan sekadar cocok pada data pembentuk profile.
+
+ATURAN KERAS:
+- READ-ONLY terlebih dahulu.
+- Jangan mengubah strategy.py, threshold, execution, bridge, MT5 execution, simulate_exit, atau default flag.
+- Jangan tuning parameter untuk memperbagus hasil.
+- Jangan membuat synthetic data.
+- Jangan memakai outcome/future data sebagai FEATURE.
+- Outcome hanya boleh dipakai sebagai LABEL EVALUASI OOS.
+- Semua evaluasi kronologis; tidak boleh shuffle yang mencampur masa depan.
+- forming/index-0 candle selalu dikeluarkan.
+- Tidak boleh look-ahead.
+- order_send=0.
+- order_check=0.
+- execution_attempts=0.
+- position_changes=0.
+- order_changes=0.
+- Jika bukti belum cukup, status HARUS tetap CANDIDATE. Jangan dipaksa menjadi VALIDATED.
+- Jika tidak ada perubahan kode yang benar-benar diperlukan, jangan commit/push.
+
+PROFILE:
+profiles/sr_pullback_v1.json
+
+KERJAKAN:
+
+1. PROFILE INTEGRITY
+   - Baca profile secara deterministik.
+   - Tampilkan:
+     profile name/version
+     input hash
+     feature/fingerprint schema
+     training range
+     validation/OOS range
+     jumlah sample
+     status saat ini
+   - Pastikan profile tidak berubah selama pengujian.
+
+2. CHRONOLOGICAL SPLIT
+   - Gunakan data real XAUUSD.m yang tersedia.
+   - Pertahankan urutan waktu.
+   - Pisahkan train/validation/OOS tanpa overlap.
+   - Tidak boleh menggunakan candle masa depan untuk menentukan feature candle saat ini.
+   - Tampilkan timestamp awal/akhir setiap split dan jumlah sample.
+
+3. PROFILE MATCH
+   Untuk setiap kandidat S/R:
+   - hitung hanya feature yang tersedia sampai candle close tersebut.
+   - evaluasi fingerprint profile.
+   - catat profile_match=True/False.
+   - jangan mengubah threshold hanya supaya match bertambah.
+
+4. S/R STRUCTURE VALIDATION
+   Uji apakah karakteristik S/R yang dipelajari konsisten:
+   - repeated touches/reactions
+   - rejection/wick/body/range/arah
+   - prior reaction
+   - penetration vs reclaim
+   - close relative terhadap zone
+   - M5 ↔ M15 alignment
+   - trend context hanya sebagai feature observasi bila memang sudah ada
+   - tidak menggunakan outcome sebagai feature.
+
+   Kelompokkan pola kasar yang memang sudah didefinisikan:
+   STRONG_REJECT
+   WEAK_REJECT/STALL
+   ABSORB/PROBE
+   THROUGH
+   RECLAIM
+   MULTI_REJECT
+   FLIP S↔R
+
+5. OOS / ADVERSARIAL TEST
+   Jalankan:
+   - normal chronological OOS
+   - truncated replay
+   - beberapa cutoff waktu berbeda
+   - past-only replay
+
+   Tujuannya memastikan profile match pada candle T identik ketika data setelah T dipotong.
+
+   Jika hasil berubah karena candle masa depan, tandai FAIL.
+
+6. STABILITY
+   Ukur secara terpisah:
+   - jumlah candidate match
+   - jumlah rejection
+   - jumlah continuation
+   - distribusi fingerprint
+   - distribusi per periode/window
+   - apakah pola hanya terkonsentrasi pada satu periode.
+
+   Jangan membuat ranking "terbaik".
+   Jangan memberikan score subjektif.
+
+7. LABEL OOS
+   Outcome WIN/LOSS hanya untuk evaluasi setelah feature/fingerprint ditentukan.
+   Jangan pernah memasukkan outcome ke profile_match atau feature.
+
+   Jika jumlah OOS belum mencukupi:
+   status tetap CANDIDATE / UNKNOWN sesuai aturan existing.
+
+8. MINIMUM EVIDENCE
+   Ikuti helper/status existing di repo.
+   Jangan membuat standar baru hanya agar profile lolos.
+
+   Laporkan:
+   - apakah minimum sample terpenuhi
+   - apakah OOS cukup
+   - apakah ada drift antar-window
+   - apakah ada leakage
+   - apakah profile layak dipertahankan sebagai CANDIDATE atau dapat menjadi VALIDATED menurut aturan existing.
+
+9. COMPARE WITH CURRENT ENGINE
+   Pastikan profile ini hanya menjadi observasi/gate yang sudah dirancang.
+   Jangan mengubah perilaku PATH A/B/C selama validasi.
+   Jangan mengaktifkan profile secara default.
+
+10. FINAL SAFETY
+   Wajib tampilkan:
+   order_send=
+   order_check=
+   execution_attempts=
+   position_changes=
+   order_changes=
+
+   Semuanya harus 0.
+
+11. GIT DISCIPLINE
+   Karena ini READ-ONLY:
+   - jika tidak ada bug implementasi yang ditemukan: NO CHANGE / NO COMMIT / NO PUSH.
+   - jika ada bug nyata yang menghalangi validasi, STOP dan laporkan file + root cause terlebih dahulu.
+   - jangan melakukan refactor atau perubahan tambahan.
+
+OUTPUT AKHIR:
+
+PHASE 2C — PROFILE VALIDATION
+
+A. Profile integrity
+B. Train / validation / OOS ranges
+C. Sample counts
+D. S/R fingerprint distribution
+E. OOS stability
+F. Truncated-replay / look-ahead result
+G. Leakage result
+H. Minimum evidence result
+I. Current status: CANDIDATE / VALIDATED / UNKNOWN
+J. Exact reason for status
+K. Safety counters
+L. Git status
+
+PENTING:
+Jangan menyimpulkan profile profitable hanya karena pola terlihat bagus.
+Tujuan Phase 2C adalah membuktikan bahwa pola S/R tersebut kausal, repeatable, dan tidak bocor masa depan.
 ```
 # 
 ```
