@@ -58,7 +58,71 @@
 ```
 # 
 ```
+STOP. DO NOT COMMIT OR PUSH.
 
+Phase 2F implementation appears to have created 5 changed files.
+
+I explicitly require that the main mt-info repository remains the source-code repository only.
+Do NOT save phase reports/design summaries into mt-info.
+
+Current expected Phase 2F implementation files are ONLY:
+
+1. python/xausr/pattern_learning.py
+2. python/tests/test_pattern_learning.py
+
+Unexpected files currently shown:
+- PHASE_2E_DESIGN.md
+- PHASE_2E_SUMMARY.md
+- test_phase2f.py
+
+TASK:
+
+1. Inspect all 5 changed files.
+2. Do NOT delete anything yet.
+3. Determine exactly what each file contains and why it was created.
+4. Verify whether pattern_learning.py actually implements the Phase 2F requirements.
+5. Verify whether test_pattern_learning.py actually tests the required causality properties.
+6. Determine whether test_phase2f.py duplicates functionality already covered by test_pattern_learning.py.
+7. Determine whether PHASE_2E_DESIGN.md and PHASE_2E_SUMMARY.md are documentation artifacts that should NOT be part of mt-info.
+
+Run:
+- focused Phase 2F tests
+- relevant existing causality tests
+- full test suite if practical
+
+Check:
+- no look-ahead
+- future truncation invariance
+- forming candle exclusion
+- closed M15/H1 usage
+- 10/20/30 parameterization
+- label/feature separation
+- deterministic output
+- insufficient-history safety
+- no execution side effects
+
+IMPORTANT:
+Do NOT modify execution.py.
+Do NOT modify backtest.py.
+Do NOT modify profiles.
+Do NOT modify bridge.
+Do NOT call order_send.
+Do NOT call order_check.
+Do NOT commit.
+Do NOT push.
+
+At the end, report:
+
+A. Files that are legitimate Phase 2F source/test files.
+B. Files that are only reports/documentation and should stay OUT of mt-info.
+C. Files that are duplicate/unnecessary.
+D. Exact test results.
+E. Any implementation bugs found.
+F. Exact recommended cleanup, but DO NOT perform cleanup yet.
+
+The result/report will be stored separately by the user, NOT in mt-info.
+
+END.
 ```
 # 
 ```
