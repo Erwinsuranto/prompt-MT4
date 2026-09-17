@@ -18,7 +18,107 @@
 ```
 # 
 ```
+PHASE 2F.0 — RESTORE MAIN REPOSITORY ACCESS
 
+The previous Phase 2F implementation was correctly halted because the agent could not access the mt-info source tree.
+
+DO NOT implement Phase 2F yet.
+
+MAIN REPOSITORY:
+https://github.com/zenolambee/mt-info.git
+
+IMPORTANT:
+The repository `hasil-prompt-mt-info` is ONLY for storing phase results/reports.
+It is NOT the source repository for implementation.
+
+TASK:
+
+1. Locate the actual mt-info working repository.
+
+Expected Windows path:
+E:\mt5\mt-info
+
+2. Verify it is the correct repository:
+   - check git remote
+   - check current branch
+   - check HEAD
+   - check git status
+   - confirm repository contains:
+     python/xausr/
+     python/tests/
+     profiles/
+     docs/
+
+3. If E:\mt5\mt-info exists:
+   use that repository directly.
+
+4. If it does NOT exist:
+   clone ONLY the main repository:
+   https://github.com/zenolambee/mt-info.git
+
+   Do not clone or modify hasil-prompt-mt-info as the source project.
+
+5. Do NOT modify source files during this phase.
+
+6. Inspect and report the actual locations/signatures of:
+   - build_zones
+   - classify_trend
+   - sr_reversal
+   - prior_reactions
+   - engulfing detection
+   - rejection detection
+   - Context / MTF helpers
+   - Bar / Zone data structures
+   - existing test helpers
+
+7. Read the relevant existing tests that establish:
+   - truncation invariance
+   - no-lookahead
+   - closed-candle handling
+   - HTF/M15/H1 gating
+   - S/R behavior
+
+8. Verify the current git state of the MAIN mt-info repository.
+
+9. Confirm whether the main repository is clean before Phase 2F implementation.
+
+10. DO NOT:
+   - create pattern_learning.py
+   - create tests yet
+   - modify execution.py
+   - modify backtest.py
+   - modify profiles
+   - modify docs
+   - run order_send
+   - run order_check
+   - perform trading
+   - commit
+   - push
+
+11. If the repository is accessible, produce a source map for Phase 2F:
+   FILE → FUNCTION/CLASS → PURPOSE → SAFE TO REUSE
+
+12. If source access is still impossible, report the exact technical reason.
+
+FINAL REPORT ONLY:
+- main repo path
+- git remote
+- branch
+- HEAD
+- git status
+- relevant source files found
+- existing primitive signatures
+- existing causality/test evidence found
+- confirmation that ZERO files were modified
+- order_send=0
+- order_check=0
+- execution_attempts=0
+- commit=0
+- push=0
+
+DO NOT ASK ME TO COPY/PASTE SOURCE FILES IF THE MAIN GITHUB REPOSITORY CAN BE ACCESSED.
+
+END PHASE 2F.0
 ```
 # 
 ```
