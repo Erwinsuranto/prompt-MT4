@@ -62,7 +62,150 @@
 ```
 # 
 ```
+PROJECT: mt-info / XAUUSD M5
+TASK: DESIGN REVIEW — S/R PATTERN LEARNING INSIDE ENGINE
+MODE: READ-ONLY, JANGAN CODING, JANGAN COMMIT, JANGAN PUSH
 
+Saya ingin menambahkan kemampuan engine untuk MEMPELAJARI POLA S/R + CANDLE dari real-data historis.
+
+Tujuan:
+Engine tidak hanya memakai S/R rule statis, tetapi dapat mengenali kombinasi pola candle/struktur yang secara historis konsisten menunjukkan bahwa suatu S/R benar-benar valid.
+
+DESAIN YANG DIINGINKAN:
+
+1. MULTI-TIMEFRAME S/R
+- H1 = konteks struktur besar.
+- M15 = struktur/S/R utama.
+- M5 = trigger dan confirmation.
+- S/R antar-timeframe tidak harus identik; gunakan konsep zona/overlap.
+- M5 S/R yang tidak didukung struktur lebih tinggi tetap boleh menjadi kandidat, tetapi confidence/validity harus dibedakan.
+
+2. POLA YANG BOLEH DIPELAJARI
+Pelajari dari REAL XAUUSD data:
+- jumlah touch/retest S/R
+- penetration depth
+- wick rejection
+- body size relatif terhadap candle/range
+- close position terhadap zona
+- close kembali ke dalam zona setelah penetration
+- candle direction
+- sequence candle sebelum confirmation
+- rejection → confirmation
+- engulfing / non-engulfing
+- hubungan M5 dengan M15/H1
+- reaksi S/R sebelumnya
+- apakah S/R merupakan continuation/reversal context
+
+Jangan membuat indikator baru hanya untuk mengejar performa.
+
+3. "BELAJAR" HARUS CAUSAL
+Pada timestamp candle T:
+- engine hanya boleh menggunakan data <= T.
+- outcome setelah T TIDAK BOLEH menjadi feature untuk signal T.
+- forming candle/index 0 harus ditolak.
+- jangan menggunakan future high/low/close.
+- jangan menggunakan label hasil trade untuk menentukan signal pada candle yang sama.
+- seluruh feature extraction harus bisa dibuktikan causal.
+
+4. JANGAN SELF-MODIFY SECARA LIVE
+Model/pola yang dipelajari tidak boleh mengubah rule engine secara otomatis ketika live.
+Learning dilakukan offline pada historical data.
+Hasil learning harus berupa pattern/profile/config/artifact yang immutable/versioned.
+Live engine hanya membaca pattern yang sudah divalidasi.
+
+5. JANGAN OPTIMASI UNTUK HASIL CANTIK
+Dilarang:
+- mencari parameter terbaik hanya berdasarkan profit/backtest.
+- memilih pola karena kebetulan cocok pada satu periode.
+- menaikkan/lowering threshold sampai signal terlihat bagus.
+- menghapus losing pattern tanpa validasi statistik.
+- menggunakan outcome untuk membentuk feature.
+
+6. VALIDASI
+Setiap discovered pattern harus dipisahkan:
+- train period
+- validation period
+- out-of-sample period
+- bila memungkinkan walk-forward/adversarial validation.
+
+Laporkan:
+- sample count
+- BUY count
+- SELL count
+- rejection/no-trade count
+- OOS behavior
+- stability antar periode
+- confidence/uncertainty
+
+Jangan menyebut pola "pasti benar" atau "100%".
+Jika bukti tidak cukup → UNKNOWN / NO TRADE.
+
+7. ENGINE DECISION
+Jangan mengganti rule existing secara diam-diam.
+
+Pisahkan:
+A. EXISTING RULE SIGNAL
+B. S/R STRUCTURE VALIDATION
+C. LEARNED PATTERN MATCH
+D. FINAL POLICY GATE
+
+Learned pattern hanya menjadi evidence/confirmation tambahan sampai terbukti aman dan stabil.
+
+Jika learned pattern bertentangan dengan causal S/R structure:
+→ jangan memaksa signal.
+→ NO_TRADE atau status conflict yang eksplisit.
+
+Jika market trending dan pola hanya valid di sideways:
+→ NO_TRADE sesuai policy existing.
+
+8. AUDIT EXISTING DATA
+Gunakan real-data repo yang sudah tersedia.
+Cari apakah dataset historis yang ada sudah cukup untuk menemukan pola S/R.
+Jangan membuat synthetic data sebagai bukti.
+
+Cari pola yang benar-benar berulang, misalnya:
+- rejection S/R + close kembali
+- penetration + rejection + directional close
+- repeated touch + weakening reaction
+- M15/H1 zone overlap + M5 confirmation
+- pola candle tertentu yang muncul sebelum rejection valid
+
+Tetapi JANGAN mengasumsikan pola tersebut valid sebelum diuji.
+
+9. OUTPUT YANG SAYA MAU
+
+Berikan laporan:
+
+A. Apakah desain ini aman ditambahkan ke architecture sekarang?
+B. File/module mana yang sebaiknya dibuat jika nanti coding?
+C. Feature schema yang causal.
+D. Bagaimana pattern learning dilakukan tanpa leakage.
+E. Bagaimana pattern disimpan/versioned.
+F. Bagaimana learned pattern dipakai oleh live engine.
+G. Bagaimana membedakan:
+   - VALIDATED PATTERN
+   - WEAK PATTERN
+   - UNKNOWN
+   - CONFLICT
+   - NO_TRADE
+H. Test yang wajib dibuat.
+I. Risiko look-ahead/repaint.
+J. Apakah ada bagian existing engine yang tidak boleh disentuh.
+K. Apakah data yang ada cukup atau perlu dataset tambahan.
+
+PENTING:
+- READ-ONLY.
+- JANGAN mengubah file.
+- JANGAN coding.
+- JANGAN commit.
+- JANGAN push.
+- Jangan mengubah parameter strategi existing.
+- Jangan menambah signal hanya supaya frekuensi signal meningkat.
+
+Kesimpulan harus berupa:
+NO CHANGE / DESIGN APPROVED / DESIGN NEEDS REVISION
+
+Jika desain perlu direvisi, jelaskan revisinya terlebih dahulu tanpa coding.
 ```
 # 
 ```
