@@ -50,7 +50,223 @@
 ```
 # 
 ```
+PHASE 2F — FINGERPRINT V2 + CAUSAL FEATURE EXTRACTION
 
+BASELINE CONFIRMED CLEAN:
+- Repository: E:\mt5\mt-info
+- HEAD: 2993985
+- Working tree: CLEAN
+- All previous accidental Phase 2F changes reverted
+- Source primitives already mapped and verified
+
+NOW IMPLEMENT PHASE 2F.
+
+LOCKED DECISIONS FROM PHASE 2E.1:
+- Outcome label: Hybrid TP/SL + 30-bar horizon
+- Minimum sample: n_train >= 20, n_val >= 10, n_oos >= 10
+- Sequence lookback: 20 closed M5 bars by default
+- Lookback must be parameterized for 10/20/30 later
+- Drift policy: rolling 50 occurrences, majority flip
+- Profitability is NOT proven
+
+CREATE ONLY:
+1. python/xausr/pattern_learning.py
+2. python/tests/test_pattern_learning.py
+
+REUSE EXISTING PRIMITIVES — DO NOT REIMPLEMENT THEM:
+- backtest.py:
+  build_zones()
+  classify_trend()
+  Context / HTF helpers
+  _htf_last_closed_index()
+- reversal.py:
+  is_bullish_engulfing()
+  is_bearish_engulfing()
+  is_support_rejection()
+  is_resistance_rejection()
+  rejection_failures()
+- sr_reversal.py:
+  candle_class()
+  SR_NONE / SR_TOUCH / SR_THROUGH / SR_PROBE / SR_STALL / SR_REVERSAL
+- reversal_quality.py:
+  prior_reactions()
+- reversal_rules.py:
+  zone_side_intact()
+  zone_side_reason()
+- existing Bar / Zone / config structures
+- existing test helpers
+
+REQUIRED FUNCTIONS:
+extract_fingerprint_v2(...)
+classify_sr_state(...)
+classify_candle_confirmation(...)
+classify_sequence_type(...)
+learn_patterns(...)
+
+DESIGN:
+
+A. FINGERPRINT V2
+Create a deliberately coarse categorical fingerprint.
+
+It should capture:
+- side: SUPPORT / RESISTANCE / UNKNOWN
+- SR state
+- sequence type
+- candle confirmation
+- M15 trend context
+- H1 trend context
+- relevant touch/reaction characteristics
+
+Do NOT create a huge combinatorial key.
+
+B. S/R STATE
+Use existing S/R ladder and zone-state taxonomy.
+Do not invent a parallel S/R engine.
+
+C. CANDLE CONFIRMATION
+Use existing engulfing/rejection primitives.
+
+Return explicit categories such as:
+- NONE
+- BULLISH
+- BEARISH
+- BULLISH_ENGULFING
+- BEARISH_ENGULFING
+- REJECTION
+where compatible with existing taxonomy.
+
+Never classify a candle using future bars.
+
+D. SEQUENCE
+Default lookback = 20 CLOSED M5 candles.
+Parameterize:
+10
+20
+30
+
+The sequence must be calculated only from bars available through decision candle i.
+
+E. MTF
+At M5 close i:
+- use only last fully closed M15 candle
+- use only last fully closed H1 candle
+- never use forming index-0 candles
+- do not use future HTF bars
+
+MTF remains CONTEXT, NOT a mandatory filter.
+
+F. LABEL SEPARATION
+Feature generation and outcome labeling MUST be separate.
+
+If a label helper is implemented:
+- Hybrid TP/SL + 30-bar horizon
+- label can inspect future bars ONLY inside the label function
+- label must never be passed into extract_fingerprint_v2()
+- label must never affect fingerprint categories
+
+G. CAUSALITY
+For decision index i:
+EVERY fingerprint field must be derivable from data <= i.
+
+Forbidden:
+- bars[i+1:]
+- future zones
+- future reactions
+- future MTF state
+- future labels
+- OOS information
+- random sampling
+- fitting from future data
+
+H. DETERMINISM
+Same input + same configuration = same output.
+No randomness.
+No current-time dependency.
+No network calls.
+
+I. LEARNING
+learn_patterns() must respect chronological:
+TRAIN -> VAL -> OOS
+
+Never shuffle chronological data.
+
+Do not claim a pattern is profitable.
+Evidence status must remain conservative:
+UNKNOWN / CANDIDATE / VALIDATED as appropriate.
+
+Minimum sample gates:
+TRAIN >= 20
+VAL >= 10
+OOS >= 10
+
+J. DRIFT API
+Prepare data/API for:
+rolling 50 occurrences
+majority-flip detection
+
+Do NOT connect this to live auto-disable yet.
+
+TESTS REQUIRED:
+
+1. deterministic fingerprint
+2. truncating all future candles after i does not change fingerprint at i
+3. injected future column cannot affect fingerprint
+4. forming candle excluded
+5. M15 uses only closed candle
+6. H1 uses only closed candle
+7. lookback 10/20/30 works
+8. label is isolated from features
+9. insufficient history returns explicit UNKNOWN/safe result
+10. repeated execution produces identical result
+11. no execution side effects
+12. no order_send
+13. no order_check
+
+IMPORTANT:
+- Real repository data/primitives only.
+- Synthetic helpers may be used ONLY for unit-test mechanics.
+- Do not use synthetic results as strategy evidence.
+- Do not tune parameters for better historical performance.
+- Do not modify execution.py.
+- Do not modify backtest.py.
+- Do not modify profiles.
+- Do not modify docs.
+- Do not modify bridge.
+- Do not integrate into live signal yet.
+
+VALIDATION:
+1. Run all new Phase 2F tests.
+2. Run the existing full test suite.
+3. Inspect git diff.
+4. Confirm only the two allowed files changed.
+
+DO NOT COMMIT OR PUSH YET.
+
+STOP if:
+- existing primitive signature differs
+- an existing primitive is not causal
+- required data structure is incompatible
+- implementing a requirement would require modifying protected files
+
+If blocked, stop and report the exact blocker instead of inventing an implementation.
+
+FINAL REPORT:
+- files created
+- functions implemented
+- exact fingerprint schema
+- causality proof
+- label isolation proof
+- tests passed/failed
+- full-suite result
+- git diff summary
+- protected files unchanged
+- order_send=0
+- order_check=0
+- execution_attempts=0
+- commit=0
+- push=0
+
+END PHASE 2F
 ```
 # 
 ```
