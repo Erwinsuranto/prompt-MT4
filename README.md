@@ -34,7 +34,174 @@
 ```
 # 
 ```
+PHASE 2D — OOS S/R PATTERN DIAGNOSTIC
+READ-ONLY — NO CHANGE / NO COMMIT / NO PUSH
 
+Tujuan:
+Cari tahu secara kausal mengapa 91 kandidat OOS pada sr_pullback_v1 tidak memenuhi agreement 3-split, tanpa mengubah profile atau parameter.
+
+ATURAN KERAS:
+- READ-ONLY.
+- Jangan edit source code.
+- Jangan edit profile.
+- Jangan tuning threshold/parameter.
+- Jangan mengaktifkan profile.
+- Jangan mengubah PATH A/B/C.
+- Jangan mengubah execution/bridge/MT5.
+- Jangan synthetic data.
+- Jangan menggunakan outcome/future sebagai feature.
+- Outcome hanya boleh dipakai setelah feature kandidat ditentukan, sebagai label evaluasi.
+- Tidak boleh look-ahead.
+- forming/index-0 selalu dikeluarkan.
+- order_send=0.
+- order_check=0.
+- execution_attempts=0.
+- position_changes=0.
+- order_changes=0.
+
+PROFILE:
+profiles/sr_pullback_v1.json
+
+DATA:
+Gunakan dataset real XAUUSD.m yang sama dengan Phase 2C.
+Pertahankan split dan aturan kronologis Phase 2C.
+
+KERJAKAN:
+
+1. REPRODUCE 91 OOS
+   - Reproduksi daftar kandidat OOS secara deterministik.
+   - Pastikan jumlah kandidat sama dengan Phase 2C.
+   - Jangan menggunakan data setelah timestamp kandidat untuk membentuk fingerprint.
+
+2. BREAKDOWN AGREEMENT
+   Untuk setiap kandidat, pecah alasan gagal agreement 3-split:
+   - split/arah mana yang berbeda
+   - BUY vs SELL
+   - S/R state
+   - rejection class
+   - engulfing state
+   - M5 close behavior
+   - M15 context
+   - zone overlap
+   - prior reaction
+   - penetration/reclaim
+   - trend context bila hanya sebagai observasi.
+
+   Jangan membuat skor baru.
+
+3. GROUP PATTERN
+   Kelompokkan kandidat berdasarkan pola kasar existing:
+   - STRONG_REJECT
+   - WEAK_REJECT/STALL
+   - ABSORB/PROBE
+   - THROUGH
+   - RECLAIM
+   - MULTI_REJECT
+   - FLIP S↔R
+   - NO_LEVEL
+
+   Tampilkan jumlah kandidat per kelas dan bagaimana agreement 3-split gagal.
+
+4. S/R VISUAL-STRUCTURE LOGIC
+   Fokus pada pola seperti yang terlihat pada chart:
+   - level disentuh berkali-kali
+   - rejection berulang
+   - wick/body response
+   - close kembali di dalam/di luar zone
+   - level berubah fungsi S↔R
+   - apakah M15 menguatkan level yang sama
+   - apakah M5 memberikan rejection/confirmation setelah touch.
+
+   Tujuannya bukan memberi opini visual, tetapi mencari fingerprint kausal yang sudah tersedia dari primitive existing.
+
+5. TIME-WINDOW STABILITY
+   Pecah 91 kandidat berdasarkan periode/waktu yang sudah digunakan.
+   Tunjukkan apakah kegagalan:
+   - tersebar merata,
+   - terkonsentrasi pada satu periode,
+   - atau muncul saat regime tertentu.
+
+   Jangan menyimpulkan profitability.
+
+6. FEATURE ABLATION — READ ONLY
+   Secara analitis saja, jangan mengubah profile:
+   Periksa kontribusi konseptual feature existing:
+   - touches
+   - prior_reactions
+   - rejection class
+   - penetration
+   - close-vs-band
+   - lag/reversal index
+   - engulfing
+   - M15/H1 trend/context
+   - zone overlap.
+
+   Tanyakan:
+   "Apakah kegagalan terutama berasal dari fingerprint S/R yang terlalu umum, atau karena confirmation MTF/arah?"
+
+   Jangan mencari kombinasi parameter terbaik.
+
+7. EXAMPLE CASES
+   Pilih beberapa contoh nyata dari OOS:
+   - contoh kandidat yang paling jelas valid secara struktur tetapi gagal agreement,
+   - contoh kandidat yang sebenarnya lemah,
+   - contoh dengan repeated touches,
+   - contoh dengan M15 confirmation,
+   - contoh dengan S↔R flip jika tersedia.
+
+   Untuk setiap contoh tampilkan timestamp + feature causal yang tersedia saat itu.
+   Jangan menampilkan outcome sebelum menjelaskan feature.
+
+8. IMPORTANT DISTINCTION
+   Bedakan tiga hal:
+   A. S/R secara struktural valid.
+   B. S/R + candle confirmation valid.
+   C. S/R + confirmation + agreement 3-split.
+
+   Jangan menyamakan A/B dengan C.
+
+9. DECISION
+   Berdasarkan bukti:
+   - apakah profile terlalu kasar,
+   - apakah profile sudah cukup spesifik tetapi agreement 3-split terlalu ketat,
+   - apakah MTF confirmation adalah sumber utama konflik,
+   - atau belum ada bukti cukup untuk mengetahui penyebabnya.
+
+   Jangan membuat solusi parameter baru.
+   Jangan mengubah status CANDIDATE.
+
+10. SAFETY/GIT
+   Wajib:
+   order_send=0
+   order_check=0
+   execution_attempts=0
+   position_changes=0
+   order_changes=0
+
+   git status harus clean.
+   Jika source/profile tidak berubah:
+   NO CHANGE / NO COMMIT / NO PUSH.
+
+OUTPUT:
+
+PHASE 2D — OOS S/R DIAGNOSTIC
+
+A. Reproduction: jumlah kandidat
+B. Agreement failure breakdown
+C. Pattern-class distribution
+D. S/R structural findings
+E. MTF confirmation findings
+F. Time-window stability
+G. Feature/ablation observations
+H. Real OOS examples
+I. Root-cause conclusion
+J. What is known vs not proven
+K. Safety counters
+L. Git status
+
+PENTING:
+Jangan memperbaiki sesuatu hanya karena hasilnya tidak sesuai harapan.
+Phase 2D hanya mencari penyebab berdasarkan data causal yang tersedia pada saat signal.
 ```
 # 
 ```
