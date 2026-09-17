@@ -50,6 +50,164 @@
 ```
 # 
 ```
+PHASE 1C — COMMIT REAL H1 DATA FOUNDATION
+MODE: READ-ONLY FIRST / NO STRATEGY CHANGE
+
+Phase 1B sudah membuktikan:
+- XAUUSD.m H1 maximum available = 43,373 valid bars
+- earliest H1 = 2011-11-02 00:00
+- latest H1 closed = 2026-09-17 03:00
+- duplicate = 0
+- OHLC invalid = 0
+- hanya gap session/weekend normal
+- triple-overlap dengan M5/M15 mulai sekitar 2025-04-22
+- M5/M15 terminal history masih lebih pendek.
+
+Sekarang lakukan PHASE 1C.
+
+TUJUAN:
+Menyediakan H1 real-data foundation yang immutable dan dapat direproduksi untuk tahap learning/pattern study berikutnya.
+
+ATURAN KERAS:
+- XAUUSD.m real MT5 data saja.
+- NO synthetic data.
+- NO outcome sebagai feature.
+- NO look-ahead.
+- forming candle/index 0 wajib dikeluarkan.
+- jangan mengubah strategy existing.
+- jangan mengubah threshold existing.
+- jangan mengubah execution/bridge/MT5 execution.
+- NO order_send.
+- NO order_check.
+- NO trading.
+- jangan optimasi parameter agar hasil terlihat bagus.
+
+1. EXPORT H1
+Export seluruh 43,373 H1 valid bars yang benar-benar tersedia dari MT5 ke CSV repository/data yang sesuai dengan struktur project.
+
+Schema minimum:
+symbol,time,open,high,low,close,volume
+
+Tambahkan metadata terpisah bila diperlukan:
+- source = MT5
+- symbol = XAUUSD.m
+- timeframe = H1
+- earliest
+- latest
+- row_count
+- data hash
+- timezone convention
+- fetch timestamp
+
+Jangan mencampur metadata ke CSV OHLC jika parser existing mengharuskan schema tetap.
+
+2. VALIDASI CSV
+Setelah export, baca kembali CSV dan verifikasi:
+- row_count = 43,373
+- duplicate = 0
+- invalid OHLC = 0
+- high >= max(open,close)
+- low <= min(open,close)
+- high >= low
+- timestamp strictly increasing
+- forming candle tidak masuk
+- symbol konsisten
+- tidak ada future timestamp relatif terhadap batas observasi
+
+3. CAUSAL OVERLAP
+Jangan membuat history palsu untuk M5/M15.
+
+Gunakan data M5/M15 real yang memang tersedia dari terminal.
+
+Untuk setiap observasi M5:
+- H1 yang digunakan harus sudah CLOSED pada saat M5 closed.
+- M15 yang digunakan harus sudah CLOSED pada saat M5 closed.
+- index terakhir yang boleh dipakai harus memenuhi:
+  open_time <= close_time_M5
+  dan candle tersebut benar-benar closed.
+
+Pastikan tidak ada:
+- future H1
+- future M15
+- forming candle
+- outcome leakage.
+
+4. DATA RANGE
+Laporkan secara eksplisit:
+A. H1 full range = 2011-11-02 → 2026-09-17
+B. M15 real range
+C. M5 real range
+D. triple-overlap range
+E. jumlah M5 observations yang benar-benar dapat memakai H1+M15 causal context.
+
+5. HASH / INTEGRITY
+Buat hash SHA-256 untuk H1 CSV final.
+
+Setelah file final dibuat:
+- jangan tulis ulang data tanpa alasan
+- dokumentasikan hash
+- dokumentasikan source/range/row count.
+
+6. TEST
+Tambahkan test hanya jika memang diperlukan untuk memastikan:
+- schema
+- integrity
+- causal alignment
+- no forming candle
+- no look-ahead.
+
+Jangan mengubah production strategy.
+
+7. OUTPUT WAJIB
+
+PHASE 1C REPORT
+
+H1:
+rows=
+earliest=
+latest=
+sha256=
+
+M15:
+rows/range=
+
+M5:
+rows/range=
+
+TRIPLE OVERLAP:
+range=
+usable M5 observations=
+
+DATA QUALITY:
+duplicates=
+invalid=
+gaps=
+forming_removed=
+
+CAUSAL:
+lookahead=PASS/FAIL
+H1 alignment=PASS/FAIL
+M15 alignment=PASS/FAIL
+
+SAFETY:
+order_send=0
+order_check=0
+execution_attempts=0
+position_changes=0
+order_changes=0
+
+GIT:
+changed files=
+tests=
+commit=
+push=
+
+PENTING:
+Jika export H1 perlu perubahan struktur repo, lakukan perubahan minimal yang hanya untuk data foundation.
+Jangan lanjut ke learning engine pada task ini.
+Jangan membuat profile S/R dulu.
+
+Setelah selesai, berhenti dan laporkan hasil.
 
 ```
 # 
