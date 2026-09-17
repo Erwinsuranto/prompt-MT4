@@ -42,7 +42,60 @@
 ```
 # 
 ```
+Masuk ke repository mt-info.
 
+Tujuan:
+Commit dan push HASIL PHASE 2G saja ke origin/main.
+
+Langkah wajib:
+
+1. Cek kondisi repository:
+   git status --short
+   git diff --stat
+
+2. Pastikan perubahan yang belum di-commit HANYA:
+   python/xausr/pattern_library.py
+   python/tests/test_pattern_library.py
+
+   Jika ada file lain berubah/baru, JANGAN ikut di-stage dan JANGAN mengubahnya.
+
+3. Stage HANYA dua file tersebut:
+   git add python/xausr/pattern_library.py python/tests/test_pattern_library.py
+
+4. Verifikasi staged changes:
+   git diff --cached --name-only
+   git diff --cached --stat
+
+   Harus hanya dua file Phase 2G.
+
+5. Jangan menjalankan optimasi strategi.
+   Jangan mengubah threshold strategi.
+   Jangan mengubah execution/bridge/risk.
+   Jangan menambahkan report hasil ke repository mt-info.
+   Jangan menyentuh order_send/order_check.
+   Jangan mengubah file lain.
+
+6. Commit dengan message:
+   feat(pattern): add offline pattern library and learner
+
+7. Push:
+   git push origin main
+
+8. Setelah push, verifikasi:
+   git rev-parse HEAD
+   git rev-parse origin/main
+   git status --short
+
+   HEAD dan origin/main harus sama dan working tree harus clean.
+
+LAPORKAN:
+- commit SHA
+- hasil push
+- daftar file yang di-commit
+- hasil verifikasi HEAD == origin/main
+- status working tree
+
+Jangan membuat commit tambahan.
 ```
 # 
 ```
