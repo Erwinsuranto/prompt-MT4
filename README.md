@@ -38,7 +38,26 @@
 ```
 # 
 ```
+Lanjutkan dari posisi sekarang.
 
+Commit Phase 2G sudah dijalankan. Sekarang:
+1. Tampilkan hasil commit dan SHA commit.
+2. Jika commit berhasil, push ke origin/main:
+   git push origin main
+3. Verifikasi:
+   git rev-parse HEAD
+   git rev-parse origin/main
+   git status --short
+
+Jangan membuat commit baru.
+Jangan stage file lain.
+Jangan mengubah file apa pun.
+
+Laporkan hanya:
+- commit SHA
+- hasil push
+- apakah HEAD == origin/main
+- status working tree
 ```
 # 
 ```
