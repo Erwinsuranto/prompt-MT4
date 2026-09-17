@@ -46,6 +46,198 @@
 ```
 # 
 ```
+PHASE 2A — S/R PATTERN LEARNING DESIGN
+DESIGN + READ-ONLY ANALYSIS ONLY
+NO CODE / NO COMMIT / NO PUSH
+
+Phase 1C sudah selesai dan committed:
+commit a1de925
+H1/M15/M5 real-data foundation tersedia.
+Look-ahead PASS.
+H1/M15 causal alignment PASS.
+Tidak ada order_send/order_check.
+Working tree clean.
+
+TUJUAN PHASE 2A
+
+Rancang mesin untuk mengenali dan mempelajari POLA VALIDITAS SUPPORT/RESISTANCE dari real XAUUSD.m.
+
+Yang saya inginkan bukan sekadar threshold S/R.
+
+Engine harus bisa mengenali pola seperti:
+
+1. ZONE FORMATION
+   - bagaimana zona terbentuk dari swing/reaction sebelumnya
+   - jumlah touch
+   - jarak antar-touch
+   - apakah touch menghasilkan rejection
+   - apakah level tetap dihormati setelah beberapa reaksi
+   - apakah zona semakin jelas atau justru melemah
+
+2. CANDLE REACTION
+   Untuk setiap reaction terhadap zone:
+   - penetration depth
+   - wick rejection
+   - body position
+   - close kembali di dalam/di luar zona
+   - arah close
+   - range candle
+   - hubungan candle reaction dengan candle sebelumnya
+   - engulfing jika benar-benar memenuhi definisi existing
+   - jangan menganggap candle biasa sebagai engulfing.
+
+3. MULTI-TIMEFRAME CONFIRMATION
+   Gunakan:
+   - H1 = structural context
+   - M15 = S/R confirmation/context
+   - M5 = reaction + entry confirmation
+
+   Contoh konsep:
+   M5 menemukan reaction di resistance.
+   Kemudian engine melihat apakah M15 juga menunjukkan rejection/struktur yang konsisten.
+   H1 dipakai untuk konteks struktur yang lebih besar.
+
+   JANGAN menggunakan candle masa depan.
+
+4. REACTION SEQUENCE
+   Jangan hanya melihat satu candle.
+
+   Pelajari urutan:
+   approach → penetration → rejection → close → follow-through.
+
+   Contoh pola yang ingin bisa dibedakan:
+   - touch → rejection kuat
+   - touch → rejection lemah
+   - touch → breakout
+   - penetration → reclaim
+   - multiple rejection
+   - failed rejection
+   - level berubah fungsi support ↔ resistance
+
+5. S/R VALIDITY FEATURES
+   Buat daftar feature yang benar-benar CAUSAL.
+
+   Feature harus berasal hanya dari informasi yang sudah tersedia pada timestamp observasi.
+
+   DILARANG:
+   - future candle
+   - future outcome
+   - TP/SL result sebagai input
+   - win/loss sebagai feature
+   - future reaction
+   - future swing confirmation
+   - hindsight label sebagai feature live.
+
+6. LEARNING
+
+Jangan langsung membuat model ML black-box.
+
+Rancang terlebih dahulu:
+   - pattern representation
+   - pattern fingerprint
+   - profile schema
+   - bagaimana pola baru dibandingkan dengan pola historis
+   - bagaimana confidence/validity evidence dihitung
+   - bagaimana UNKNOWN digunakan ketika evidence belum cukup.
+
+Engine harus bisa mengatakan secara internal misalnya:
+   S/R candidate
+   → weak
+   → qualified
+   → strong historical pattern match
+
+Tetapi JANGAN membuat angka confidence palsu atau probabilitas tanpa basis statistik yang jelas.
+
+7. OUTCOME LABEL
+
+Outcome hanya boleh dipakai untuk:
+   - evaluasi OOS
+   - validasi apakah pattern memang memiliki evidence historis
+
+Outcome TIDAK BOLEH menjadi feature live.
+
+Pisahkan dengan jelas:
+   FEATURES
+   LABEL
+   TRAIN
+   VALIDATION
+   OOS
+   LIVE OBSERVATION
+
+8. ANTI-OVERFIT
+
+Data tersedia besar, tetapi jangan mining ribuan pola kecil.
+
+Mulai dari pola kasar/primitif yang dapat dijelaskan manusia.
+
+Buat aturan:
+   - minimum sample
+   - minimum independent occurrences
+   - chronological train/validation/OOS
+   - walk-forward
+   - pattern stability
+   - drift detection.
+
+Jangan mencari parameter yang menghasilkan win-rate paling bagus.
+
+9. NO FORCED SIGNAL
+
+Jika:
+   S/R tidak valid
+   atau
+   M15/H1 context tidak mendukung
+   atau
+   reaction tidak cukup
+   atau
+   pattern belum mempunyai evidence
+
+hasil harus:
+   NO_TRADE / UNKNOWN
+
+Jangan memaksa BUY/SELL.
+
+10. EXISTING ENGINE
+
+Audit terlebih dahulu engine existing dan tentukan:
+   - primitive S/R apa yang sudah tersedia
+   - reaction/evidence apa yang sudah tersedia
+   - trend M15 apa yang sudah tersedia
+   - engulfing apa yang sudah tersedia
+   - bagian mana yang dapat digunakan ulang.
+
+JANGAN mengubah file production pada task ini.
+
+11. OUTPUT
+
+Buat laporan:
+
+A. Existing primitives
+B. Candidate causal features
+C. Candidate S/R pattern classes
+D. Multi-timeframe confirmation design
+E. Pattern fingerprint design
+F. Learning/evaluation separation
+G. Anti-lookahead controls
+H. Anti-overfit controls
+I. Minimum sample requirements
+J. Proposed profile JSON schema
+K. Data required for Phase 2B
+L. Files that would eventually need modification
+
+PENTING:
+- READ-ONLY.
+- Tidak coding.
+- Tidak membuat profile final.
+- Tidak mengubah threshold.
+- Tidak mengubah strategy.
+- Tidak mengubah execution.
+- Tidak commit.
+- Tidak push.
+
+Akhiri dengan:
+PHASE 2A = DESIGN READY / NOT READY
+
+Jika ada konflik dengan aturan strategy existing, laporkan konflik tersebut dan jangan mengubahnya.
 
 ```
 # 
