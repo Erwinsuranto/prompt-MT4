@@ -22,7 +22,179 @@
 ```
 # 
 ```
+PHASE 2F — FINGERPRINT V2 + CAUSAL FEATURE EXTRACTION
 
+Implement ONLY Phase 2F based on the locked Phase 2E.1 decisions.
+
+Repository:
+- Main project: mt-info
+- Existing strategy/execution must remain untouched.
+
+LOCKED DECISIONS:
+1. Outcome label:
+   Hybrid TP/SL + 30-bar horizon.
+   IMPORTANT: label is evaluation/training outcome only.
+   NEVER use label/future outcome as a feature.
+
+2. Minimum sample:
+   n_train >= 20
+   n_val >= 10
+   n_oos >= 10
+   These are validation gates, NOT proof of profitability.
+
+3. Sequence lookback:
+   20 closed M5 bars by default.
+   Must be parameterized so 10/20/30 can be tested later.
+   Do not optimize it now.
+
+4. Drift detection:
+   Rolling 50 occurrences, majority-flip rule.
+   Phase 2F only needs the data structure/API needed later; do not implement live auto-disable yet.
+
+GOAL:
+Create a coarse, deterministic, causal Pattern Fingerprint V2 for XAUUSD M5 reversal detection using:
+- Support/Resistance state
+- Touch/reaction sequence
+- Candle confirmation
+- M15/H1 contextual information
+- Reduced categorical fingerprint
+
+CREATE ONLY:
+1. python/xausr/pattern_learning.py
+2. python/tests/test_pattern_learning.py
+
+DO NOT MODIFY:
+- python/xausr/execution.py
+- python/xausr/backtest.py
+- profiles/sr_pullback_v1.json
+- docs/AUDIT.md
+- docs/CONFLUENCE.md
+- bridge/execution/order code
+
+REUSE EXISTING PRIMITIVES WHERE POSSIBLE:
+- build_zones
+- classify_trend
+- sr_reversal
+- prior_reactions
+- engulfing detection
+- zone_side_reason
+- existing context/MTF helpers
+
+REQUIRED API:
+
+extract_fingerprint_v2(...)
+classify_sr_state(...)
+classify_candle_confirmation(...)
+classify_sequence_type(...)
+learn_patterns(...)
+
+FINGERPRINT:
+Use a deliberately coarse categorical representation, for example:
+- side
+- SR state
+- sequence type
+- candle confirmation
+- M15 trend context
+- H1 trend context
+- touch/reaction characteristics
+
+Do NOT create a huge combinatorial feature key.
+Do NOT use arbitrary continuous values unless required internally.
+Do NOT add features merely because they improve historical results.
+
+CAUSALITY REQUIREMENTS:
+For candle index i, every feature must be computable using data available at the CLOSE of candle i.
+
+STRICTLY FORBIDDEN:
+- m5[i+1:]
+- future candles
+- future labels
+- future zone information
+- future reaction information
+- future MTF state
+- any post-event information
+- fitting thresholds using OOS data
+
+MTF:
+At M5 close i:
+- H1 context must only use a fully closed H1 candle.
+- M15 context must only use a fully closed M15 candle.
+- Do not accidentally use forming index-0 candles.
+- MTF is contextual information, NOT a mandatory trade filter.
+
+SR:
+Represent the existing S/R structure coarsely.
+Preserve existing causal zone construction.
+Do not invent new S/R logic unless absolutely necessary.
+
+CANDLE CONFIRMATION:
+Explicitly distinguish:
+- no confirmation
+- bullish confirmation
+- bearish confirmation
+- genuine engulfing where existing rules support it
+- rejection/failed rejection if already available
+
+SEQUENCE:
+Use the locked default lookback=20.
+The implementation must allow lookback=10/20/30 for later validation.
+Do not select a winner between them now.
+
+LABEL SEPARATION:
+Implement the feature extraction architecture so LABEL is completely separate from FEATURES.
+If a label helper is needed, it must never be called by fingerprint generation.
+Do not use TP/SL/horizon outcome information in fingerprint generation.
+
+DETERMINISM:
+Same historical input + same parameters must produce byte-for-byte equivalent logical results.
+No randomness.
+No current-time dependency.
+No network dependency.
+
+TESTS REQUIRED:
+1. fingerprint is deterministic
+2. truncating future candles does not change fingerprint at i
+3. explicit future-column injection cannot affect fingerprint
+4. forming candle is never used
+5. MTF only uses closed candles
+6. lookback 10/20/30 is parameterized
+7. fingerprint remains stable across repeated runs
+8. label/outcome data cannot enter feature extraction
+9. insufficient history fails safely / returns explicit UNKNOWN
+10. no execution side effects
+
+IMPORTANT:
+Use real repository data/primitives only.
+No synthetic data as evidence.
+Do not run or create orders.
+Do not call order_send.
+Do not call order_check.
+Do not modify execution behavior.
+Do not optimize for better backtest results.
+
+VALIDATION:
+- Run focused Phase 2F tests.
+- Then run the full existing test suite if practical.
+- Report exact pass/fail counts.
+- Report every file changed.
+- Check git diff carefully to ensure only the two allowed files changed.
+
+STOP CONDITION:
+If the existing architecture does not provide enough information to implement a requirement safely, STOP and report the exact blocker instead of inventing behavior.
+
+DO NOT commit or push yet.
+
+FINAL REPORT:
+- implementation summary
+- fingerprint fields
+- causality proof
+- test results
+- full-suite result
+- git diff/file list
+- confirmation that execution/backtest/bridge were untouched
+- confirmation order_send=0 and order_check=0
+
+END PHASE 2F.
 ```
 # 
 ```
