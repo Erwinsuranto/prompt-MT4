@@ -30,7 +30,297 @@
 ```
 # 
 ```
+PHASE 2E — S/R + CANDLE PATTERN LEARNING DESIGN
+READ-ONLY DESIGN — JANGAN CODING
 
+Tujuan:
+Merancang mekanisme agar engine dapat "belajar" pola S/R + candle confirmation dari data historis secara causal, lalu mengenali pola serupa di live.
+
+HASIL PHASE 2D YANG WAJIB DIJADIKAN DASAR:
+- 91 kandidat berhasil direproduksi.
+- 91/91 gagal agreement karena TIE, bukan konflik arah antar-split.
+- 38 ABSORB_PROBE -> PROBE -> NO_LABEL.
+- 53 NO_LEVEL -> NO_LABEL.
+- Label reversal terlalu terfragmentasi.
+- Fingerprint existing terlalu halus/13 dimensi.
+- Base-rate kandidat sekitar 2.4%.
+- Tidak ada bukti bahwa MTF adalah akar masalah.
+- Profile tetap CANDIDATE.
+- Tidak boleh menganggap hasil ini sebagai bukti profitability.
+
+ATURAN KERAS:
+- READ-ONLY.
+- JANGAN mengubah source code.
+- JANGAN mengubah profile.
+- JANGAN commit/push.
+- JANGAN tuning threshold demi menaikkan hasil.
+- JANGAN synthetic data.
+- JANGAN look-ahead.
+- Outcome hanya label evaluasi, bukan feature.
+- Feature pada timestamp T hanya boleh memakai data <= T.
+- forming candle/index-0 dilarang.
+- Tidak boleh menggunakan TP/SL/WIN/LOSS sebagai feature.
+- Tidak boleh menggunakan outcome untuk memilih pola terbaik lalu menguji pola yang sama pada periode yang sama.
+- Jangan membuat ML black-box.
+- Prioritaskan pola yang dapat dijelaskan dan direproduksi.
+
+DESAIN YANG HARUS DIKAJI:
+
+1. COARSE S/R STATE
+
+Rancang representasi pola S/R yang lebih kasar dan stabil daripada fingerprint 13-dimensi.
+
+Contoh state yang boleh dianalisis:
+- NO_LEVEL
+- APPROACH
+- FIRST_TOUCH
+- REPEATED_TOUCH
+- REJECTION
+- ABSORPTION
+- BREAK
+- RECLAIM
+- FLIP_S_TO_R
+- FLIP_R_TO_S
+
+Jangan langsung menganggap daftar ini final.
+Gunakan primitive existing bila memungkinkan.
+
+2. TOUCH / REACTION SEQUENCE
+
+Engine harus bisa melihat urutan kejadian, bukan hanya satu candle.
+
+Contoh:
+
+approach
+→ touch
+→ rejection
+→ retest
+→ rejection kedua
+→ confirmation candle
+
+atau:
+
+approach
+→ penetration
+→ close back inside zone
+→ reclaim
+→ confirmation
+
+Tentukan bagaimana sequence ini dapat direpresentasikan dengan primitive existing tanpa membuat data masa depan masuk ke feature.
+
+3. CANDLE CONFIRMATION
+
+Analisis pola candle yang tersedia secara causal:
+
+- bullish/bearish engulfing
+- wick rejection
+- body/range relationship
+- close location
+- penetration
+- close kembali ke dalam zone
+- consecutive rejection
+- failure to continue
+- reversal candle setelah touch
+
+Jangan mengarang indikator baru jika primitive existing sudah cukup.
+
+Yang dicari:
+"Apakah kombinasi S/R state + candle behavior lebih stabil daripada fingerprint 13 dimensi?"
+
+4. MTF CONFIRMATION
+
+Pisahkan dengan tegas:
+
+A. S/R structural validity
+B. S/R + candle confirmation
+C. S/R + candle + M15/H1 contextual confirmation
+D. agreement 3-split
+
+Jangan menyamakan A/B/C dengan D.
+
+MTF hanya menjadi contextual confirmation bila memang tersedia pada timestamp T.
+
+5. PATTERN FINGERPRINT BARU
+
+Rancang fingerprint kategorikal yang lebih kasar.
+
+Contoh struktur:
+
+sr_side
+sr_state
+touch_count_bucket
+reaction_sequence
+penetration_state
+close_position
+rejection_class
+engulfing_state
+m15_context
+h1_context
+zone_overlap
+trend_context
+
+Tetapi:
+- jangan langsung membuat 13 dimensi final;
+- cari dimensi minimum yang benar-benar diperlukan;
+- hindari kombinasi kategori yang menyebabkan fragmentation ekstrem.
+
+Tujuan fingerprint:
+Pola yang secara struktur serupa harus mendapatkan fingerprint yang sama.
+
+6. "LEARNING" HARUS OFFLINE
+
+Rancang learner sederhana:
+
+TRAIN:
+mempelajari distribusi pola dari periode TRAIN.
+
+VALIDATION:
+menguji apakah pola yang ditemukan tetap muncul pada periode VALIDATION.
+
+OOS:
+menguji pola yang SUDAH TERDAFTAR sebelum OOS.
+
+Tidak boleh:
+OOS -> menemukan pola -> langsung memakai pola itu sebagai live rule.
+
+7. MINIMUM SAMPLE
+
+Jangan memilih pola hanya karena pernah menghasilkan satu atau dua reversal.
+
+Tentukan mekanisme status:
+
+UNKNOWN
+CANDIDATE
+VALIDATED
+
+Dengan syarat yang dapat dijelaskan:
+- minimum sample,
+- OOS sample,
+- directional agreement,
+- stability antar-window,
+- truncated replay identical.
+
+Jangan membuat angka threshold baru tanpa alasan statistik/desain yang jelas.
+Jika data belum cukup, katakan BELUM CUKUP.
+
+8. ANTI-OVERFIT
+
+Wajib desain:
+
+- chronological split
+- walk-forward
+- OOS untouched
+- truncated replay
+- adversarial future-column test
+- fingerprint stability
+- pattern drift detection
+
+Periksa apakah learner hanya menghafal timestamp/sequence tertentu.
+
+9. PATTERN LIBRARY
+
+Rancang format:
+
+profiles/patterns/<name>_vN.json
+
+Minimal menyimpan:
+- pattern definition
+- categorical fingerprint
+- training range
+- validation range
+- OOS range
+- input hash
+- sample counts
+- stability metrics
+- status
+- version
+
+Immutable setelah dipakai live.
+
+10. LIVE MATCHING
+
+Rancang fungsi konseptual:
+
+observe(T)
+→ build causal fingerprint
+→ match registered patterns
+→ jika MATCH + status VALIDATED
+→ lanjut ke existing confirmation/gate
+→ jika UNKNOWN/CANDIDATE
+→ NO_TRADE
+
+Jangan mengubah execution.
+
+11. CONFLICT RULE
+
+Jika:
+S/R valid
+tetapi candle confirmation tidak valid
+→ NO_TRADE.
+
+Jika:
+candle valid
+tetapi S/R structural state tidak valid
+→ NO_TRADE.
+
+Jika:
+S/R + candle valid
+tetapi MTF context bertentangan
+→ NO_TRADE atau status terpisah, jangan dipaksa menjadi signal.
+
+Jika pattern belum validated
+→ NO_TRADE.
+
+12. EVIDENCE
+
+Jangan mengatakan "pola ini akurat" hanya karena terlihat bagus.
+
+Output harus membedakan:
+
+STRUCTURAL EVIDENCE
+CAUSAL REPEATABILITY
+OOS EVIDENCE
+STATISTICAL SUFFICIENCY
+PROFITABILITY EVIDENCE
+
+Profitability tetap BELUM TERBUKTI jika memang belum ada bukti.
+
+13. HASIL YANG WAJIB
+
+PHASE 2E — PATTERN LEARNING DESIGN
+
+A. Root cause Phase 2D
+B. Mengapa fingerprint sekarang terlalu fragmented
+C. Representasi S/R state yang disarankan
+D. Representasi candle confirmation
+E. Sequence model yang causal
+F. MTF contextual confirmation
+G. Minimal fingerprint
+H. Offline learning flow
+I. Train/VAL/OOS separation
+J. Pattern library schema
+K. Live matching flow
+L. Anti-overfit safeguards
+M. Status UNKNOWN/CANDIDATE/VALIDATED
+N. Contoh 3–5 pola yang secara konseptual dapat dikenali
+O. Bagian yang belum terbukti
+P. Daftar file yang NANTI perlu dibuat/diubah
+Q. Apakah desain sudah siap untuk implementasi
+
+SAFETY:
+order_send=0
+order_check=0
+execution_attempts=0
+position_changes=0
+order_changes=0
+
+Git:
+NO CHANGE / NO COMMIT / NO PUSH.
+
+PENTING:
+Jangan coding pada fase ini.
+Jangan mengubah perilaku engine.
+Ini hanya desain sebelum implementasi.
 ```
 # 
 ```
