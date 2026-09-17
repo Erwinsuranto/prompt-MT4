@@ -26,7 +26,207 @@
 ```
 # 
 ```
+PHASE 2E.1 — LOCK THE FOUR UNRESOLVED DESIGN DECISIONS
+READ-ONLY — JANGAN CODING
 
+Baca hasil Phase 2E yang sudah ada di README/repo hasil-prompt-mt-info.
+
+Tujuan:
+Sebelum Phase 2F implementasi, selesaikan 4 keputusan desain yang masih terbuka:
+
+1. OUTCOME LABEL
+2. MINIMUM SAMPLE
+3. SEQUENCE LOOKBACK
+4. DRIFT DETECTION
+
+ATURAN KERAS:
+- READ-ONLY.
+- Jangan ubah source code.
+- Jangan ubah profile.
+- Jangan commit.
+- Jangan push.
+- Jangan tuning untuk mempercantik hasil.
+- Jangan synthetic data.
+- Jangan menggunakan outcome sebagai feature.
+- Tidak boleh look-ahead.
+- Jangan mengubah execution.
+- Jangan mengubah threshold existing kecuali hanya dianalisis sebagai referensi.
+- Semua keputusan harus dapat dijelaskan dan diuji secara causal.
+- Jika data tidak cukup untuk menentukan sesuatu, nyatakan UNKNOWN/UNRESOLVED, jangan mengarang.
+
+==================================================
+A. OUTCOME LABEL — SELESAIKAN TIE PROBLEM
+==================================================
+
+Analisis outcome labeling existing dan penyebab 91/91 agreement menjadi TIE.
+
+Bandingkan minimal 3 pendekatan:
+
+A. existing TP/SL logic
+B. fixed-horizon follow-through/fade
+C. hybrid: TP/SL jika tersentuh, otherwise time-horizon TIE
+
+Untuk setiap pendekatan jelaskan:
+- causal validity
+- compatibility dengan existing engine
+- risiko look-ahead
+- risiko label fragmentation
+- interpretability
+- dampak terhadap learner
+
+Jangan memilih berdasarkan hasil accuracy.
+
+Pilih hanya jika dapat dipertanggungjawabkan secara metodologis.
+Jika belum dapat diputuskan, nyatakan keputusan BELUM FINAL.
+
+==================================================
+B. MINIMUM SAMPLE
+==================================================
+
+Analisis:
+n_train >= 10
+n_val >= 5
+n_oos >= 3
+
+Bandingkan dengan threshold yang lebih konservatif.
+
+Gunakan confidence interval atau metode statistik yang sesuai.
+
+Tujuannya bukan mencari threshold yang menghasilkan pattern paling banyak.
+
+Tujuannya:
+pattern yang disebut VALIDATED harus memiliki evidence yang cukup.
+
+Pisahkan:
+- structural repeatability
+- directional evidence
+- OOS evidence
+- profitability evidence
+
+Jangan menyebut pattern PROFITABLE hanya karena directional agreement.
+
+Berikan aturan final:
+UNKNOWN
+CANDIDATE
+VALIDATED
+
+Jika perlu, tambahkan status PROVEN_STRUCTURAL secara terpisah dari profitability.
+
+==================================================
+C. SEQUENCE LOOKBACK
+==================================================
+
+Phase 2E mengusulkan 20 candle.
+
+Jangan menganggap 20 optimal.
+
+Analisis 10 / 20 / 30 candle.
+
+Uji secara causal terhadap:
+- fragmentation
+- fingerprint stability
+- sample availability
+- sequence interpretability
+- risiko overfitting
+
+Jangan memilih berdasarkan profit.
+
+Jika belum ada evidence cukup:
+DEFAULT = 20 hanya sebagai design default,
+bukan sebagai parameter yang dianggap optimal.
+
+==================================================
+D. DRIFT DETECTION
+==================================================
+
+Rancang mekanisme drift detection yang sederhana dan explainable.
+
+Harus membedakan:
+- normal variation
+- insufficient sample
+- genuine pattern drift
+
+Analisis rolling occurrence window.
+
+Contoh kandidat:
+last 30
+last 50
+last 100 occurrences
+
+Jangan menetapkan angka hanya karena terlihat bagus.
+
+Tentukan:
+- minimum recent sample
+- comparison metric
+- trigger drift
+- status setelah drift
+- apakah otomatis disable
+- apakah kembali UNKNOWN/CANDIDATE
+- bagaimana recovery setelah pattern kembali stabil
+
+Semua harus fail-safe:
+jika evidence tidak cukup → NO_TRADE.
+
+==================================================
+E. CHECK TERHADAP DESAIN PHASE 2E
+==================================================
+
+Pastikan empat keputusan ini tidak merusak:
+
+- coarse S/R states
+- candle confirmation
+- sequence representation
+- MTF contextual flag
+- reduced fingerprint
+- TRAIN/VAL/OOS separation
+- truncated replay
+- adversarial future-column test
+- immutable pattern library
+- live matching read-only
+
+==================================================
+F. HASIL WAJIB
+==================================================
+
+Tulis:
+
+PHASE 2E.1 — DECISION LOCK
+
+1. Outcome label:
+   FINAL / UNRESOLVED
+   alasan
+
+2. Minimum sample:
+   FINAL / UNRESOLVED
+   aturan UNKNOWN/CANDIDATE/VALIDATED
+
+3. Sequence lookback:
+   FINAL / DEFAULT ONLY / UNRESOLVED
+   alasan
+
+4. Drift detection:
+   FINAL / UNRESOLVED
+   mekanisme
+
+5. Updated pattern status model.
+
+6. Updated implementation sequence Phase 2F → 2K.
+
+7. Daftar hal yang masih belum terbukti.
+
+8. Apakah sekarang aman masuk Phase 2F coding?
+
+Jangan coding.
+
+SAFETY:
+order_send=0
+order_check=0
+execution_attempts=0
+position_changes=0
+order_changes=0
+
+Git:
+NO CHANGE / NO COMMIT / NO PUSH
 ```
 # 
 ```
