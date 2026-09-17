@@ -54,7 +54,100 @@
 ```
 # 
 ```
+PHASE 2F — CLEANUP + FINAL VERIFICATION
 
+Current Phase 2F implementation has been reviewed and is considered technically correct.
+
+KEEP ONLY THESE TWO PHASE 2F FILES:
+1. python/xausr/pattern_learning.py
+2. python/tests/test_pattern_learning.py
+
+REMOVE FROM mt-info:
+1. PHASE_2E_DESIGN.md
+2. PHASE_2E_SUMMARY.md
+3. test_phase2f.py
+
+IMPORTANT:
+- These three files are documentation/duplicate verification artifacts.
+- Phase reports are stored separately by the user.
+- Do NOT move them into another directory inside mt-info.
+- Do NOT create replacement documentation files.
+
+BEFORE CLEANUP:
+1. Show git status.
+2. Show git diff for all modified files.
+3. Confirm the two legitimate Phase 2F files are present.
+
+CLEANUP:
+- Delete only:
+  PHASE_2E_DESIGN.md
+  PHASE_2E_SUMMARY.md
+  test_phase2f.py
+- Do NOT modify any other file.
+
+THEN RUN:
+1. pytest -q python/tests/test_pattern_learning.py
+2. Relevant existing causality tests.
+3. Full test suite if practical.
+
+VERIFY:
+- Fingerprint V2 deterministic
+- Future truncation invariant
+- No future-column influence
+- Forming candle rejected
+- M15 closed-candle only
+- H1 closed-candle only
+- lookback 10/20/30
+- label/feature separation
+- insufficient history safe
+- no execution side effects
+- no order_send
+- no order_check
+
+THEN:
+Run:
+git status --short
+git diff --stat
+git diff --name-only
+
+REQUIRED FINAL GIT STATE:
+Only these two files may appear as new/modified:
+
+python/xausr/pattern_learning.py
+python/tests/test_pattern_learning.py
+
+No other source, strategy, execution, bridge, profile, or documentation file may be changed.
+
+DO NOT:
+- commit
+- push
+- modify execution.py
+- modify backtest.py
+- modify reversal.py
+- modify sr_reversal.py
+- modify sr_learn.py
+- modify profiles
+- modify bridge
+- call order_send
+- call order_check
+
+FINAL REPORT:
+- cleanup result
+- exact remaining changed files
+- focused test result
+- relevant causality test result
+- full suite result
+- git diff summary
+- confirmation protected files unchanged
+- order_send=0
+- order_check=0
+- execution_attempts=0
+- commit=0
+- push=0
+
+STOP AFTER VERIFICATION.
+
+END PHASE 2F CLEANUP
 ```
 # 
 ```
