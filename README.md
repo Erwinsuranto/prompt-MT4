@@ -46,7 +46,238 @@
 ```
 # 
 ```
+PHASE 2G — OFFLINE PATTERN LEARNER + PATTERN LIBRARY
 
+BASELINE:
+Phase 2F Fingerprint V2 is implemented and causality-tested.
+
+IMPORTANT:
+- mt-info is the source-code repository.
+- Phase reports/results are stored separately by the user.
+- Do NOT create phase-report markdown files in mt-info.
+- Do NOT modify execution or live trading behavior.
+
+GOAL:
+Build the offline pattern-learning layer on top of the existing causal Fingerprint V2.
+
+CREATE ONLY:
+
+1. python/xausr/pattern_library.py
+2. python/tests/test_pattern_library.py
+
+If an existing Phase 2F function needs a minimal correction to make the learner work, STOP and report the exact reason instead of modifying pattern_learning.py automatically.
+
+PATTERN LIBRARY:
+
+Implement a deterministic PatternLibrary that can:
+
+1. load pattern profiles
+2. validate profile schema
+3. match a FingerprintV2 against patterns
+4. return UNKNOWN when no valid pattern matches
+5. track evidence counts
+6. track TRAIN / VAL / OOS evidence separately
+7. expose pattern status:
+   UNKNOWN
+   CANDIDATE
+   VALIDATED
+
+DO NOT claim profitability from pattern status.
+
+LEARNING:
+
+Implement offline chronological learning using the existing Phase 2F feature extraction.
+
+Required split order:
+
+TRAIN -> VAL -> OOS
+
+Never shuffle.
+
+Locked minimum evidence:
+- TRAIN >= 20
+- VAL >= 10
+- OOS >= 10
+
+These are evidence gates, NOT proof of profitability.
+
+OUTCOME:
+
+Use the locked Phase 2E.1 outcome definition:
+- Hybrid TP/SL + 30-bar horizon
+
+CRITICAL:
+Outcome/label data is evaluation data only.
+
+A pattern fingerprint MUST NEVER contain:
+- future outcome
+- TP/SL result
+- future candles
+- future MTF state
+- future S/R state
+
+PROFILE CONTENT:
+
+Each learned pattern should contain enough information to reproduce and audit it, including:
+
+- schema/version
+- fingerprint definition
+- categorical fingerprint
+- train count
+- validation count
+- OOS count
+- outcome counts
+- directional statistics
+- status
+- source-data identity/hash where available
+- configuration identity
+- creation metadata that does NOT affect deterministic matching
+
+Do not store unnecessary continuous parameters.
+
+CONFLICT RULE:
+
+If multiple patterns match the same observation:
+- deterministic resolution only
+- no arbitrary priority
+- no future information
+- unresolved conflict => UNKNOWN / NO_TRADE equivalent for observation purposes
+
+Do NOT turn the library into a trading gate yet.
+
+DRIFT:
+
+Prepare the PatternLibrary data model/API for:
+- rolling 50 occurrences
+- majority-flip detection
+
+Do NOT implement automatic live disable.
+Do NOT connect drift to live_signal.
+
+ANTI-OVERFIT:
+
+The learner must:
+
+- preserve chronological ordering
+- never shuffle
+- never fit using OOS
+- never use OOS to choose a pattern
+- never use validation results to modify TRAIN features
+- produce identical output from identical input/configuration
+- explicitly distinguish observation count from labelable outcome count
+
+IMPORTANT FRAGMENTATION RULE:
+
+Do NOT repeat the old Phase 2C mistake where n_obs >= 30 was treated as sufficient despite fragmented labels.
+
+Track separately:
+
+n_observations
+n_labelable
+n_train
+n_val
+n_oos
+
+A pattern cannot become VALIDATED merely because observation count is high.
+
+VALIDATION STATUS:
+
+Use conservative status transitions.
+
+UNKNOWN:
+insufficient evidence
+
+CANDIDATE:
+pattern exists and has minimum train evidence but is not sufficiently validated
+
+VALIDATED:
+ONLY if the implementation's explicit validation criteria are satisfied.
+
+Do not invent a profitability threshold.
+
+If the repository does not contain a defensible statistical validation criterion yet, leave VALIDATED unreachable and report that Phase 2H must define it.
+
+REAL DATA:
+
+Use the existing committed XAUUSD data and existing primitives.
+
+Do not generate synthetic market data as evidence.
+
+TESTS REQUIRED:
+
+1. deterministic library load
+2. deterministic fingerprint matching
+3. schema validation
+4. chronological TRAIN/VAL/OOS split
+5. no shuffle
+6. labelable count differs correctly from observation count
+7. insufficient evidence => UNKNOWN
+8. candidate status works
+9. VALIDATED cannot be claimed without required evidence
+10. OOS cannot influence training
+11. identical input => identical learned library
+12. conflict matching resolves deterministically
+13. no future data enters fingerprint
+14. no execution imports
+15. no order_send
+16. no order_check
+17. drift rolling-50 data structure
+18. empty/invalid profile fails safely
+
+RUN:
+- all Phase 2G tests
+- existing Phase 2F tests
+- relevant existing causality tests
+- full test suite if practical
+
+BEFORE FINISHING:
+Run:
+
+git status --short
+git diff --stat
+git diff --name-only
+
+ONLY THESE NEW FILES ARE ALLOWED:
+python/xausr/pattern_library.py
+python/tests/test_pattern_library.py
+
+DO NOT:
+- modify execution.py
+- modify backtest.py
+- modify reversal.py
+- modify sr_reversal.py
+- modify sr_learn.py
+- modify profiles
+- modify bridge
+- modify live_signal.py
+- modify shadow.py
+- create documentation
+- call order_send
+- call order_check
+- commit
+- push
+
+FINAL REPORT:
+- files created
+- PatternLibrary API
+- learner behavior
+- status rules
+- TRAIN/VAL/OOS handling
+- observation vs labelable handling
+- drift API
+- exact tests passed/failed
+- full-suite result
+- git diff
+- protected files unchanged
+- order_send=0
+- order_check=0
+- execution_attempts=0
+- commit=0
+- push=0
+
+STOP AFTER VERIFICATION.
+
+END PHASE 2G
 ```
 # 
 ```
