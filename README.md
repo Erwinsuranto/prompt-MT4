@@ -54,6 +54,95 @@
 ```
 # 
 ```
+PHASE 1B — PROBE MAXIMUM REAL H1 HISTORY
+MODE: READ-ONLY / NO STRATEGY CHANGE
+
+Hasil Phase 1:
+- XAUUSD.m H1 tersedia via MT5.
+- Fetch 8000 H1 bars valid.
+- Tidak ada invalid OHLC/duplicate.
+- Tetapi triple-overlap H1→M15→M5 baru mencakup sekitar 6 minggu.
+- Blocker sekarang: kedalaman maksimum history H1 terminal belum diprobing.
+
+TASK:
+
+1. Probe MAXIMUM AVAILABLE H1 HISTORY dari MT5 untuk XAUUSD.m.
+- Jangan mengubah strategy.
+- Jangan membuat synthetic data.
+- Jangan commit/push.
+- Jangan order_send.
+- Jangan order_check.
+- Gunakan read-only data access.
+- Jangan mengandalkan angka 8000 sebagai batas maksimum.
+
+2. Coba beberapa kedalaman secara bertahap, misalnya:
+- 8,000
+- 12,000
+- 20,000
+- 30,000
+- 50,000
+atau sampai terminal/source benar-benar berhenti menyediakan data.
+
+Jangan memaksa request yang menyebabkan environment tidak stabil.
+
+3. Untuk setiap hasil laporkan:
+- jumlah bar yang benar-benar diterima
+- earliest timestamp
+- latest CLOSED timestamp
+- apakah ada gap besar/session gap
+- duplicate
+- invalid OHLC
+- forming candle
+- symbol
+- timezone convention
+
+4. Pastikan "maksimum history" benar-benar dibedakan dari:
+- batas request API
+- batas warmup engine
+- batas file/export
+- batas history yang tersedia di terminal MT5.
+
+Jika request lebih besar hanya mengembalikan jumlah yang sama, jelaskan apakah itu benar-benar terminal history limit atau hanya limit implementasi fetch.
+
+5. Jika MT5 ternyata dapat menyediakan history jauh lebih panjang:
+- tentukan rentang H1 real yang paling panjang dan valid.
+- jangan membuat profile/learning dulu.
+- jangan mengubah engine.
+
+6. Jika history H1 memang hanya sekitar 6 minggu:
+- jangan dipaksakan untuk training.
+- jelaskan apakah perlu menambah history melalui MT5/chart history atau sumber data lain yang kompatibel.
+- tetap jangan menggunakan synthetic data.
+
+7. CEK TRIPLE-TIMEFRAME
+Untuk history H1 yang paling panjang:
+- H1 closed
+- M15 closed
+- M5 closed
+- alignment harus causal:
+  H1/M15 timestamp <= M5 closed timestamp.
+- forming candle harus dikeluarkan.
+
+8. OUTPUT WAJIB:
+
+A. MAX H1 AVAILABLE
+B. EARLIEST H1 CLOSED
+C. LATEST H1 CLOSED
+D. TOTAL VALID H1
+E. DATA QUALITY
+F. TRIPLE-OVERLAP PERIOD H1→M15→M5
+G. apakah jumlah history cukup untuk Phase 2
+H. jika belum cukup, blocker persisnya
+
+SAFETY:
+ORDER_SEND=0
+ORDER_CHECK=0
+EXECUTION_ATTEMPTS=0
+POSITION_CHANGES=0
+ORDER_CHANGES=0
+
+FINAL:
+NO CHANGE / NO COMMIT / NO PUSH.
 
 ```
 # 
