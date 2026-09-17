@@ -42,7 +42,359 @@
 ```
 # 
 ```
+PHASE 2B — IMPLEMENT S/R PATTERN LEARNER + PROFILE
+MODE: CODING TERBATAS + TEST + COMMIT/PUSH
 
+BASELINE:
+- Phase 1C committed: a1de925
+- Phase 2A = DESIGN READY
+- Real XAUUSD.m H1/M15/M5 tersedia
+- NO look-ahead
+- NO synthetic data
+- NO trading
+- Existing strategy/threshold/execution/bridge jangan diubah.
+
+TUJUAN:
+Implementasikan S/R Pattern Learner sesuai desain Phase 2A.
+
+PRINSIP UTAMA:
+Engine belajar MENGENALI POLA VALIDITAS S/R dari observasi historis causal.
+Engine TIDAK boleh belajar dengan cara mencari kombinasi parameter yang menghasilkan profit terbaik.
+
+A. FILE / MODULARITAS
+
+Buat modul terpisah, minimal konsep:
+- xausr/sr_profile.py
+- xausr/sr_learn.py
+- profiles/<nama_profile>_vN.json
+- tests/test_sr_profile.py
+
+Gunakan nama/path yang paling sesuai dengan struktur repo existing jika sudah ada padanan.
+Jangan membuat duplicate primitive yang sudah ada.
+
+B. REUSE EXISTING PRIMITIVES
+
+Sebelum coding, cari dan reuse:
+- build_zones
+- classify_trend
+- rejection failures
+- ladder S/R reversal
+- prior_reactions
+- zone_side_reason
+- Context.build/live_context
+- walk_forward_audit
+- stats.MIN_SAMPLE
+- driftbench
+
+Jangan membuat algoritma S/R kedua yang bertentangan dengan primitive existing.
+
+C. CAUSAL FEATURES
+
+Implementasikan fingerprint berbasis informasi yang tersedia <= T:
+
+- side: BUY/SELL
+- zone state
+- SR class
+- touch count
+- independent prior reactions
+- penetration
+- wick/body/range
+- close-vs-band
+- reversal_idx
+- engulf class existing
+- M15 trend
+- H1 context
+- MTF zone overlap
+- reaction sequence
+- distance from zone
+- follow-through OBSERVATION yang hanya memakai candle yang sudah closed sampai T
+
+Semua feature harus dapat dihitung pada timestamp T tanpa mengetahui masa depan.
+
+D. PATTERN CLASSES
+
+Implementasikan kelas pola kasar dan explainable:
+
+STRONG_REJECT
+WEAK_REJECT_STALL
+ABSORB_PROBE
+THROUGH
+RECLAIM
+MULTI_REJECT
+FLIP_SR
+
+Dan sequence:
+
+APPROACH
+→ PENETRATION
+→ REJECTION
+→ CLOSE
+→ FOLLOW_THROUGH
+
+Jangan membuat ribuan kelas kombinasi.
+
+E. MULTI-TIMEFRAME
+
+Untuk setiap M5 observation T:
+
+H1:
+- hanya H1 yang sudah closed pada T.
+
+M15:
+- hanya M15 yang sudah closed pada T.
+
+M5:
+- candle confirmation harus closed.
+
+Tidak boleh mengambil index 0/forming candle.
+
+Jika alignment tidak tersedia:
+→ UNKNOWN / NO_TRADE
+bukan interpolasi atau synthetic fill.
+
+F. FINGERPRINT
+
+Fingerprint harus:
+- deterministic
+- categorical/discrete
+- reproducible
+- tidak memasukkan outcome.
+
+Format harus jelas, misalnya tuple canonical:
+(side, zone_state, sr_class, touch_bucket, reaction_class,
+engulf_class, trend_h1, trend_m15, mtf_overlap, sequence_class)
+
+Jika ada numeric evidence, simpan terpisah untuk analisis; jangan memasukkan floating-point noise langsung ke fingerprint.
+
+G. LEARNING
+
+Learner harus menghasilkan profile berdasarkan pola historis.
+
+Pisahkan:
+
+FEATURES
+LABEL
+TRAIN
+VALIDATION
+OOS
+LIVE_OBS
+
+LABEL outcome hanya untuk evaluasi historis.
+
+Jangan pernah:
+- memasukkan WIN/LOSS ke live fingerprint
+- memasukkan TP/SL outcome ke feature
+- memakai candle setelah T untuk menentukan fingerprint T.
+
+H. MINIMUM EVIDENCE
+
+Profile tidak boleh menganggap satu atau dua contoh sebagai pola valid.
+
+Gunakan minimum sample yang konservatif dan existing policy jika tersedia.
+
+Bedakan:
+UNKNOWN
+INSUFFICIENT_EVIDENCE
+CANDIDATE
+VALIDATED
+
+Jangan mengklaim probability/confidence bila sample belum cukup.
+
+I. CHRONOLOGICAL SPLIT
+
+Gunakan chronological train/validation/OOS.
+
+Tidak boleh random shuffle.
+
+Gunakan walk-forward/rolling evaluation yang sesuai primitive existing.
+
+Pattern hanya boleh dianggap VALIDATED jika stabil di OOS.
+
+Jika belum:
+→ CANDIDATE/UNKNOWN.
+
+J. PROFILE JSON
+
+Profile harus immutable/versioned dan menyimpan minimal:
+
+- profile_name
+- version
+- symbol
+- timeframes
+- feature_schema
+- pattern_classes
+- fingerprint_schema
+- training_range
+- validation_range
+- oos_range
+- input_hash
+- source_data_metadata
+- sample_counts
+- stability metrics
+- minimum_evidence
+- created_at
+- status
+
+Jangan menyimpan secrets.
+
+K. LIVE MATCH
+
+Tambahkan fungsi read-only seperti:
+
+decide(observation)
+
+atau nama yang paling sesuai.
+
+Output minimal:
+
+profile_match
+pattern_class
+evidence_state
+matched_sample_count
+mtf_context
+reason
+
+Output tidak boleh mengubah BUY/SELL strategy existing secara otomatis.
+
+Untuk sekarang learner hanya memberikan:
+OBSERVATION / MATCH / EVIDENCE
+
+Jangan aktifkan sebagai trading gate.
+
+L. TEST WAJIB
+
+Tambahkan regression tests untuk:
+
+1. same input → same fingerprint
+2. future candle tidak mempengaruhi fingerprint
+3. forming candle ditolak
+4. missing MTF → UNKNOWN
+5. outcome tidak masuk feature
+6. chronological split
+7. minimum sample enforcement
+8. insufficient evidence → UNKNOWN
+9. profile hash/integrity
+10. deterministic profile load
+11. no random shuffle
+12. no order_send
+13. no order_check
+14. existing strategy tests tetap PASS.
+
+M. REAL DATA BUILD
+
+Gunakan real XAUUSD.m data yang sudah committed/tersedia.
+
+Jangan synthetic.
+
+Build candidate profile dari data causal yang tersedia.
+
+Laporkan:
+- total observations
+- fingerprint count
+- unique patterns
+- candidate patterns
+- validated patterns
+- unknown/insufficient
+- train/val/OOS ranges
+- input hash
+- profile hash
+
+Jangan mengejar win-rate.
+
+N. INTEGRATION SAFETY
+
+CRITICAL:
+Profile learner belum menjadi gate trading.
+
+Jangan mengubah:
+- PATH A/B/C behaviour
+- threshold existing
+- simulate_exit
+- execution
+- mt5_execution
+- bridge
+- risk
+- order logic.
+
+Kalau integrasi membutuhkan perubahan production:
+STOP dan laporkan, jangan lakukan perubahan tanpa alasan.
+
+O. FULL TEST
+
+Jalankan:
+- targeted Phase 2B tests
+- existing relevant strategy tests
+- full test suite
+
+Jika failure berasal dari environment/pre-existing:
+jelaskan terpisah.
+
+P. GIT
+
+Jika semua valid:
+- commit satu commit Phase 2B
+- push ke origin/main
+- working tree harus clean.
+
+Jangan force push.
+
+OUTPUT:
+
+PHASE 2B REPORT
+
+Implementation:
+files=
+features=
+pattern_classes=
+fingerprint_schema=
+
+REAL DATA:
+observations=
+unique_fingerprints=
+candidate=
+validated=
+unknown=
+
+SPLIT:
+train=
+validation=
+OOS=
+
+CAUSAL:
+lookahead=PASS/FAIL
+forming_candle=PASS/FAIL
+MTF_alignment=PASS/FAIL
+
+PROFILE:
+name=
+version=
+input_hash=
+profile_hash=
+status=
+
+TEST:
+targeted=
+full=
+failures=
+
+SAFETY:
+order_send=0
+order_check=0
+execution_attempts=0
+position_changes=0
+order_changes=0
+
+GIT:
+commit=
+push=
+working_tree=
+
+PENTING:
+Jika learner belum cukup bukti untuk menghasilkan VALIDATED pattern, jangan memaksa.
+Lebih baik UNKNOWN/CANDIDATE daripada pola palsu.
+
+Setelah report selesai, BERHENTI.
+Jangan lanjut Phase 2C otomatis.
 ```
 # 
 ```
