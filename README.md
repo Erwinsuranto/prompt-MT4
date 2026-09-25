@@ -10,7 +10,74 @@
 ```
 # 
 ```
+PHASE LIVE-1 — XAUUSD M5 LIVE SHADOW SIGNAL ENGINE
 
+Tujuan:
+Pindahkan strategi frozen Phase 2J dari historical backtest ke market berjalan untuk PAPER/SHADOW TESTING saja.
+
+WAJIB:
+1. Gunakan XAUUSD real-time dari MT5/read-only market data yang sudah tersedia.
+2. Tidak boleh mengirim order.
+3. Tidak boleh mengubah frozen strategy rules Phase 2J.
+4. Tidak boleh optimization/tuning.
+5. Tidak boleh synthetic price/data.
+6. M5 sebagai execution/confirmation timeframe, M15 untuk structure/SR.
+7. Hanya gunakan candle yang sudah CLOSE.
+8. Tidak boleh look-ahead/repaint.
+9. Jika kondisi tidak valid: NO TRADE.
+10. Jangan memaksa signal.
+
+Setiap signal valid harus menghasilkan:
+- timestamp
+- symbol
+- BUY/SELL
+- entry price
+- SL
+- TP
+- RR
+- M15 structure
+- support/resistance zone
+- engulfing confirmation
+- rejection confirmation
+- alasan signal
+- strategy version
+- data timestamp yang digunakan
+
+Buat mode:
+- SHADOW = hanya menghasilkan signal, tidak order
+- NO_TRADE = default jika kondisi tidak valid
+
+Logging:
+- simpan semua signal dan NO_TRADE reason
+- jangan overwrite signal sebelumnya
+- gunakan timestamp/ID unik
+- simpan hasil ke file/database yang sudah digunakan project
+- jangan mengubah execution bridge
+
+Safety:
+- order_send = 0
+- order_check = 0
+- execution_attempts = 0
+- strategy tidak boleh memanggil execution layer
+- tambahkan test untuk memastikan tidak ada order
+
+Monitoring:
+- pastikan hanya 1 signal per setup
+- cegah duplicate signal pada candle yang sama
+- signal baru hanya setelah candle M5 berikutnya closed
+- handle MT5 disconnect/stale data dengan fail-safe NO_TRADE
+
+Output:
+1. Implementasikan Live Shadow Signal Engine.
+2. Tambahkan test.
+3. Jalankan test.
+4. Tampilkan contoh output signal jika ada kondisi valid; jika belum ada, tampilkan NO_TRADE secara jujur.
+5. Buat laporan singkat PHASE_LIVE_1_REPORT.md.
+6. Simpan laporan di repo hasil: hasil-prompt-mt-info.
+7. Jangan commit/push mt-info.
+8. Jangan mengubah frozen strategy.
+
+STOP setelah implementasi dan hasil test selesai.
 ```
 # 
 ```
