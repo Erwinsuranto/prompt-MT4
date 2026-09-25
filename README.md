@@ -22,7 +22,104 @@
 ```
 # 
 ```
+PHASE 2I — REAL XAUUSD BACKTEST OF FROZEN S/R STRATEGY
 
+Jangan mengubah aturan strategi.
+Jangan menambah indikator.
+Jangan optimasi parameter.
+Jangan commit/push.
+
+Gunakan implementasi Phase 2H yang sekarang sebagai FROZEN VERSION.
+
+Tujuan:
+Mengukur performa strategi S/R reversal terbaru pada REAL XAUUSD historical data.
+
+WAJIB:
+- gunakan data XAUUSD nyata yang sudah tersedia di repository
+- bukan synthetic data untuk hasil performance
+- chronological processing
+- M15 closed-only
+- M5 closed-only
+- no look-ahead/repaint
+- entry hanya setelah confirmation candle CLOSED
+- true engulfing tetap confirmation
+- trending tanpa valid reversal = NO TRADE
+- gunakan S/R zone versi Phase 2H
+- jangan mengubah threshold/parameter untuk memperbaiki hasil
+
+Split data:
+TRAIN 60%
+VALIDATION 20%
+OOS 20%
+
+OOS tidak boleh digunakan untuk memilih atau mengubah rule.
+
+Catat minimal:
+
+- total setup
+- total valid signal
+- BUY
+- SELL
+- NO TRADE
+- wins
+- losses
+- win rate
+- average R
+- expectancy
+- profit factor
+- max drawdown
+- consecutive losses
+- hasil per pattern/SR condition
+- hasil per market regime
+- hasil first touch vs repeated touch
+- hasil support vs resistance
+- hasil M15 alignment vs non-alignment
+
+Untuk setiap trade gunakan outcome yang causal dan konsisten dengan
+framework sebelumnya.
+
+PENTING:
+Jangan mengklaim "profitable", "akurasi tinggi", atau "edge" hanya
+karena TRAIN/VALIDATION terlihat bagus.
+
+Cari juga:
+- apakah OOS konsisten dengan TRAIN/VAL
+- apakah performa runtuh pada OOS
+- apakah hasil terlalu bergantung pada sedikit trade
+- apakah repeated-touch zone justru lebih buruk
+- apakah trend filter benar-benar mengurangi false reversal tanpa
+  membuat data dipilih secara bias
+
+Jalankan regression/casuality tests yang relevan terlebih dahulu.
+
+Execution safety:
+order_send = 0
+order_check = 0
+execution_attempts = 0
+
+Jangan menjalankan MT5 live order.
+
+HASIL:
+Jangan menyimpan report ke mt-info.
+Saya akan menyimpan hasilnya sendiri di repository hasil-prompt-mt-info.
+
+Laporkan ringkas:
+
+1. Data yang digunakan
+2. Periode
+3. Jumlah bar
+4. TRAIN result
+5. VALIDATION result
+6. OOS result
+7. Jumlah setup/signal
+8. Win rate dan expectancy per split
+9. Max drawdown
+10. Apakah ada indikasi hasil tidak stabil
+11. Causality test
+12. Execution safety
+13. git status
+
+STOP setelah hasil keluar.
 ```
 # 
 ```
