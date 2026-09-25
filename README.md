@@ -6,6 +6,74 @@
 ```
 # 
 ```
+
+```
+# 
+```
+
+```
+# 
+```
+PHASE LIVE-3 — EXTENDED WINDOWS MT5 SHADOW
+
+Lanjutkan dari LIVE-2 pada Windows MT5.
+
+Tujuan:
+mengumpulkan sebanyak mungkin candle M5 XAUUSD.m real sebelum sesi/pasar berhenti, untuk observasi shadow saja.
+
+WAJIB:
+- SHADOW ONLY.
+- READ-ONLY MT5.
+- Tidak boleh order_send/order_check/execution.
+- Jangan ubah StrategyConfig/ReversalConfig.
+- Jangan tuning threshold.
+- Jangan optimasi berdasarkan hasil.
+- Frozen strategy: PHASE-2J-FROZEN-b782c394aca8.
+- Hanya closed M5 candle.
+- M15 sebagai structure/SR.
+- Forming candle harus ditolak.
+- Dedup 1 keputusan per candle.
+- Disconnect/stale/clock error => NO_TRADE.
+- Gunakan broker symbol XAUUSD.m.
+- Jangan gunakan synthetic data.
+- Jangan gunakan Gorouter.
+
+Jalankan shadow loop sampai mendekati market/session close atau sampai feed benar-benar tidak menghasilkan candle baru.
+
+CATAT:
+1. jumlah M5 closed candle baru
+2. jumlah SIGNAL
+3. jumlah NO_TRADE
+4. alasan NO_TRADE terbanyak
+5. setiap SIGNAL lengkap:
+   timestamp, BUY/SELL, entry, SL, TP, RR,
+   M15 structure, S/R zone,
+   engulfing, rejection, reason
+6. forming bars rejected
+7. duplicate
+8. stale/disconnect/clock errors
+9. order_send/order_check/execution_attempts
+10. positions/orders setelah run
+11. strategy hash/version
+12. broker symbol dan server timezone
+
+PENTING:
+Jangan menganggap SIGNAL sebagai profit.
+Jangan menghitung win/loss karena belum ada execution.
+Jangan menghapus atau mengubah journal append-only.
+
+Setelah selesai buat:
+PHASE_LIVE_3_REPORT.md
+
+Simpan report hanya di:
+hasil-prompt-mt-info
+
+Jangan commit/push mt-info.
+
+STOP setelah report selesai.
+```
+# 
+```
 PHASE LIVE-2 — WINDOWS MT5 XAUUSD SHADOW RUN
 
 Jalankan LIVE-1 pada Windows dengan MT5 aktif.
