@@ -26,7 +26,41 @@
 ```
 # 
 ```
+Lakukan FINAL CHECK singkat Phase 2H setelah 3 perbaikan tadi.
 
+Jangan melakukan refactor tambahan kecuali ada error nyata.
+
+1. Jalankan hanya test yang relevan untuk:
+   - S/R zone
+   - chart audit
+   - pattern_learning
+   - lookahead/causality
+
+2. Pastikan:
+   - S/R clustering tetap bekerja
+   - touch/retest episode tetap benar
+   - M15/M5 closed-only
+   - no look-ahead
+   - truncation invariant
+   - true engulfing tetap confirmation
+   - trending tanpa valid reversal tetap NO TRADE
+
+3. Pastikan:
+   order_send = 0
+   order_check = 0
+   execution_attempts = 0
+
+4. Jangan mengubah execution, bridge, risk, deployment, atau .env.
+
+5. Jangan git add, commit, atau push.
+
+6. Jika semua test PASS:
+   STOP dan laporkan hasil ringkas saja.
+
+7. Jika ada FAIL:
+   perbaiki hanya bug yang menyebabkan FAIL tersebut, lalu jalankan ulang test terkait.
+
+Jangan membuat fitur baru dan jangan melakukan optimasi parameter.
 ```
 # 
 ```
