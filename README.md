@@ -30,6 +30,268 @@
 ```
 # 
 ```
+PHASE 2H — FINAL S/R ZONE BEHAVIOR AUDIT
+
+Jangan commit dan jangan push.
+
+Tujuan audit:
+Memastikan implementasi S/R Phase 2H benar-benar membaca beberapa swing/rejection yang berdekatan sebagai SATU S/R ZONE, sesuai contoh chart yang dibahas.
+
+==================================================
+1. AUDIT ALGORITMA CLUSTERING
+==================================================
+
+Periksa implementasi di:
+
+python/xausr/sr_zones.py
+
+Pastikan beberapa swing/rejection dengan harga yang cukup dekat
+dapat dikelompokkan menjadi satu zone.
+
+Yang harus dibuktikan secara kode:
+
+- swing high yang berdekatan → dapat menjadi satu RESISTANCE zone
+- swing low yang berdekatan → dapat menjadi satu SUPPORT zone
+- zone memiliki low/high/center yang jelas
+- penambahan touch tidak membuat zone baru jika masih merupakan
+  kunjungan ke area yang sama
+- harga yang benar-benar sudah meninggalkan zone lalu kembali lagi
+  menghasilkan episode retest baru
+- zone yang sudah broken ditandai dengan benar
+
+Jangan hanya membaca nama fungsi.
+Telusuri actual calculation dan kondisi clustering.
+
+==================================================
+2. REPRODUKSI POLA CONTOH CHART
+==================================================
+
+Buat test deterministik kecil menggunakan data OHLC sintetis
+HANYA untuk menguji mekanisme clustering, bukan untuk mengklaim
+performance strategi.
+
+Gunakan pola konseptual berikut:
+
+A:
+swing/rejection 1 sekitar level yang sama dengan 3
+→ harus dapat menjadi SATU SUPPORT zone.
+
+B:
+swing/rejection 2, 5, 8, 10 berada pada area harga yang sama
+→ harus dapat menjadi SATU RESISTANCE zone dengan beberapa
+touch/rejection episode.
+
+C:
+4 dan 6 berada pada area support yang sama
+→ harus dapat menjadi SATU SUPPORT zone.
+
+D:
+7 dan 9 berada pada area level yang sama
+→ harus dapat menjadi SATU zone/level structure sesuai arah
+reaksinya.
+
+Jangan hard-code angka dari gambar sebagai trading rule.
+Test hanya mekanisme pengelompokan.
+
+==================================================
+3. CEK MASALAH OVER-CLUSTERING
+==================================================
+
+Pastikan dua level yang sebenarnya berbeda tidak otomatis digabung
+hanya karena terlalu dekat.
+
+Contoh:
+
+Zone A
+harga sekitar X
+
+Zone B
+harga cukup jauh dari X
+
+harus tetap menjadi dua zone.
+
+Jelaskan dasar jarak clustering yang digunakan:
+
+- fixed distance?
+- ATR-relative?
+- volatility-relative?
+- kombinasi?
+
+Jika menggunakan ATR, pastikan ATR hanya memakai data yang tersedia
+pada waktu tersebut dan tidak menggunakan future candle.
+
+==================================================
+4. TOUCH VS EPISODE
+==================================================
+
+Verifikasi dengan test:
+
+harga masuk zone
+→ beberapa candle tetap berada di dalam/sekitar zone
+→ keluar
+
+harus dihitung sebagai:
+
+1 episode
+
+bukan:
+
+5 atau 10 touch hanya karena ada banyak candle.
+
+Kemudian:
+
+harga menjauh dari zone
+→ kembali lagi
+
+harus menghasilkan episode berikutnya.
+
+==================================================
+5. REJECTION
+==================================================
+
+Pastikan:
+
+touch != rejection.
+
+Rejection hanya dicatat jika price action setelah touch memenuhi
+kondisi rejection yang ditentukan.
+
+Pastikan feature rejection tidak menggunakan candle masa depan
+untuk membuat keputusan pada timestamp sebelumnya.
+
+==================================================
+6. M15 DAN M5
+==================================================
+
+Verifikasi:
+
+M15 = struktur/context S/R utama.
+
+M5 = retest/rejection/engulfing confirmation.
+
+Pastikan:
+
+- M15 forming candle tidak digunakan.
+- M5 forming candle tidak digunakan.
+- confirmation hanya setelah candle close.
+- tidak ada future bar lookup.
+
+==================================================
+7. INDICATORS
+==================================================
+
+Audit:
+
+ATR
+EMA 20/50
+RSI
+
+Pastikan semuanya hanya FILTER/CONTEXT.
+
+Tidak boleh berubah menjadi:
+
+RSI oversold → BUY
+RSI overbought → SELL
+EMA crossover → BUY/SELL
+
+S/R tetap menjadi sumber utama setup reversal.
+
+Jika market trending kuat dan tidak ada valid S/R reversal:
+
+NO TRADE.
+
+==================================================
+8. PATTERN LEARNING
+==================================================
+
+Periksa:
+
+python/xausr/pattern_learning.py
+
+Pastikan pattern learning menerima informasi S/R zone yang
+representatif:
+
+- support/resistance
+- touch/retest episode
+- rejection
+- zone quality
+- M15 alignment
+- M5 confirmation
+- regime/context
+
+Jangan menambahkan dimensi fingerprint secara berlebihan hanya
+untuk meningkatkan jumlah pattern.
+
+==================================================
+9. CAUSALITY TEST
+==================================================
+
+Jalankan atau tambahkan test untuk:
+
+- no look-ahead
+- truncation invariance
+- deterministic output
+- forming candle excluded
+- closed M15 only
+- closed M5 only
+
+Jika hasil full-history dan truncated-history berbeda pada bagian
+yang seharusnya causal, investigasi.
+
+==================================================
+10. EXECUTION SAFETY
+==================================================
+
+Pastikan audit layer ini tetap:
+
+order_send = 0
+order_check = 0
+execution_attempts = 0
+
+Jangan menjalankan live order.
+
+==================================================
+11. GIT SAFETY
+==================================================
+
+JANGAN:
+
+git add
+git commit
+git push
+
+Jangan menghapus perubahan Phase 2H.
+
+Jangan mengubah execution/bridge/risk.
+
+==================================================
+12. FINAL REPORT
+==================================================
+
+Laporkan:
+
+A. Apakah clustering benar-benar bekerja seperti konsep chart?
+B. Apakah 1↔3 dapat menjadi satu zone?
+C. Apakah 2↔5↔8↔10 dapat menjadi satu resistance zone?
+D. Apakah 4↔6 dapat menjadi satu support zone?
+E. Apakah 7↔9 diperlakukan sebagai satu level/zone bila memang
+   berada pada area yang sama?
+F. Bagaimana menentukan lebar zone?
+G. Bagaimana touch dan retest episode dibedakan?
+H. Bagaimana rejection ditentukan?
+I. Apakah ada look-ahead/repaint?
+J. Hasil seluruh test.
+K. order_send count.
+L. order_check count.
+M. execution_attempts count.
+N. git status.
+
+Jika ditemukan bug atau konsep clustering belum sesuai:
+PERBAIKI KODE DAN TEST TERKAIT.
+
+Jika harus melakukan perubahan, tetap JANGAN commit/push.
+
+STOP setelah audit dan report selesai.
 
 ```
 # 
