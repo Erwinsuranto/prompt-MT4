@@ -14,11 +14,281 @@
 ```
 # 
 ```
+PHASE 2J — EXPANDED REAL OOS + WALK-FORWARD VALIDATION
 
+Tujuan:
+Melanjutkan Phase 2I untuk menguji apakah pola reversal memiliki bukti edge yang lebih stabil pada data REAL XAUUSD, tanpa mengubah strategi yang sudah dibekukan.
+
+ATURAN WAJIB:
+1. Gunakan hanya data REAL XAUUSD M5 + M15 yang tersedia.
+2. Jangan gunakan synthetic data.
+3. Freeze seluruh StrategyConfig(), ReversalConfig(), SR zone, engulfing, rejection, ATR, entry/exit rules dari Phase 2I.
+4. JANGAN mengubah threshold, indikator, parameter strategi, atau melakukan optimization/tuning untuk memperbagus hasil.
+5. Chronological only. Tidak boleh shuffle.
+6. Tidak boleh look-ahead/repaint.
+7. Candle forming tidak boleh digunakan.
+8. Entry hanya setelah confirmation candle benar-benar close.
+9. Exit hanya menggunakan candle setelah entry.
+10. Jika tidak ada reversal valid, tetap NO TRADE. Jangan memaksa signal.
+11. Jangan mengubah execution/bridge/live trading code.
+12. Jangan kirim order apa pun.
+
+VALIDASI:
+- Gunakan seluruh histori REAL yang tersedia.
+- Buat expanded chronological OOS / walk-forward evaluation.
+- Jika data memungkinkan, targetkan >=100 valid trades kumulatif OOS, tetapi JANGAN memperlonggar rule hanya untuk mencapai jumlah tersebut.
+- Jika <100 trade, laporkan jumlah sebenarnya dan jelaskan keterbatasannya.
+- Pisahkan hasil frozen-rule strategy dari observation/learning analysis.
+- Learning tidak boleh mengubah strategy rule.
+
+LAPORKAN:
+A. TRAIN / VALIDATION / setiap OOS window:
+   - jumlah bar
+   - jumlah valid signal
+   - BUY / SELL
+   - win / loss
+   - win rate
+   - expectancy R
+   - profit factor
+   - total R
+   - max drawdown
+   - consecutive win/loss
+
+B. Analisis pola:
+   - SUPPORT vs RESISTANCE
+   - first/repeated touch
+   - M15 aligned vs non-aligned
+   - BULL / BEAR / SIDE
+   - rejection + true engulfing
+   - distribusi R
+   - kontribusi trade terbesar terhadap total hasil
+
+C. Stability:
+   - bandingkan semua OOS window secara chronological
+   - cari perubahan performa antar-window
+   - jangan menyimpulkan edge jika hanya ditopang sedikit trade
+   - tandai INSUFFICIENT DATA bila sample kecil
+
+D. Statistik:
+   - confidence interval win rate bila aman dihitung
+   - bootstrap confidence interval expectancy bila implementasinya valid
+   - jangan menggunakan statistik untuk mengubah strategy
+
+E. CAUSALITY:
+   - pastikan semua feature hanya memakai data sampai decision candle
+   - pastikan M15 closed-only
+   - pastikan truncation-invariant
+   - tambahkan regression test jika diperlukan
+
+F. SAFETY:
+   - order_send = 0
+   - order_check = 0
+   - execution_attempts = 0
+   - tidak ada live order
+   - strategy/backtest tidak boleh import execution path
+
+OUTPUT:
+1. Buat laporan hasil lengkap:
+   PHASE_2J_IMPLEMENTATION_REPORT.md
+2. Simpan hasil/report di repo:
+   https://github.com/zenolambee/hasil-prompt-mt-info
+3. JANGAN simpan report hasil Phase 2J ke repo mt-info.
+4. Jangan git add/commit/push ke mt-info.
+5. Jangan melakukan optimization.
+6. Jangan mengubah frozen strategy hanya karena hasil OOS buruk.
+7. Jika edge belum terbukti, tulis jelas:
+   "EDGE NOT PROVEN"
+   dan jelaskan berdasarkan data.
+
+SELESAI setelah seluruh evaluasi, test, statistik, dan report selesai.
+
+Jangan membuat prompt lanjutan.
+Berikan hasil akhir Phase 2J saja.
 ```
 # 
 ```
+PHASE 2J — EXPANDED REAL-DATA OOS + WALK-FORWARD
 
+Lanjutkan dari Phase 2I.
+
+Jangan mengubah strategi S/R Phase 2H.
+Jangan menambah indikator.
+Jangan optimasi parameter.
+Jangan commit/push.
+
+TUJUAN:
+Mendapatkan sample OOS yang cukup besar untuk menentukan apakah
+strategi S/R reversal benar-benar mempunyai edge atau tidak.
+
+1. DATA
+Gunakan SELURUH real XAUUSD historical data yang kompatibel dengan
+M5 + M15 yang tersedia di repository.
+
+Laporkan:
+- tanggal awal
+- tanggal akhir
+- jumlah M5
+- jumlah M15
+- gap/missing data
+- periode yang benar-benar dapat digunakan oleh strategy
+
+Jangan memakai synthetic data untuk performance.
+
+2. WALK-FORWARD
+Gunakan chronological walk-forward.
+
+Jangan random shuffle.
+
+Untuk setiap window:
+TRAIN → VALIDATION → OOS
+
+OOS harus benar-benar berada setelah data training/validation.
+
+Jangan menggunakan hasil OOS untuk memilih parameter/rule.
+
+3. STRATEGY HARUS FROZEN
+Tetap gunakan:
+
+S/R zone
+→ retest/touch
+→ rejection
+→ true engulfing confirmation
+→ ATR/EMA/RSI sebagai context/filter yang sudah ada
+→ trend tanpa valid reversal = NO TRADE
+
+Jangan menambah rule baru hanya karena hasil Phase 2I negatif.
+
+4. HAPUS POTENSI BIAS LEARNING
+Audit penggunaan Pattern Library / keep-lookalike.
+
+Pastikan pattern selection atau learning dari TRAIN tidak secara
+langsung menggunakan informasi VAL/OOS.
+
+Jika strategi frozen sebenarnya tidak membutuhkan learned pattern
+untuk menghasilkan signal, ukur baseline frozen strategy secara
+langsung terlebih dahulu.
+
+Pisahkan dengan jelas:
+
+A. FROZEN RULE PERFORMANCE
+B. OPTIONAL LEARNED/PATTERN OBSERVATION
+
+Jangan memakai B untuk mempercantik hasil A.
+
+5. MINIMUM SAMPLE
+Targetkan OOS kumulatif minimal 100 valid trades jika data
+memungkinkan.
+
+Jangan memaksa mencapai 100 jika data nyata memang tidak cukup.
+
+Jika kurang:
+laporkan jumlah sebenarnya dan alasan.
+
+Jangan membuat signal tambahan untuk mengejar sample.
+
+6. METRICS
+Untuk setiap OOS window dan kumulatif:
+
+- trades
+- BUY
+- SELL
+- wins
+- losses
+- win rate
+- expectancy R
+- average R
+- profit factor
+- max drawdown R
+- consecutive losses
+- gross profit
+- gross loss
+
+Tambahkan:
+- support vs resistance
+- first touch vs repeated touch
+- M15 aligned vs non-aligned
+- market regime
+- rejection + engulfing
+- distribution of R
+
+7. STABILITY
+Cari apakah hasil:
+
+- konsisten antar-window
+- hanya bagus pada satu periode
+- berubah tanda TRAIN → OOS
+- sensitif terhadap market regime
+- bergantung pada sedikit trade besar
+
+Jangan memberi label "edge" hanya karena FULL result positif.
+
+8. STATISTICAL VALIDATION
+Hitung uncertainty sederhana yang sesuai dengan sample.
+
+Minimal:
+- confidence interval win rate
+- bootstrap confidence interval expectancy jika implementasi
+  tersedia secara aman
+
+Jangan memilih metode statistik setelah melihat hasil untuk
+mendapatkan kesimpulan yang lebih bagus.
+
+9. CAUSALITY
+Pastikan kembali:
+
+- no look-ahead
+- no repaint
+- M15 closed-only
+- M5 closed-only
+- confirmation candle closed
+- truncation invariant
+- deterministic
+
+10. EXECUTION SAFETY
+
+Tetap:
+
+order_send = 0
+order_check = 0
+execution_attempts = 0
+
+Tidak ada live order.
+
+11. JANGAN OPTIMASI
+DILARANG:
+
+- mengubah threshold karena OOS negatif
+- memilih window terbaik
+- membuang losing periods
+- memilih hanya pattern yang profitable
+- menambah filter baru
+- mengubah TP/SL hanya untuk menaikkan PF
+- mengulang backtest dengan parameter berbeda sampai hasil positif
+
+Jika hasil negatif, catat sebagai hasil negatif.
+
+12. FINAL VERDICT
+
+Berikan kesimpulan berdasarkan data:
+
+A. SAMPLE SUFFICIENT / INSUFFICIENT
+B. OOS POSITIVE / NEUTRAL / NEGATIVE
+C. STABLE / UNSTABLE
+D. Apakah bukti saat ini cukup untuk menyebut ada edge?
+E. Jika belum, jelaskan tepat apa yang masih kurang.
+
+Jangan gunakan kata "profitable" atau "edge" jika statistik belum
+mendukung.
+
+13. GIT
+
+Jangan git add.
+Jangan commit.
+Jangan push.
+
+Jangan menyimpan report ke mt-info.
+
+STOP setelah hasil lengkap tersedia.
 ```
 # 
 ```
