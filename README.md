@@ -34,7 +34,438 @@
 ```
 # 
 ```
+PHASE 2H — REWORK S/R DETECTION TO MATCH REAL CHART STRUCTURE
 
+Kita sekarang mengubah konsep S/R mt-info agar lebih sesuai dengan cara membaca chart XAUUSD M5 seperti contoh yang saya berikan.
+
+ATURAN UTAMA:
+Jika implementasi S/R yang sekarang berbeda dengan konsep di bawah, WAJIB ubah/refactor kode yang ada agar sesuai. Jangan mempertahankan desain lama hanya karena sudah dibuat.
+
+JANGAN langsung coding sebelum audit.
+
+==================================================
+1. AUDIT IMPLEMENTASI S/R SAAT INI
+==================================================
+
+Audit seluruh kode yang berkaitan dengan:
+
+- S/R detection
+- swing high / swing low
+- support/resistance zone
+- rejection
+- touch/retest
+- engulfing
+- M5/M15 structure
+- pattern learning/library
+- signal generation
+
+Cari tahu:
+- bagaimana level S/R saat ini dibuat
+- apakah swing yang berdekatan digabung menjadi satu zona
+- bagaimana touch/retest dihitung
+- apakah satu level bisa memiliki beberapa rejection
+- apakah M15 digunakan sebagai struktur
+- apakah M5 digunakan sebagai confirmation
+- apakah ada look-ahead/repaint
+- apakah kode lama menggunakan pendekatan yang berbeda dari konsep baru
+
+Sebelum mengubah kode, buat ringkasan singkat:
+CURRENT IMPLEMENTATION vs TARGET CONCEPT.
+
+==================================================
+2. TARGET KONSEP S/R BARU
+==================================================
+
+S/R bukan sekadar satu swing = satu level.
+
+Sistem harus membaca struktur seperti manusia membaca chart.
+
+Contoh dari chart:
+
+1 ↔ 3
+= dua rejection pada area support yang sama.
+
+2 ↔ 5 ↔ 8 ↔ 10
+= beberapa rejection/touch pada area resistance yang sama.
+
+4 ↔ 6
+= dua rejection pada area support yang sama.
+
+7 ↔ 9
+= dua reaction pada area level tengah yang sama.
+
+Artinya:
+
+BEBERAPA swing/rejection yang memiliki harga berdekatan harus dapat
+DIKELOMPOKKAN menjadi SATU S/R ZONE.
+
+Jangan membuat:
+swing 1 = level A
+swing 3 = level B
+
+jika secara struktur keduanya adalah zona support yang sama.
+
+==================================================
+3. S/R ZONE
+==================================================
+
+Implementasikan konsep:
+
+candidate swing
+    ↓
+candidate S/R
+    ↓
+cluster level yang berdekatan
+    ↓
+S/R zone
+    ↓
+touch/rejection history
+    ↓
+quality score/statistics
+
+Zona harus mempunyai informasi minimal:
+
+- type: SUPPORT / RESISTANCE
+- zone_low
+- zone_high
+- center
+- touches
+- rejection_count
+- first_seen
+- last_seen
+- broken status
+- reaction information
+
+Lebar zona jangan menggunakan angka pip yang kaku jika ATR tersedia.
+
+Zona harus dapat menggunakan volatilitas historis secara causal.
+
+Tidak boleh menggunakan future candle untuk menentukan zona pada waktu sebelumnya.
+
+==================================================
+4. TOUCH / RETEST
+==================================================
+
+Setiap kali harga kembali ke zona:
+
+catat sebagai touch/retest.
+
+Tetapi jangan menghitung setiap candle yang berada di dalam zona
+sebagai touch baru.
+
+Satu kunjungan harga ke zona harus diperlakukan sebagai satu episode
+touch/retest sampai harga benar-benar meninggalkan zona.
+
+Contoh:
+
+harga masuk zona
+→ 5 candle bergerak di dalam zona
+→ keluar
+
+= 1 touch/retest episode,
+BUKAN 5 touch.
+
+Jika kemudian harga pergi jauh dan kembali lagi:
+
+= touch/retest baru.
+
+==================================================
+5. REJECTION
+==================================================
+
+Touch belum tentu rejection.
+
+Rejection harus dinilai berdasarkan reaksi harga setelah menyentuh zona.
+
+Contoh support:
+
+harga masuk/menyentuh support
+→ gagal menembus secara valid
+→ candle close kembali di atas zona
+→ harga bergerak menjauh
+
+= bullish rejection candidate.
+
+Resistance sebaliknya.
+
+Semua penilaian harus causal.
+
+Tidak boleh melihat candle masa depan ketika membuat keputusan pada candle entry.
+
+==================================================
+6. MULTI-TIMEFRAME
+==================================================
+
+M15:
+- struktur utama
+- S/R utama
+- context
+
+M5:
+- retest/reaction
+- rejection
+- engulfing
+- entry confirmation
+
+M15 candle yang digunakan harus CLOSED.
+
+M5 entry confirmation hanya setelah candle confirmation CLOSED.
+
+Tidak boleh menggunakan forming candle sebagai confirmation.
+
+==================================================
+7. TRUE ENGULFING
+==================================================
+
+Pertahankan konsep true engulfing yang sudah ada jika memang benar.
+
+Jangan mengganti engulfing hanya demi meningkatkan hasil statistik.
+
+Engulfing harus menjadi confirmation di sekitar S/R,
+BUKAN sumber utama S/R.
+
+Urutan:
+
+S/R zone
+→ price enters/retests zone
+→ rejection
+→ true engulfing confirmation
+→ additional filters
+→ possible signal
+
+==================================================
+8. TAMBAHAN FILTER — JANGAN BERLEBIHAN
+==================================================
+
+Tambahkan hanya filter yang benar-benar relevan.
+
+Prioritas:
+
+A. ATR
+- adaptive zone width
+- membantu mengukur volatility
+- bukan signal generator
+
+B. EMA 20/50
+- membantu mengidentifikasi kondisi trend
+- digunakan sebagai context/regime filter
+- jangan membuat sistem menjadi EMA crossover strategy
+
+C. RSI
+- hanya confirmation tambahan ketika harga sudah berada di S/R
+- jangan membuat:
+  RSI oversold = BUY
+  RSI overbought = SELL
+
+Jika salah satu filter ternyata tidak memberi nilai tambah secara
+out-of-sample, desain harus memungkinkan filter tersebut dimatikan.
+
+==================================================
+9. TRENDING MARKET = NO TRADE
+==================================================
+
+Ini sangat penting.
+
+Strategi ini adalah S/R reversal strategy.
+
+Jika market sedang trending kuat dan tidak ada valid reversal S/R setup:
+
+NO TRADE.
+
+Jangan memaksa membuat signal.
+
+Jangan menambahkan trend-following entry hanya agar jumlah trade bertambah.
+
+==================================================
+10. QUALITY OF S/R
+==================================================
+
+Buat data yang memungkinkan kita mengevaluasi kualitas zona:
+
+- number of touches
+- rejection count
+- reaction magnitude
+- distance between touches
+- zone age
+- whether zone was broken
+- retest count
+- M15 alignment
+- M5 confirmation
+
+Jangan langsung mengubah quality menjadi trading threshold.
+
+Untuk tahap ini, utamakan OBSERVATION / LEARNING.
+
+==================================================
+11. ANTI LOOK-AHEAD / REPAINT
+==================================================
+
+WAJIB:
+
+- chronological processing
+- closed candles only
+- no future candle access
+- no future-derived zone boundaries
+- no future-derived labels leaking into features
+- deterministic result
+- truncation invariant
+
+Jika sebuah S/R baru diketahui setelah candle tertentu,
+jangan berpura-pura bahwa S/R tersebut sudah diketahui pada candle sebelumnya.
+
+==================================================
+12. COMPATIBILITY DENGAN PATTERN LIBRARY
+==================================================
+
+Integrasikan konsep S/R baru dengan Pattern Library yang baru dibuat.
+
+Pattern Library tetap observation/learning layer.
+
+Jangan menjadikan pattern library sebagai alasan untuk membuat
+signal otomatis.
+
+Pattern fingerprint harus dapat membedakan kondisi seperti:
+
+- support retest
+- resistance retest
+- first touch
+- second touch
+- repeated touch
+- rejection strength
+- engulfing confirmation
+- M15 alignment
+- market regime
+
+Tetapi jangan memperbesar dimensionality secara berlebihan.
+
+Jika fingerprint lama terlalu berbeda dengan konsep baru,
+refactor secara terukur dan dokumentasikan perubahan.
+
+==================================================
+13. NO OPTIMIZATION FOR PRETTY RESULTS
+==================================================
+
+DILARANG:
+
+- mengoptimalkan parameter hanya untuk menaikkan win rate
+- memilih parameter berdasarkan OOS
+- membuang data yang menghasilkan loss
+- cherry-pick pola
+- mengubah rule agar backtest terlihat bagus
+- mengklaim profitability
+
+Tujuan fase ini adalah:
+
+REALISTIC S/R REPRESENTATION
++
+CAUSAL PATTERN OBSERVATION
++
+VALIDATION FOUNDATION
+
+bukan membuat backtest terlihat bagus.
+
+==================================================
+14. TESTING
+==================================================
+
+Tambahkan/update tests untuk:
+
+1. swing clustering
+2. support zone clustering
+3. resistance zone clustering
+4. multiple touches = one visit episode
+5. separated retest = new episode
+6. rejection detection
+7. broken zone
+8. M15 closed-only
+9. M5 closed-only
+10. forming candle excluded
+11. no look-ahead
+12. truncation invariance
+13. deterministic output
+14. insufficient history safe
+15. pattern library compatibility
+16. no execution side effects
+
+Run full relevant test suite.
+
+Pastikan:
+
+order_send = 0
+order_check = 0
+execution_attempts = 0
+
+==================================================
+15. PROTECTED AREAS
+==================================================
+
+Jangan mengubah:
+
+- live execution
+- Windows MT5 bridge
+- risk management
+- order execution
+- deployment
+- credentials
+- .env
+- existing safety gates
+
+kecuali perubahan memang mutlak diperlukan untuk kompatibilitas,
+dan jika demikian STOP sebelum mengubahnya dan laporkan.
+
+==================================================
+16. RESULT REPORT
+==================================================
+
+Jangan membuat report hasil di repository mt-info.
+
+Hasil/report akan saya simpan sendiri di repository:
+
+hasil-prompt-mt-info
+
+==================================================
+17. GIT
+==================================================
+
+Untuk fase ini:
+
+JANGAN commit.
+JANGAN push.
+
+Saya akan review hasil terlebih dahulu.
+
+==================================================
+FINAL REPORT
+==================================================
+
+Laporkan:
+
+1. CURRENT S/R DESIGN
+2. TARGET S/R DESIGN
+3. Apa saja yang berbeda
+4. File yang diubah
+5. File yang tidak diubah
+6. Implementasi S/R zone clustering
+7. Touch/retest logic
+8. Rejection logic
+9. M15/M5 causal behavior
+10. ATR/EMA/RSI implementation
+11. Pattern Library compatibility
+12. Anti-lookahead verification
+13. Test results
+14. order_send count
+15. order_check count
+16. execution_attempts count
+17. git status
+18. Commit/push = TIDAK dilakukan
+
+Jika kode lama sudah sesuai pada bagian tertentu,
+PERTAHANKAN bagian tersebut dan jangan refactor tanpa alasan.
+
+Jika desain lama bertentangan dengan konsep baru,
+UBAH agar mengikuti konsep baru dan jelaskan perubahan tersebut.
+
+STOP setelah report selesai.
 ```
 # 
 ```
