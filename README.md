@@ -6,7 +6,45 @@
 ```
 # 
 ```
+PHASE LIVE-2 — WINDOWS MT5 XAUUSD SHADOW RUN
 
+Jalankan LIVE-1 pada Windows dengan MT5 aktif.
+
+WAJIB:
+- XAUUSD broker dari MT5, READ-ONLY.
+- SHADOW ONLY, tidak boleh order.
+- Frozen Phase 2J/LIVE-1.
+- Jangan tuning atau mengubah strategi.
+- Hanya candle M5 yang sudah CLOSE.
+- M15 untuk structure/SR.
+- Simpan semua SIGNAL dan NO_TRADE.
+- Dedup: maksimal 1 keputusan per candle M5.
+- Jika MT5 disconnect/stale/clock invalid → NO_TRADE.
+- Pastikan symbol dan feed broker tercatat.
+
+Jalankan cukup lama untuk memastikan feed live benar-benar masuk dan engine bekerja.
+
+LAPORKAN:
+1. MT5 connected atau tidak.
+2. Symbol XAUUSD yang digunakan.
+3. Jumlah M5 closed bars diterima.
+4. Jumlah SIGNAL.
+5. Jumlah NO_TRADE.
+6. Alasan NO_TRADE utama.
+7. Contoh signal jika ada.
+8. Pastikan order_send=0, order_check=0, execution_attempts=0.
+9. Pastikan tidak ada perubahan strategy.
+10. Test/regression harus tetap PASS.
+
+Buat:
+PHASE_LIVE_2_REPORT.md
+
+Simpan report di:
+hasil-prompt-mt-info
+
+Jangan commit/push mt-info.
+
+STOP setelah shadow run dan report selesai.
 ```
 # 
 ```
