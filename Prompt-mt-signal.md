@@ -8,6 +8,457 @@ https://github.com/zenolambee/mt-signal.git
 ```
 # 
 ```
+PHASE BERIKUTNYA — CLEANUP REPO HASIL + VALIDASI SIGNAL XAUUSD DENGAN CANDLE AKTUAL
+
+Lanjutkan dari kondisi repository saat ini.
+
+PENTING:
+- Jangan membuat strategy baru.
+- Jangan menambah indikator baru.
+- Jangan mengubah logic utama EMA20/50 + RSI14 + ATR14 + Market Structure + Fibonacci yang sudah dibuat.
+- Jangan menghapus hasil coding yang sudah dibuat sebelum memastikan source code aman di repository utama.
+- Repository `hasil-prompt-mt-signal` adalah REPO HASIL/DOKUMENTASI PROMPT, bukan repository source code utama.
+- Source code utama tetap berada di repository utama `zenolambee/mt-signal`.
+- Semua perubahan harus diverifikasi sebelum commit/push.
+
+==================================================
+BAGIAN 1 — CLEANUP REPOSITORY HASIL
+==================================================
+
+Repository hasil:
+
+https://github.com/zenolambee/hasil-prompt-mt-signal.git
+
+Tujuan repository ini:
+MENYIMPAN HASIL DARI PROMPT/PHASE, BUKAN MENJADI SOURCE CODE UTAMA.
+
+1. Inspect terlebih dahulu:
+- branch
+- commit history
+- seluruh file
+- isi README.md
+- source code yang saat ini terlanjur berada di repository hasil.
+
+2. Pastikan source code strategy tetap aman di repository utama:
+
+https://github.com/zenolambee/mt-signal
+
+Jika source code yang sekarang hanya ada di repository hasil dan belum ada di repository utama:
+- jangan hapus dulu.
+- pastikan source code sudah tersedia/tersimpan di repository utama.
+- setelah aman, baru rapikan repository hasil.
+
+3. Repository `hasil-prompt-mt-signal` setelah cleanup harus berisi DOKUMENTASI HASIL, bukan source code utama.
+
+Gunakan struktur sederhana:
+
+hasil-prompt-mt-signal/
+├── README.md
+└── phase/
+    └── phase-01-xauusd-ema-rsi-atr-fibonacci.md
+
+Jika sudah ada format folder/hasil yang lebih baik di repository, pertahankan dan sesuaikan tanpa membuat struktur berlebihan.
+
+4. File hasil phase harus menjelaskan:
+
+- Nama strategy:
+  XAUUSD_EMA_RSI_ATR_STRUCTURE_FIB
+
+- Indikator:
+  EMA20
+  EMA50
+  RSI14
+  ATR14
+  Fibonacci
+  Market Structure
+
+- Timeframe:
+  M15 confirmation
+  M5 entry
+
+- Logic BUY secara ringkas.
+- Logic SELL secara ringkas.
+- Logic NO SIGNAL.
+- Fibonacci 0.382 / 0.500 / 0.618 / 0.786.
+- Fibonacci extension 1.272 / 1.618.
+- ATR SL.
+- RR TP.
+- Confidence.
+- Test yang sudah dilakukan.
+- Jumlah test PASS/FAIL.
+- Status validasi candle aktual.
+
+5. Jangan masukkan:
+- API key
+- password
+- token
+- `.env`
+- credential
+- secret
+- data sensitif.
+
+6. Setelah cleanup:
+- git status
+- git diff
+- pastikan source code strategy tidak hilang.
+- commit dengan message yang jelas.
+- push ke repository hasil.
+
+JANGAN menghapus source code dari repository hasil sebelum memastikan source code aman di repository utama.
+
+==================================================
+BAGIAN 2 — VALIDASI DENGAN CANDLE XAUUSD AKTUAL
+==================================================
+
+Setelah cleanup repository selesai, lanjutkan validasi strategy.
+
+Tujuan:
+Memastikan strategy bukan hanya lulus unit test, tetapi benar-benar dapat memproses candle XAUUSD dan menghasilkan:
+
+BUY
+SELL
+atau
+NO SIGNAL
+
+berdasarkan data candle.
+
+==================================================
+A. INSPECT SOURCE CODE
+==================================================
+
+Inspect strategy yang sekarang.
+
+Pastikan fungsi/komponen yang digunakan untuk signal dapat menerima data candle secara nyata/deterministik.
+
+Jangan membuat mock BUY/SELL hanya supaya test PASS.
+
+Jika architecture belum memiliki candle input yang jelas, buat adapter/input layer minimal tanpa mengubah logic strategy.
+
+==================================================
+B. DATA CANDLE
+==================================================
+
+Gunakan data candle XAUUSD aktual jika repository/project sudah memiliki data provider atau feed.
+
+Jika belum ada live feed:
+- gunakan historical candle XAUUSD yang nyata untuk validation.
+- jangan menggunakan candle random.
+- jangan mengarang OHLC.
+
+Data minimal:
+
+timestamp
+open
+high
+low
+close
+
+Jika diperlukan:
+
+volume
+spread
+
+Gunakan:
+M15 untuk confirmation.
+M5 untuk entry.
+
+==================================================
+C. PIPELINE VALIDASI
+==================================================
+
+Test pipeline:
+
+XAUUSD candle
+↓
+M15 EMA20/EMA50
+↓
+M15 trend
+↓
+M5 EMA20/EMA50
+↓
+Market Structure
+↓
+Fibonacci swing
+↓
+Fibonacci retracement
+↓
+RSI14
+↓
+Candle confirmation
+↓
+Structure break
+↓
+ATR14
+↓
+SL
+↓
+TP
+↓
+BUY / SELL / NO SIGNAL
+
+Pastikan setiap tahap menggunakan candle yang tersedia pada saat itu.
+
+Jangan menggunakan candle masa depan untuk menentukan signal.
+
+==================================================
+D. AVOID LOOK-AHEAD BIAS
+==================================================
+
+Ini WAJIB.
+
+Signal pada candle N hanya boleh menggunakan data candle sampai candle N.
+
+Tidak boleh:
+- menggunakan future candle.
+- menggunakan future swing.
+- menggunakan future Fibonacci anchor.
+- menggunakan candle setelah entry untuk menentukan signal entry.
+
+Jika swing membutuhkan confirmation candle, gunakan hanya setelah swing tersebut benar-benar confirmed.
+
+Dokumentasikan aturan ini.
+
+==================================================
+E. END-TO-END VALIDATION
+==================================================
+
+Buat minimal:
+
+1. Satu scenario BUY yang berasal dari candle nyata.
+2. Satu scenario SELL yang berasal dari candle nyata.
+3. Satu scenario NO SIGNAL.
+
+Untuk setiap scenario tampilkan:
+
+timestamp
+symbol
+timeframe
+M15 trend
+M5 trend
+EMA20
+EMA50
+RSI
+ATR
+swing high
+swing low
+Fib 0.382
+Fib 0.500
+Fib 0.618
+Fib 0.786
+current price
+market structure
+candle confirmation
+structure break
+entry
+SL
+TP
+RR
+confidence
+final signal
+reason
+
+==================================================
+F. SIGNAL TIDAK BOLEH DIPAKSA
+==================================================
+
+Jika data candle tidak menghasilkan BUY/SELL:
+
+→ tampilkan NO SIGNAL.
+
+Jangan mengubah parameter hanya untuk memaksa muncul BUY/SELL.
+
+Jika historical dataset tidak menemukan setup yang valid, laporkan:
+
+"Dataset tidak menghasilkan setup valid."
+
+Jangan membuat hasil palsu.
+
+==================================================
+G. VALIDASI OUTPUT
+==================================================
+
+Pastikan output seperti:
+
+XAUUSD
+Strategy: XAUUSD_EMA_RSI_ATR_STRUCTURE_FIB
+
+M15 Trend: Bullish
+M5 Structure: Higher High / Higher Low
+
+Fibonacci:
+0.382 = ...
+0.500 = ...
+0.618 = ...
+0.786 = ...
+
+RSI: ...
+ATR: ...
+
+Signal: BUY
+
+Entry: ...
+SL: ...
+TP: ...
+RR: 1:2
+
+Confidence: .../100
+
+Reason:
+M15 bullish + M5 pullback + Fib 0.500-0.618 + RSI confirmation + bullish structure break.
+
+Untuk SELL gunakan informasi yang sesuai.
+
+Jika NO SIGNAL:
+
+Signal: NO SIGNAL
+
+Reason:
+jelaskan kondisi yang gagal.
+
+==================================================
+H. TEST
+==================================================
+
+Jalankan seluruh test existing.
+
+Kemudian tambahkan test untuk:
+
+- candle input aktual/deterministik.
+- BUY end-to-end.
+- SELL end-to-end.
+- NO SIGNAL.
+- M15/M5 alignment.
+- Fibonacci calculation.
+- Fibonacci anchor.
+- RSI.
+- ATR.
+- SL.
+- TP.
+- structure break.
+- candle confirmation.
+- duplicate signal.
+- no look-ahead bias.
+
+Jalankan:
+
+python -m unittest -v
+
+Jika project memiliki pytest, gunakan pytest juga.
+
+Jalankan compile/typecheck/lint yang tersedia.
+
+==================================================
+I. JANGAN MERUSAK STRATEGI EXISTING
+==================================================
+
+Sebelum selesai lakukan:
+
+git diff
+
+Pastikan:
+- strategy lama tidak rusak.
+- logic Fibonacci tidak hilang.
+- test lama tetap PASS.
+- tidak ada credential.
+- tidak ada file `.env`.
+- tidak ada file temporary/cache.
+
+==================================================
+J. REPOSITORY HASIL
+==================================================
+
+Setelah validasi selesai, update repository:
+
+https://github.com/zenolambee/hasil-prompt-mt-signal.git
+
+Tambahkan hasil validation ke dokumentasi phase.
+
+Contoh:
+
+phase/
+└── phase-02-candle-validation.md
+
+Isi:
+- tujuan
+- data yang digunakan
+- periode data
+- jumlah candle
+- BUY scenario
+- SELL scenario
+- NO SIGNAL scenario
+- hasil test
+- hasil validation
+- limitation
+- status
+
+Repository hasil tetap hanya untuk dokumentasi hasil.
+
+Jangan memasukkan source code utama ke repository hasil lagi.
+
+==================================================
+K. GIT COMMIT
+==================================================
+
+Repository utama:
+https://github.com/zenolambee/mt-signal
+
+Repository hasil:
+https://github.com/zenolambee/hasil-prompt-mt-signal.git
+
+Pastikan perubahan source code hanya masuk repository utama.
+
+Pastikan dokumentasi hasil masuk repository hasil.
+
+Commit message yang jelas.
+
+Contoh source repository:
+
+feat: validate xauusd fib strategy with candle data
+
+Contoh repository hasil:
+
+docs: add xauusd candle validation result
+
+Push kedua repository sesuai fungsinya.
+
+==================================================
+L. FINAL REPORT
+==================================================
+
+Setelah selesai tampilkan singkat:
+
+1. Repository utama:
+   - source code aman atau tidak
+   - commit
+   - push status
+
+2. Repository hasil:
+   - cleanup berhasil atau tidak
+   - struktur file
+   - commit
+   - push status
+
+3. Validation:
+   - dataset yang digunakan
+   - jumlah candle
+   - BUY scenario
+   - SELL scenario
+   - NO SIGNAL scenario
+
+4. Test:
+   - total PASS
+   - total FAIL
+
+5. Look-ahead bias:
+   - PASS/FAIL
+
+6. Masalah yang ditemukan.
+
+7. Jangan mengatakan berhasil jika push atau test sebenarnya gagal.
+
+PENTING:
+Jangan lanjut membuat indikator atau strategi baru.
+Fokus menyelesaikan CLEANUP REPO + VALIDASI CANDLE AKTUAL terlebih dahulu.
 
 ```
 # 
