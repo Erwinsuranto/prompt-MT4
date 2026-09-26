@@ -64,7 +64,66 @@ https://github.com/zenolambee/mt-signal.git
 ```
 # 
 ```
+PHASE 03 — RUN REAL XAUUSD BACKTEST
 
+Data historis XAUUSD sudah tersedia di folder:
+data/
+
+Gunakan DATA HISTORY NYATA yang sudah ada, terutama:
+- XAUUSD_m_M5
+- XAUUSD_m_M15
+- XAUUSD_M5_history jika formatnya diperlukan
+
+Tugas:
+1. Deteksi format dan nama file secara otomatis.
+2. Validasi timestamp, OHLC, duplicate candle, missing candle, dan urutan waktu.
+3. Gunakan XAUUSD M5 sebagai data utama backtest.
+4. Gunakan M15 yang tersedia jika valid; jangan membuat data sintetis jika M15 nyata tersedia.
+5. Jalankan backtest Phase 03 menggunakan STRATEGI YANG SUDAH ADA.
+6. JANGAN mengubah indikator, parameter, entry rule, SL, TP, Fib, atau RR.
+7. Jangan melakukan optimization/curve fitting.
+8. Walk-forward candle-by-candle dan pastikan TIDAK ADA LOOK-AHEAD.
+9. Jalankan seluruh historical dataset yang valid.
+
+Hitung hasil nyata:
+- periode awal → akhir
+- jumlah candle M5
+- jumlah candle M15
+- total signal
+- BUY
+- SELL
+- NO SIGNAL
+- total trade
+- TP
+- SL
+- AMBIGUOUS
+- OPEN
+- Win Rate
+- Total R
+- Average R
+- Profit Factor
+- Max Drawdown
+- consecutive win/loss
+- breakdown per hari
+- breakdown BUY vs SELL
+
+Simpan hasil ke:
+results/backtest_results.csv
+results/backtest_summary.json
+results/backtest_signal_log.csv
+
+Kemudian jalankan:
+python -m unittest -v
+
+Pastikan semua test PASS.
+
+PENTING:
+- Jangan menganggap fixture sebagai hasil market.
+- Jangan mengarang data.
+- Jika ada masalah format file, perbaiki loader agar bisa membaca file history yang tersedia tanpa mengubah strategy logic.
+- Setelah selesai, commit dan push source/results sesuai struktur repo yang sudah ditetapkan.
+- Update phase/phase-03-xauusd-backtest.md dengan HASIL BACKTEST HISTORIS NYATA, termasuk periode dan seluruh metrics.
+- Tampilkan ringkasan hasil akhir yang sebenarnya dari dataset tersebut.
 ```
 # 
 ```
