@@ -68,6 +68,534 @@ https://github.com/zenolambee/mt-signal.git
 ```
 # 
 ```
+PHASE 03 — BACKTEST XAUUSD STRATEGY
+
+Lanjutkan dari strategy yang sekarang:
+
+XAUUSD_EMA_RSI_ATR_STRUCTURE_FIB
+
+Jangan membuat strategy baru.
+Jangan menambah indikator.
+Jangan mengubah parameter existing hanya untuk memperbaiki hasil backtest.
+
+==================================================
+1. TUJUAN
+==================================================
+
+Lakukan backtest terhadap rangkaian candle XAUUSD untuk mengetahui bagaimana strategy bekerja secara berurutan.
+
+Pipeline:
+
+Historical XAUUSD candles
+↓
+M15 confirmation
+↓
+M5 entry
+↓
+EMA20/EMA50
+↓
+RSI14
+↓
+Market Structure
+↓
+Fibonacci
+↓
+Candle Confirmation
+↓
+ATR14
+↓
+BUY / SELL / NO SIGNAL
+↓
+Entry
+↓
+SL / TP
+↓
+TP HIT / SL HIT / OPEN
+
+==================================================
+2. DATA
+==================================================
+
+Gunakan data XAUUSD historis nyata jika tersedia.
+
+Prioritas:
+1. Historical XAUUSD M5.
+2. M15 boleh dibuat dari M5 jika memang belum tersedia.
+3. Jangan menggunakan random/generated OHLC.
+4. Jangan menggunakan fixture strategy sebagai dataset utama backtest.
+
+Jika data historis belum tersedia:
+- jangan mengarang data.
+- buat backtest engine yang menerima CSV.
+- jelaskan dataset apa yang dibutuhkan.
+
+Format minimal:
+
+timestamp
+open
+high
+low
+close
+
+Optional:
+
+volume
+spread
+
+Contoh:
+
+data/xauusd_m5.csv
+
+==================================================
+3. WALK-FORWARD BACKTEST
+==================================================
+
+Backtest harus berjalan candle demi candle.
+
+Pada candle N:
+
+Gunakan hanya data:
+
+candle[0 ... N]
+
+Tidak boleh menggunakan candle masa depan.
+
+Setiap signal harus dihitung ulang berdasarkan data yang tersedia pada saat itu.
+
+WAJIB menghindari look-ahead bias.
+
+==================================================
+4. ENTRY
+==================================================
+
+Jika strategy menghasilkan BUY:
+
+Entry:
+harga close candle signal atau sesuai mekanisme entry existing.
+
+Jika strategy menghasilkan SELL:
+
+Entry:
+harga close candle signal atau sesuai mekanisme entry existing.
+
+Jangan mengubah entry rule tanpa alasan.
+
+Simpan:
+
+timestamp
+direction
+entry
+SL
+TP
+confidence
+Fib zone
+RSI
+ATR
+M15 trend
+market structure
+
+==================================================
+5. SL / TP
+==================================================
+
+Gunakan SL strategy existing.
+
+Default:
+
+ATR multiplier = 1.5
+
+RR:
+
+1:2
+
+Jangan mengoptimalkan parameter dulu.
+
+TP:
+
+Risk × 2
+
+SL/TP harus dihitung dari entry aktual masing-masing signal.
+
+==================================================
+6. HASIL TRADE
+==================================================
+
+Untuk setiap signal:
+
+Jika BUY:
+- cek candle berikutnya apakah menyentuh SL atau TP.
+- Jika TP terkena → TP HIT.
+- Jika SL terkena → SL HIT.
+
+Jika SELL:
+- lakukan pengecekan yang sama.
+
+Jika dalam satu candle HIGH dan LOW menyentuh SL dan TP sekaligus:
+- jangan memilih secara sembarangan.
+- gunakan aturan konservatif yang terdokumentasi.
+- atau tandai sebagai AMBIGUOUS.
+
+Jangan menganggap TP lebih dulu tanpa bukti urutan intrabar.
+
+==================================================
+7. DUPLICATE / OPEN TRADE
+==================================================
+
+Tentukan aturan yang konsisten.
+
+Default:
+
+Jika masih ada trade terbuka:
+→ jangan membuka signal baru dari strategy yang sama.
+
+Setelah trade selesai:
+→ strategy boleh mencari signal berikutnya.
+
+Simpan status:
+
+OPEN
+TP_HIT
+SL_HIT
+AMBIGUOUS
+
+==================================================
+8. METRICS
+==================================================
+
+Hitung:
+
+Total candles
+Total signals
+BUY signals
+SELL signals
+NO SIGNAL
+
+Total trades
+TP hit
+SL hit
+Ambiguous
+
+Win rate
+
+Total R
+
+Average R
+
+Largest win
+Largest loss
+
+Maximum consecutive wins
+Maximum consecutive losses
+
+Maximum drawdown
+
+Profit factor jika dapat dihitung secara valid.
+
+Jangan menyebut strategy "bagus" atau "buruk".
+Tampilkan angka mentah agar hasil bisa kita evaluasi.
+
+==================================================
+9. DAILY BREAKDOWN
+==================================================
+
+Buat ringkasan per hari:
+
+Date
+Signals
+BUY
+SELL
+TP
+SL
+Net R
+
+Contoh:
+
+2026-01-05
+Signals: 4
+BUY: 2
+SELL: 2
+TP: 2
+SL: 2
+Net R: +2R
+
+==================================================
+10. SIGNAL LOG
+==================================================
+
+Simpan setiap signal:
+
+timestamp
+direction
+entry
+SL
+TP
+result
+R
+confidence
+
+M15 trend
+M5 structure
+
+EMA20
+EMA50
+RSI
+ATR
+
+Fib 0.382
+Fib 0.500
+Fib 0.618
+Fib 0.786
+
+active Fib zone
+
+reason
+
+==================================================
+11. OUTPUT FILE
+==================================================
+
+Buat hasil yang mudah dianalisis.
+
+Contoh:
+
+backtest_results.csv
+
+Kolom:
+
+timestamp
+direction
+entry
+sl
+tp
+result
+r_multiple
+confidence
+m15_trend
+m5_structure
+rsi
+atr
+fib_zone
+
+Buat juga summary:
+
+backtest_summary.json
+
+Isi:
+
+total_candles
+total_signals
+buy_signals
+sell_signals
+total_trades
+tp_hits
+sl_hits
+ambiguous
+win_rate
+total_r
+average_r
+max_drawdown
+profit_factor
+
+==================================================
+12. CLI
+==================================================
+
+Buat command sederhana:
+
+python backtest_xauusd.py \
+  --m5 data/xauusd_m5.csv
+
+Jika M15 tidak diberikan:
+
+python backtest_xauusd.py \
+  --m5 data/xauusd_m5.csv
+
+→ resample M15 dari M5 menggunakan fungsi existing.
+
+Jika M15 diberikan:
+
+python backtest_xauusd.py \
+  --m5 data/xauusd_m5.csv \
+  --m15 data/xauusd_m15.csv
+
+==================================================
+13. VALIDATION
+==================================================
+
+Tambahkan test untuk:
+
+1. BUY → TP.
+2. BUY → SL.
+3. SELL → TP.
+4. SELL → SL.
+5. Open trade tidak membuka duplicate.
+6. TP/SL calculation.
+7. RR 1:2.
+8. Ambiguous candle.
+9. No look-ahead.
+10. M5 → M15 resampling.
+11. Empty dataset.
+12. Invalid CSV.
+13. Sequential candle processing.
+14. Drawdown calculation.
+15. R calculation.
+
+Semua test existing harus tetap PASS.
+
+==================================================
+14. DATA LIMITATION
+==================================================
+
+Jika repository belum memiliki historical XAUUSD:
+
+JANGAN membuat data palsu.
+
+Buat engine + test menggunakan fixture hanya untuk memastikan engine bekerja.
+
+Kemudian tampilkan:
+
+"Backtest historical belum dijalankan karena dataset XAUUSD historis belum tersedia."
+
+Jangan mengklaim hasil backtest sebagai hasil market nyata.
+
+==================================================
+15. JANGAN OPTIMASI
+==================================================
+
+PENTING:
+
+Jangan melakukan:
+- parameter optimization
+- mencari EMA terbaik
+- mencari RSI terbaik
+- mencari ATR terbaik
+- mengubah Fibonacci
+- mengubah RR
+- menghapus signal yang kalah
+- curve fitting
+
+Gunakan parameter strategy saat ini:
+
+EMA20
+EMA50
+RSI14
+ATR14
+ATR SL 1.5
+RR 1:2
+Fib 0.382
+Fib 0.500
+Fib 0.618
+Fib 0.786
+Extension 1.272
+Extension 1.618
+
+Tujuan Phase 03 hanya:
+MENGETAHUI HASIL STRATEGY SAAT INI.
+
+==================================================
+16. TEST COMMAND
+==================================================
+
+Jalankan:
+
+python -m unittest -v
+
+Kemudian:
+
+python -m py_compile *.py
+
+Jika pytest tersedia, jalankan pytest.
+
+Pastikan test lama tidak rusak.
+
+==================================================
+17. GIT
+==================================================
+
+Source code dan backtest engine:
+
+https://github.com/zenolambee/mt-signal
+
+Dokumentasi hasil:
+
+https://github.com/zenolambee/hasil-prompt-mt-signal
+
+Source code backtest hanya masuk repository utama.
+
+Repository hasil hanya menerima dokumentasi hasil Phase 03.
+
+Jangan memasukkan source code ke repository hasil.
+
+==================================================
+18. DOKUMENTASI PHASE 03
+==================================================
+
+Buat:
+
+phase/phase-03-xauusd-backtest.md
+
+Isi:
+
+- tujuan
+- strategy yang digunakan
+- parameter
+- dataset
+- periode dataset
+- jumlah candle
+- metode walk-forward
+- aturan entry
+- aturan SL
+- aturan TP
+- aturan ambiguous candle
+- hasil metrics
+- daily breakdown
+- limitation
+- status test
+
+Jika belum ada historical data nyata, tulis jelas bahwa backtest market nyata belum dilakukan.
+
+==================================================
+19. FINAL REPORT
+==================================================
+
+Setelah selesai tampilkan:
+
+SOURCE REPOSITORY:
+commit
+push status
+
+RESULT REPOSITORY:
+commit
+push status
+
+BACKTEST:
+dataset
+periode
+jumlah candle
+jumlah signal
+BUY
+SELL
+TP
+SL
+ambiguous
+win rate
+total R
+average R
+max drawdown
+profit factor
+
+TEST:
+PASS
+FAIL
+
+LOOK-AHEAD:
+PASS / FAIL
+
+Jika historical data belum tersedia:
+jelaskan secara eksplisit dan jangan mengarang hasil.
+
+Jangan lanjut ke optimasi atau indikator baru setelah Phase 03.
+Kita evaluasi angka hasil backtest terlebih dahulu.
 
 ```
 
