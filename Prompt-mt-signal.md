@@ -60,7 +60,95 @@ https://github.com/zenolambee/mt-signal.git
 ```
 # 
 ```
+PHASE 04 — XAUUSD TRADE FAILURE ANALYSIS
 
+Gunakan hasil REAL backtest Phase 03:
+- Periode 2023-08-28 sampai 2026-08-26
+- M5: 212,625 candle
+- M15: 70,892 candle
+- 35 trades
+- 9 TP / 26 SL
+- BUY: 5 TP / 18 SL
+- SELL: 4 TP / 8 SL
+- Total: -8R
+- Win rate: 25.71%
+- PF: 0.69
+- Max DD: 13R
+
+TUJUAN:
+Bedah 35 trade satu per satu untuk mencari penyebab kegagalan strategi.
+
+PENTING:
+- JANGAN mengubah strategy logic.
+- JANGAN mengubah parameter.
+- JANGAN optimization.
+- JANGAN curve fitting.
+- Jangan membuat strategi baru.
+- Ini hanya ANALYSIS/DIAGNOSTIC.
+
+Analisis setiap trade:
+1. Timestamp
+2. BUY/SELL
+3. Entry
+4. SL
+5. TP
+6. Result TP/SL
+7. R
+8. M15 trend
+9. M5 structure
+10. RSI
+11. ATR
+12. Fib zone
+13. Confidence
+14. Swing yang digunakan
+15. Alasan signal terbentuk
+16. Kondisi market saat entry
+17. Apakah entry terjadi terlalu dekat dengan resistance/support
+18. Apakah pullback Fib valid
+19. Apakah candle confirmation valid
+20. Apakah structure break valid
+21. Penyebab paling mungkin trade gagal
+
+KELOMPOKKAN HASIL:
+A. BUY failure
+B. SELL failure
+C. M15 trend failure
+D. Fib failure
+E. Structure failure
+F. RSI/momentum failure
+G. Candle confirmation failure
+H. SL terlalu dekat / ATR
+I. Entry pada kondisi ranging
+J. Faktor lain
+
+Hitung:
+- jumlah trade tiap kategori
+- persentase tiap kategori
+- TP vs SL per kategori
+- BUY vs SELL
+- hasil per tahun
+- hasil per bulan jika datanya memungkinkan
+- consecutive loss pattern
+
+Cari juga:
+- Apakah 26 SL memiliki pola yang sama.
+- Apakah ada kondisi tertentu yang berulang sebelum SL.
+- Apakah 9 TP memiliki karakteristik yang berbeda dari 26 SL.
+- Kondisi apa yang paling sering muncul pada TP.
+- Kondisi apa yang paling sering muncul pada SL.
+
+Buat:
+1. results/trade_analysis.csv
+2. results/trade_analysis_summary.json
+3. phase/phase-04-trade-analysis.md
+
+Jangan menghapus hasil Phase 03.
+
+HASIL AKHIR WAJIB:
+Tampilkan tabel 35 trade dan ringkasan pola utama.
+
+Jangan memberikan rekomendasi perubahan strategi pada tahap ini.
+Hanya berikan temuan faktual berdasarkan data.
 ```
 # 
 ```
