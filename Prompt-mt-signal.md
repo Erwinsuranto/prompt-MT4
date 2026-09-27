@@ -56,7 +56,113 @@ https://github.com/zenolambee/mt-signal.git
 ```
 # 
 ```
+PHASE 05 — CHANGE ENTRY PATTERN
 
+Tujuan:
+Mengubah pola entry XAUUSD agar tidak langsung entry pada breakout yang rawan false breakout.
+
+JANGAN ubah indikator utama:
+- M15: EMA20/EMA50 + structure
+- M5: EMA20/EMA50 + RSI14 + ATR14
+- Fibonacci tetap digunakan
+
+UBAH POLA ENTRY:
+
+1. M15 menentukan arah trend.
+
+2. M5 harus membentuk structure break terlebih dahulu.
+
+3. JANGAN entry langsung pada candle breakout.
+
+4. Tunggu harga melakukan pullback/retest ke area breakout atau Fib 0.500–0.618.
+
+5. Pullback harus bertahan dan tidak membatalkan structure.
+
+6. Tunggu candle confirmation kedua setelah retest:
+   BUY  = bullish rejection / bullish continuation
+   SELL = bearish rejection / bearish continuation
+
+7. Entry hanya setelah confirmation candle CLOSE.
+
+8. BUY:
+   - M15 bullish
+   - M5 bullish structure
+   - breakout valid
+   - pullback/retest terjadi
+   - harga tetap di area Fib valid
+   - RSI > 50
+   - confirmation candle bullish
+   - entry setelah candle confirmation close
+
+9. SELL:
+   - M15 bearish
+   - M5 bearish structure
+   - breakout valid
+   - pullback/retest terjadi
+   - harga tetap di area Fib valid
+   - RSI < 50
+   - confirmation candle bearish
+   - entry setelah candle confirmation close
+
+10. SL:
+    tetap structure-aware + ATR14.
+    Jangan mengubah RR dulu.
+    TP tetap RR 1:2.
+
+11. Jika breakout langsung berbalik tanpa retest/confirmation:
+    NO SIGNAL.
+
+12. Jangan melakukan optimization banyak parameter.
+    Jangan mencoba banyak threshold untuk mencari hasil terbaik.
+
+VALIDASI:
+- Gunakan dataset historis yang sama dengan Phase 03/04.
+- Walk-forward candle-by-candle.
+- No look-ahead.
+- Bandingkan BASELINE vs pola baru.
+- Catat:
+  trades
+  TP
+  SL
+  win rate
+  total R
+  profit factor
+  max drawdown
+  consecutive losses
+  BUY vs SELL
+  hasil per tahun.
+
+TEST:
+- Semua test lama harus tetap PASS.
+- Tambahkan test khusus pola:
+  breakout tanpa retest = NO SIGNAL
+  breakout + retest + confirmation = SIGNAL
+  retest gagal = NO SIGNAL
+  BUY/SELL harus mirrored.
+
+DOKUMENTASI:
+- Buat Phase 05 report.
+- Jangan hapus hasil Phase 03/04.
+- Jangan memasukkan source code ke hasil-prompt repo.
+- Commit dan push source ke:
+  zenolambee/mt-signal
+
+- Commit dan push dokumentasi/hasil saja ke:
+  zenolambee/hasil-prompt-mt-signal
+
+Setelah selesai tampilkan:
+1. commit source
+2. commit hasil
+3. jumlah trade
+4. TP/SL
+5. Win Rate
+6. Total R
+7. Profit Factor
+8. Max Drawdown
+9. perbandingan baseline vs pola baru
+10. apakah pola baru menghasilkan perbaikan atau tidak.
+
+Jangan mengubah strategi lagi sebelum hasil Phase 05 selesai dianalisis.
 ```
 # 
 ```
